@@ -432,7 +432,7 @@ steward plugin docs --out site python src/plugin.py
 ```
 
 The pages are written to `docs`, or to `--out`, in the plugin's folder (the current directory, or the one
-given with `--cwd`). Commit them, so the registry reads them with the plugin.
+given with `--cwd`). Commit them, so Steward reads them with the plugin.
 
 Each page can be a template, so you decide where the generated parts go. A page without one uses a
 default layout:
