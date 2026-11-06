@@ -34,12 +34,12 @@ ProviderValidateRequest = contract.ValidateRequest
 ProviderGrantAccessRequest = contract.ProviderServiceGrantAccessRequest
 ProviderRevokeAccessRequest = contract.ProviderServiceRevokeAccessRequest
 ProviderGetAccessRequest = contract.ProviderServiceGetAccessRequest
-ResourceProvisionRequest = contract.ResourceServiceProvisionRequest
-ResourceDeprovisionRequest = contract.ResourceServiceDeprovisionRequest
-ResourceListRequest = contract.ResourceServiceListRequest
-ResourceGrantAccessRequest = contract.ResourceServiceGrantAccessRequest
-ResourceRevokeAccessRequest = contract.ResourceServiceRevokeAccessRequest
-ResourceGetAccessRequest = contract.ResourceServiceGetAccessRequest
+ComponentProvisionRequest = contract.ComponentServiceProvisionRequest
+ComponentDeprovisionRequest = contract.ComponentServiceDeprovisionRequest
+ComponentListRequest = contract.ComponentServiceListRequest
+ComponentGrantAccessRequest = contract.ComponentServiceGrantAccessRequest
+ComponentRevokeAccessRequest = contract.ComponentServiceRevokeAccessRequest
+ComponentGetAccessRequest = contract.ComponentServiceGetAccessRequest
 ApplicationCreateRequest = contract.ApplicationServiceCreateRequest
 ApplicationDestroyRequest = contract.ApplicationServiceDestroyRequest
 ApplicationDeployRequest = contract.ApplicationServiceDeployRequest
@@ -50,12 +50,12 @@ ProviderValidateResponse = Union[contract.ValidateResponse, Mapping[str, Any], N
 ProviderGrantAccessResponse = Union[contract.ProviderServiceGrantAccessResponse, Mapping[str, Any], None]
 ProviderRevokeAccessResponse = Union[contract.ProviderServiceRevokeAccessResponse, Mapping[str, Any], None]
 ProviderGetAccessResponse = Union[contract.ProviderServiceGetAccessResponse, Mapping[str, Any], None]
-ResourceProvisionResponse = Union[contract.ResourceServiceProvisionResponse, Mapping[str, Any], None]
-ResourceDeprovisionResponse = Union[contract.ResourceServiceDeprovisionResponse, Mapping[str, Any], None]
-ResourceListResponse = Union[contract.ResourceServiceListResponse, Mapping[str, Any], None]
-ResourceGrantAccessResponse = Union[contract.ResourceServiceGrantAccessResponse, Mapping[str, Any], None]
-ResourceRevokeAccessResponse = Union[contract.ResourceServiceRevokeAccessResponse, Mapping[str, Any], None]
-ResourceGetAccessResponse = Union[contract.ResourceServiceGetAccessResponse, Mapping[str, Any], None]
+ComponentProvisionResponse = Union[contract.ComponentServiceProvisionResponse, Mapping[str, Any], None]
+ComponentDeprovisionResponse = Union[contract.ComponentServiceDeprovisionResponse, Mapping[str, Any], None]
+ComponentListResponse = Union[contract.ComponentServiceListResponse, Mapping[str, Any], None]
+ComponentGrantAccessResponse = Union[contract.ComponentServiceGrantAccessResponse, Mapping[str, Any], None]
+ComponentRevokeAccessResponse = Union[contract.ComponentServiceRevokeAccessResponse, Mapping[str, Any], None]
+ComponentGetAccessResponse = Union[contract.ComponentServiceGetAccessResponse, Mapping[str, Any], None]
 ApplicationCreateResponse = Union[contract.ApplicationServiceCreateResponse, Mapping[str, Any], None]
 ApplicationDestroyResponse = Union[contract.ApplicationServiceDestroyResponse, Mapping[str, Any], None]
 ApplicationDeployResponse = Union[contract.ApplicationServiceDeployResponse, Mapping[str, Any], None]
@@ -66,7 +66,7 @@ Definitions = Sequence[Mapping[str, Any]]
 
 ACCESS_CALLS = ("grant_access", "revoke_access", "get_access")
 PROVISIONING_CALLS = ("provision", "deprovision")
-RESOURCE_CALLS = (*ACCESS_CALLS, *PROVISIONING_CALLS, "list")
+COMPONENT_CALLS = (*ACCESS_CALLS, *PROVISIONING_CALLS, "list")
 APPLICATION_CALLS = ("create", "destroy", "deploy")
 
 
@@ -103,17 +103,17 @@ def _handlers(**calls: Handler | None) -> dict[str, Handler]:
 
 
 class Provider:
-    """A provider. Declare its resources, then call `serve()`."""
+    """A provider. Declare its components, then call `serve()`."""
 
     def __init__(self, name: str, version: str, definition: dict[str, Any], handlers: dict[str, Handler]) -> None:
         self.name = name
         self.version = version
         self.definition = definition
         self.handlers = handlers
-        self.resources: dict[str, _Kind] = {}
+        self.components: dict[str, _Kind] = {}
         self.applications: dict[str, _Kind] = {}
 
-    def resource(
+    def component(
         self,
         *,
         kind: str,
@@ -131,7 +131,7 @@ class Provider:
         revoke_access: Handler | None = None,
         get_access: Handler | None = None,
     ) -> Provider:
-        """Declares a kind of resource the provider manages, with its handlers."""
+        """Declares a kind of component the provider manages, with its handlers."""
         handlers = _handlers(
             provision=provision,
             deprovision=deprovision,
@@ -150,7 +150,7 @@ class Provider:
             permissions=permissions,
             roles=roles,
         )
-        self.resources[kind] = _Kind(kind, definition, handlers)
+        self.components[kind] = _Kind(kind, definition, handlers)
 
         return self
 
@@ -186,7 +186,7 @@ class Provider:
     def describe(self) -> contract.DescribeResponse:
         definition = {
             **self.definition,
-            "resources": [kind.definition for kind in self.resources.values()],
+            "components": [kind.definition for kind in self.components.values()],
             "applications": [kind.definition for kind in self.applications.values()],
         }
 
@@ -224,7 +224,7 @@ def create_provider(
     revoke_access: Handler | None = None,
     get_access: Handler | None = None,
 ) -> Provider:
-    """Creates a provider. Declare its resources, then call `serve()`."""
+    """Creates a provider. Declare its components, then call `serve()`."""
     definition = _defined(
         title=title,
         description=description,
@@ -306,7 +306,7 @@ def _owner(provider: Provider, target: str, request: Message) -> Mapping[str, Ha
     if target == "provider":
         return provider.handlers
 
-    kinds = provider.resources if target == "resource" else provider.applications
+    kinds = provider.components if target == "component" else provider.applications
     kind = _kind_of(request, target)
 
     if kind not in kinds:
@@ -400,8 +400,8 @@ async def _serve(provider: Provider) -> None:
         {"describe": describe, "validate": validate, **_routes(provider, ACCESS_CALLS, "provider")},
     )
 
-    if provider.resources:
-        _register(server, "ResourceService", _routes(provider, RESOURCE_CALLS, "resource"))
+    if provider.components:
+        _register(server, "ComponentService", _routes(provider, COMPONENT_CALLS, "component"))
 
     if provider.applications:
         _register(server, "ApplicationService", _routes(provider, APPLICATION_CALLS, "application"))

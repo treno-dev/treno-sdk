@@ -6,7 +6,7 @@ import "google/protobuf/struct.proto";
 
 // The provider contract. Every provider serves ProviderService: it describes itself and, when it declares grants,
 // gives access as a whole. A provider that offers credentials serves CredentialService, one that
-// has resources also serves ResourceService, and one that runs applications serves ApplicationService. A provider
+// has components also serves ComponentService, and one that runs applications serves ApplicationService. A provider
 // offers a call by implementing it. A call it does not offer fails with UNIMPLEMENTED, and Steward
 // treats that as not offered. Within v1 the contract is additive only.
 //
@@ -48,29 +48,29 @@ message Organization {
 }
 
 // Something in the tool that access can be granted to or that can be provisioned.
-message Resource {
-  // A kind declared in ProviderDefinition.resources.
+message Component {
+  // A kind declared in ProviderDefinition.components.
   string kind = 1;
 
-  // The resource's name in the tool, such as a repository's full name. Steward stores it with the
-  // kind and sends it on every later call, which is how a resource is identified.
+  // The component's name in the tool, such as a repository's full name. Steward stores it with the
+  // kind and sends it on every later call, which is how a component is identified.
   string name = 2;
 
-  // Values for the inputs declared in ResourceDefinition.inputs, keyed by input name.
+  // Values for the inputs declared in ComponentDefinition.inputs, keyed by input name.
   google.protobuf.Struct inputs = 3;
 
-  // Values for the secrets declared in ResourceDefinition.secrets, keyed by secret name. Resolved
+  // Values for the secrets declared in ComponentDefinition.secrets, keyed by secret name. Resolved
   // by the runner for this call only, like Credential.secrets.
   map<string, string> secrets = 4;
 
-  // Values the resource produced, as declared in ResourceDefinition.outputs, keyed by output name.
-  // Set by the provider when it lists a resource; ignored on calls. Provision returns its outputs
+  // Values the component produced, as declared in ComponentDefinition.outputs, keyed by output name.
+  // Set by the provider when it lists a component; ignored on calls. Provision returns its outputs
   // separately. Values of outputs declared sensitive stay with the runner and are not passed on to
   // Steward.
   google.protobuf.Struct outputs = 5;
 }
 
-// Something deployed and run in the tool, as opposed to a resource, which is provisioned.
+// Something deployed and run in the tool, as opposed to a component, which is provisioned.
 message Application {
   // A kind declared in ProviderDefinition.applications.
   string kind = 1;
@@ -213,20 +213,20 @@ message ProviderDefinition {
   string title = 1;
   string description = 2;
 
-  // A provider has no settings or secrets of its own. They belong to what it offers: each credential, resource and application
+  // A provider has no settings or secrets of its own. They belong to what it offers: each credential, component and application
   // declares its own inputs and secrets.
   reserved 3, 8;
   reserved "inputs", "secrets";
 
-  // The resource kinds this provider manages. Kinds are unique within the provider.
-  repeated ResourceDefinition resources = 4;
+  // The component kinds this provider manages. Kinds are unique within the provider.
+  repeated ComponentDefinition components = 4;
 
   // What can be granted on the provider as a whole is declared as grants. Roles and permissions are not part of the provider.
   reserved 5, 6, 12;
   reserved "permissions", "roles", "grant_inputs";
 
   // The application kinds this provider can run, such as a Laravel app on a host. Applications are a
-  // second kind of thing next to resources: they are deployed from a source and have variables that
+  // second kind of thing next to components: they are deployed from a source and have variables that
   // people edit over time. Kinds are unique within the provider. Empty when the provider runs no
   // applications.
   repeated ApplicationDefinition applications = 7;
@@ -248,9 +248,9 @@ message ProviderDefinition {
   repeated GrantDefinition grants = 13;
 }
 
-// One setting a provider, a resource or an application takes, declared the way a variable is: a name
+// One setting a provider, a component or an application takes, declared the way a variable is: a name
 // and a type, with the value passed separately, keyed by `name`, in Credential.inputs,
-// Resource.inputs or Application.inputs.
+// Component.inputs or Application.inputs.
 message InputDefinition {
   string name = 1;
   string label = 2;
@@ -273,7 +273,7 @@ message InputDefinition {
   optional double max = 9;
 }
 
-// One secret a provider, a resource or an application takes, such as an API token or a private
+// One secret a provider, a component or an application takes, such as an API token or a private
 // key. Secrets are separate from inputs: they are stored, sent and shown differently. The value is
 // passed in the `secrets` map, keyed by `name`, for one call only, and is never shown back once set.
 message SecretDefinition {
@@ -282,7 +282,7 @@ message SecretDefinition {
   bool required = 3;
 }
 
-// One value a resource produces, declared like an input: a name and a type. Same types as an input.
+// One value a component produces, declared like an input: a name and a type. Same types as an input.
 message OutputDefinition {
   string name = 1;
   string label = 2;
@@ -290,21 +290,21 @@ message OutputDefinition {
   string type = 4;
 
   // The value is a secret, such as a generated password. The provider still returns it in
-  // Resource.outputs, but the runner writes it to the customer's own secret store and reports only
+  // Component.outputs, but the runner writes it to the customer's own secret store and reports only
   // a reference to Steward, which never sees or stores the value.
   bool sensitive = 5;
 }
 
-message ResourceDefinition {
+message ComponentDefinition {
   // Unique within the provider, such as "repository".
   string kind = 1;
   string title = 2;
   string description = 3;
 
-  // What is required to create a resource of this kind. Provision takes values for these.
+  // What is required to create a component of this kind. Provision takes values for these.
   repeated InputDefinition inputs = 4;
 
-  // The secrets a resource of this kind takes, separate from its inputs.
+  // The secrets a component of this kind takes, separate from its inputs.
   repeated SecretDefinition secrets = 8;
 
   // What can be granted on this type. Declaring permissions or roles is what says the type supports
@@ -313,13 +313,13 @@ message ResourceDefinition {
   repeated PermissionDefinition permissions = 5;
   repeated RoleDefinition roles = 6;
 
-  // What a resource of this kind produces, such as a URL or an ARN, known once it exists. The
-  // values come back in Resource.outputs.
+  // What a component of this kind produces, such as a URL or an ARN, known once it exists. The
+  // values come back in Component.outputs.
   repeated OutputDefinition outputs = 7;
 }
 
-// An application is deployable and has open-ended variables, which a resource has neither of. A
-// resource has fixed inputs and outputs that the provider declares; an application also has a source
+// An application is deployable and has open-ended variables, which a component has neither of. A
+// component has fixed inputs and outputs that the provider declares; an application also has a source
 // and variables whose names are chosen by the people who run it. Every declared application kind
 // can be deployed and has variables.
 message ApplicationDefinition {
@@ -395,7 +395,7 @@ message RoleDefinition {
 }
 
 // Access to the provider as a whole, such as a role in an AWS account or membership of a GitHub organization. Steward grants it before
-// it grants access to the provider's resources, and decides when to remove it.
+// it grants access to the provider's components, and decides when to remove it.
 //
 // Idempotent: granting what is already granted succeeds.
 message ProviderServiceGrantAccessRequest {
@@ -471,22 +471,22 @@ message ProviderServiceGetAccessResponse {
 }
 
 // ---------------------------------------------------------------------------------------------
-// ResourceService messages
+// ComponentService messages
 // ---------------------------------------------------------------------------------------------
 
-// Access to one resource, such as a role on a repository. Steward grants it after the identity has
+// Access to one component, such as a role on a repository. Steward grants it after the identity has
 // access to the provider.
 //
 // Idempotent: granting what is already granted succeeds.
-message ResourceServiceGrantAccessRequest {
+message ComponentServiceGrantAccessRequest {
   Credential credential = 1;
-  Resource resource = 2;
+  Component component = 2;
   Identity identity = 3;
   Role role = 4;
   repeated Permission permissions = 5;
 }
 
-message ResourceServiceGrantAccessResponse {
+message ComponentServiceGrantAccessResponse {
   // The grant's own identity in the tool, such as an assignment or invitation id. Empty when the
   // tool has none. Steward records it and sends it back on revoke.
   string id = 1;
@@ -503,9 +503,9 @@ message ResourceServiceGrantAccessResponse {
 
 // Idempotent: revoking what is already absent succeeds. Steward works out overlap between roles
 // before it sends a revoke, so the role here is safe to remove in full.
-message ResourceServiceRevokeAccessRequest {
+message ComponentServiceRevokeAccessRequest {
   Credential credential = 1;
-  Resource resource = 2;
+  Component component = 2;
   Identity identity = 3;
   Role role = 4;
   repeated Permission permissions = 6;
@@ -514,17 +514,17 @@ message ResourceServiceRevokeAccessRequest {
   string id = 5;
 }
 
-message ResourceServiceRevokeAccessResponse {}
+message ComponentServiceRevokeAccessResponse {}
 
-// Asks what an identity holds on a resource now.
-message ResourceServiceGetAccessRequest {
+// Asks what an identity holds on a component now.
+message ComponentServiceGetAccessRequest {
   Credential credential = 1;
-  Resource resource = 2;
+  Component component = 2;
   Identity identity = 3;
 }
 
-message ResourceServiceGetAccessResponse {
-  // The roles and permissions the identity holds on the resource. Empty when it has none.
+message ComponentServiceGetAccessResponse {
+  // The roles and permissions the identity holds on the component. Empty when it has none.
   repeated Role roles = 1;
   repeated Permission permissions = 3;
 
@@ -534,10 +534,10 @@ message ResourceServiceGetAccessResponse {
 
 // Idempotent: provisioning something that already exists with the same kind and name succeeds, and
 // still returns its outputs. Steward works out what changed by comparing the state it stores.
-message ResourceServiceProvisionRequest {
+message ComponentServiceProvisionRequest {
   Credential credential = 1;
 
-  // The kind to create, as declared in ProviderDefinition.resources.
+  // The kind to create, as declared in ProviderDefinition.components.
   string kind = 2;
 
   // What to call it in the tool. Steward stores the name with the kind.
@@ -551,29 +551,29 @@ message ResourceServiceProvisionRequest {
   map<string, string> secrets = 5;
 }
 
-message ResourceServiceProvisionResponse {
-  // What the resource produced, as declared in ResourceDefinition.outputs, keyed by output name,
+message ComponentServiceProvisionResponse {
+  // What the component produced, as declared in ComponentDefinition.outputs, keyed by output name,
   // such as a URL or an id the tool assigned. Values of outputs declared sensitive stay with the
   // runner and are not passed on to Steward.
   google.protobuf.Struct outputs = 1;
 }
 
 // Idempotent: removing something that is already gone succeeds.
-message ResourceServiceDeprovisionRequest {
+message ComponentServiceDeprovisionRequest {
   Credential credential = 1;
-  Resource resource = 2;
+  Component component = 2;
 }
 
-message ResourceServiceDeprovisionResponse {}
+message ComponentServiceDeprovisionResponse {}
 
-message ResourceServiceListRequest {
+message ComponentServiceListRequest {
   Credential credential = 1;
   string kind = 2;
   string page_token = 3;
 }
 
-message ResourceServiceListResponse {
-  repeated Resource resources = 1;
+message ComponentServiceListResponse {
+  repeated Component components = 1;
 
   // Empty on the last page.
   string next_page_token = 2;
@@ -673,7 +673,7 @@ message CredentialFile {
 // Mandatory for every provider. Describe is always served. GrantAccess, RevokeAccess and
 // GetAccess apply only to a provider that declares grants, and answer UNIMPLEMENTED otherwise.
 service ProviderService {
-  // Describes the provider: the credentials it offers, the resources and applications it manages, and the grants it gives.
+  // Describes the provider: the credentials it offers, the components and applications it manages, and the grants it gives.
   rpc Describe(DescribeRequest) returns (DescribeResponse);
 
   // Access to the provider as a whole: giving identities a grant, taking it away, and checking
@@ -683,15 +683,15 @@ service ProviderService {
   rpc GetAccess(ProviderServiceGetAccessRequest) returns (ProviderServiceGetAccessResponse);
 }
 
-// For providers that manage resources. A call a resource kind does not offer answers UNIMPLEMENTED.
+// For providers that manage components. A call a component kind does not offer answers UNIMPLEMENTED.
 // GrantAccess, RevokeAccess and GetAccess are offered by kinds that declare roles or permissions.
-service ResourceService {
-  rpc GrantAccess(ResourceServiceGrantAccessRequest) returns (ResourceServiceGrantAccessResponse);
-  rpc RevokeAccess(ResourceServiceRevokeAccessRequest) returns (ResourceServiceRevokeAccessResponse);
-  rpc GetAccess(ResourceServiceGetAccessRequest) returns (ResourceServiceGetAccessResponse);
-  rpc Provision(ResourceServiceProvisionRequest) returns (ResourceServiceProvisionResponse);
-  rpc Deprovision(ResourceServiceDeprovisionRequest) returns (ResourceServiceDeprovisionResponse);
-  rpc List(ResourceServiceListRequest) returns (ResourceServiceListResponse);
+service ComponentService {
+  rpc GrantAccess(ComponentServiceGrantAccessRequest) returns (ComponentServiceGrantAccessResponse);
+  rpc RevokeAccess(ComponentServiceRevokeAccessRequest) returns (ComponentServiceRevokeAccessResponse);
+  rpc GetAccess(ComponentServiceGetAccessRequest) returns (ComponentServiceGetAccessResponse);
+  rpc Provision(ComponentServiceProvisionRequest) returns (ComponentServiceProvisionResponse);
+  rpc Deprovision(ComponentServiceDeprovisionRequest) returns (ComponentServiceDeprovisionResponse);
+  rpc List(ComponentServiceListRequest) returns (ComponentServiceListResponse);
 }
 
 // For providers that run applications (ProviderDefinition.applications): deployable things with a source

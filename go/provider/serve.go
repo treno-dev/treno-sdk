@@ -41,8 +41,8 @@ func (g *grpcProvider) GRPCServer(_ *goplugin.GRPCBroker, server *grpc.Server) e
 
 	providerv1.RegisterProviderServiceServer(server, providerService{provider: p})
 
-	if len(p.resources) > 0 {
-		providerv1.RegisterResourceServiceServer(server, resourceService{provider: p})
+	if len(p.components) > 0 {
+		providerv1.RegisterComponentServiceServer(server, componentService{provider: p})
 	}
 
 	if len(p.applications) > 0 {
@@ -117,84 +117,84 @@ func (s providerService) GetAccess(ctx context.Context, request *ProviderGetAcce
 	return s.provider.options.GetAccess(ctx, request)
 }
 
-type resourceService struct {
-	providerv1.UnimplementedResourceServiceServer
+type componentService struct {
+	providerv1.UnimplementedComponentServiceServer
 	provider *Provider
 }
 
-func (s resourceService) Provision(ctx context.Context, request *ResourceProvisionRequest) (*ResourceProvisionResponse, error) {
-	kind, err := s.provider.resource(request.GetKind())
+func (s componentService) Provision(ctx context.Context, request *ComponentProvisionRequest) (*ComponentProvisionResponse, error) {
+	kind, err := s.provider.component(request.GetKind())
 	if err != nil {
 		return nil, err
 	}
 
 	if kind.Provision == nil {
-		return nil, unimplemented("provision", "resource")
+		return nil, unimplemented("provision", "component")
 	}
 
 	return kind.Provision(ctx, request)
 }
 
-func (s resourceService) Deprovision(ctx context.Context, request *ResourceDeprovisionRequest) (*ResourceDeprovisionResponse, error) {
-	kind, err := s.provider.resource(request.GetResource().GetKind())
+func (s componentService) Deprovision(ctx context.Context, request *ComponentDeprovisionRequest) (*ComponentDeprovisionResponse, error) {
+	kind, err := s.provider.component(request.GetComponent().GetKind())
 	if err != nil {
 		return nil, err
 	}
 
 	if kind.Deprovision == nil {
-		return nil, unimplemented("deprovision", "resource")
+		return nil, unimplemented("deprovision", "component")
 	}
 
 	return kind.Deprovision(ctx, request)
 }
 
-func (s resourceService) List(ctx context.Context, request *ResourceListRequest) (*ResourceListResponse, error) {
-	kind, err := s.provider.resource(request.GetKind())
+func (s componentService) List(ctx context.Context, request *ComponentListRequest) (*ComponentListResponse, error) {
+	kind, err := s.provider.component(request.GetKind())
 	if err != nil {
 		return nil, err
 	}
 
 	if kind.List == nil {
-		return nil, unimplemented("list", "resource")
+		return nil, unimplemented("list", "component")
 	}
 
 	return kind.List(ctx, request)
 }
 
-func (s resourceService) GrantAccess(ctx context.Context, request *ResourceGrantAccessRequest) (*ResourceGrantAccessResponse, error) {
-	kind, err := s.provider.resource(request.GetResource().GetKind())
+func (s componentService) GrantAccess(ctx context.Context, request *ComponentGrantAccessRequest) (*ComponentGrantAccessResponse, error) {
+	kind, err := s.provider.component(request.GetComponent().GetKind())
 	if err != nil {
 		return nil, err
 	}
 
 	if kind.GrantAccess == nil {
-		return nil, unimplemented("grant_access", "resource")
+		return nil, unimplemented("grant_access", "component")
 	}
 
 	return kind.GrantAccess(ctx, request)
 }
 
-func (s resourceService) RevokeAccess(ctx context.Context, request *ResourceRevokeAccessRequest) (*ResourceRevokeAccessResponse, error) {
-	kind, err := s.provider.resource(request.GetResource().GetKind())
+func (s componentService) RevokeAccess(ctx context.Context, request *ComponentRevokeAccessRequest) (*ComponentRevokeAccessResponse, error) {
+	kind, err := s.provider.component(request.GetComponent().GetKind())
 	if err != nil {
 		return nil, err
 	}
 
 	if kind.RevokeAccess == nil {
-		return nil, unimplemented("revoke_access", "resource")
+		return nil, unimplemented("revoke_access", "component")
 	}
 
 	return kind.RevokeAccess(ctx, request)
 }
 
-func (s resourceService) GetAccess(ctx context.Context, request *ResourceGetAccessRequest) (*ResourceGetAccessResponse, error) {
-	kind, err := s.provider.resource(request.GetResource().GetKind())
+func (s componentService) GetAccess(ctx context.Context, request *ComponentGetAccessRequest) (*ComponentGetAccessResponse, error) {
+	kind, err := s.provider.component(request.GetComponent().GetKind())
 	if err != nil {
 		return nil, err
 	}
 
 	if kind.GetAccess == nil {
-		return nil, unimplemented("get_access", "resource")
+		return nil, unimplemented("get_access", "component")
 	}
 
 	return kind.GetAccess(ctx, request)

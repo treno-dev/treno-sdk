@@ -32,7 +32,7 @@ SDK it depends on. To work on the SDK and its templates together, point it at a 
 
 ## A provider
 
-`steward provider init --language python` generates a provider with a resource that can be provisioned and
+`steward provider init --language python` generates a provider with a component that can be provisioned and
 given access to. The whole file, with every call and its comments, is
 [`templates/python/src/provider.py.tmpl`](https://github.com/treno-dev/steward-sdk/blob/main/templates/python/src/provider.py.tmpl).
 In short:
@@ -58,7 +58,7 @@ provider = create_provider(
     secrets=[{"name": "API_TOKEN", "description": "The token to call the API with.", "required": True}],
 )
 
-provider.resource(
+provider.component(
     kind="item",
     outputs=[{"name": "url", "label": "URL", "type": "string"}],
     provision=provision,
@@ -68,7 +68,7 @@ provider.resource(
 provider.serve()
 ```
 
-A provider needs one `create_provider(...)`, any number of `provider.resource(...)` and
+A provider needs one `create_provider(...)`, any number of `provider.component(...)` and
 `provider.application(...)` declarations, and a final `provider.serve()`. If it needs more than one tool,
 for example both Cloudflare and AWS, take a secret for each tool.
 
@@ -85,9 +85,9 @@ for example both Cloudflare and AWS, take a secret for each tool.
 | `validate`                                                            | Optional. Checks the secrets, which Steward cannot. Returns `{"errors": [...], "input_errors": [...], "secret_errors": [...]}`, each a list of `{"field": ..., "message": ...}`: `input_errors` and `secret_errors` name an input or a secret, and `errors` is about the credential as a whole. Without it, every credential is accepted. |
 | `roles`, `permissions`, `grant_access`, `revoke_access`, `get_access` | Access to the provider as a whole, such as membership of an organization.                                                                              |
 
-**A resource**, with `provider.resource(kind=..., ...)`, and **an application**, with
+**A component**, with `provider.component(kind=..., ...)`, and **an application**, with
 `provider.application(kind=..., ...)`, both have a `kind` that is unique within the provider, a `title`, a
-`description`, `inputs`, `secrets` and `outputs`. Resources also take `roles` and `permissions`. Applications take
+`description`, `inputs`, `secrets` and `outputs`. Components also take `roles` and `permissions`. Applications take
 `sources`, the types they can be deployed from: `"github"`, `"registry"`, `"s3"` or `"raw"`. The `source`
 of an application arrives as `type`, `config` and `ref`, where `config` holds the settings of that type:
 `github` `{owner, name, branch?}`, `registry` `{image, tag?}`, `s3` `{bucket, key}` and `raw` `{path}`.
@@ -115,8 +115,8 @@ Access exists at two levels, each with the same three handlers, `grant_access`, 
 `get_access`:
 
 - **The provider**, in `create_provider`: membership of the tool as a whole, such as an organization or a
-  site. Steward grants this first, then access to the resources.
-- **A resource kind**, in `provider.resource`: a role on one resource, such as a repository. The
+  site. Steward grants this first, then access to the components.
+- **A component kind**, in `provider.component`: a role on one component, such as a repository. The
   generated provider above shows this.
 
 For the provider it looks like this:
@@ -143,17 +143,17 @@ provider = create_provider(
 
 `invite` stands for a call to the tool's own API.
 
-A resource kind takes the same three handlers and its own `roles` and `permissions`. Its requests also
-carry the `resource`:
+A component kind takes the same three handlers and its own `roles` and `permissions`. Its requests also
+carry the `component`:
 
 ```python
-async def grant_access(request: ResourceGrantAccessRequest) -> ResourceGrantAccessResponse:
-    await add_collaborator(request.credential, request.resource.name, request.identity.external_id, request.role.name)
+async def grant_access(request: ComponentGrantAccessRequest) -> ComponentGrantAccessResponse:
+    await add_collaborator(request.credential, request.component.name, request.identity.external_id, request.role.name)
 
     return {"role": plain(request.role), "permissions": [plain(item) for item in request.permissions]}
 
 
-provider.resource(
+provider.component(
     kind="repository",
     permissions=[{"name": "pull"}, {"name": "push"}],
     roles=[{"name": "viewer", "title": "Viewer"}, {"name": "editor", "title": "Editor"}],
@@ -170,8 +170,8 @@ two separate lists:
 - **`permissions`** are the pieces Steward builds its own roles from. A permission is a `name` with an
   optional `level`: `{"name": "pull_requests", "level": "read"}`, or just `{"name": "s3:GetObject"}`.
 
-Handlers receive the `identity` (`external_id`, `name`, `attrs`) and the `role` to apply, and a resource
-call also gets the `resource` (`kind`, `name`). The `role` is always set. For a role Steward composed
+Handlers receive the `identity` (`external_id`, `name`, `attrs`) and the `role` to apply, and a component
+call also gets the `component` (`kind`, `name`). The `role` is always set. For a role Steward composed
 from your permissions, `permissions` lists its pieces too, for you to apply as far as the tool allows.
 They return:
 
@@ -194,8 +194,8 @@ what can be granted.
 | You pass                                                       | The kind can                                                                                                                 |
 | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | `provision`, `deprovision`                                     | be created and removed                                                                                                       |
-| `list`                                                         | be discovered (optional: Steward keeps track of what it creates, so `list` is only for finding resources that already exist) |
-| `roles` or `permissions`, with `grant_access`, `revoke_access`, `get_access` | have access granted (resources and the provider)                                                                 |
+| `list`                                                         | be discovered (optional: Steward keeps track of what it creates, so `list` is only for finding components that already exist) |
+| `roles` or `permissions`, with `grant_access`, `revoke_access`, `get_access` | have access granted (components and the provider)                                                                 |
 | `create`, `destroy`, `deploy`                                  | be run as an application                                                                                                     |
 
 ## Handlers
@@ -211,13 +211,13 @@ plain one runs in a thread, so blocking calls do not stall the provider).
   as they are. Returning nothing is an empty response.
 - **Inputs and secrets.** `credential.inputs` and `inputs` hold the values of the inputs, keyed by input
   name; numbers arrive as floats. The values of secrets arrive apart from them, keyed by secret name,
-  in `credential.secrets` (and a resource's or application's `secrets`), a plain `dict`-like of strings.
+  in `credential.secrets` (and a component's or application's `secrets`), a plain `dict`-like of strings.
   Never store them.
 - **Idempotent, and no report of changes.** Make calls that change something idempotent: creating what
   exists, or removing what is gone, simply succeeds. Return the result of the change (the `outputs`,
   the applied `role`), not a description of what changed: Steward keeps the state and works out the
   difference itself.
-- **Resources and identities.** A resource is identified by its `kind` and `name`, which Steward stores
+- **Components and identities.** A component is identified by its `kind` and `name`, which Steward stores
   and sends on every later call. `provision` receives them with the `inputs` and returns only the
   `outputs`, such as a URL or an id the tool assigned. An identity has `external_id`, `name`, `ulid`
   and `attrs`; those that are optional report whether they were set with `HasField`.

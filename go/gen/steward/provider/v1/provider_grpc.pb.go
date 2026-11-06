@@ -32,7 +32,7 @@ const (
 // Mandatory for every provider. Describe is always served. GrantAccess, RevokeAccess and
 // GetAccess apply only to a provider that declares grants, and answer UNIMPLEMENTED otherwise.
 type ProviderServiceClient interface {
-	// Describes the provider: the credentials it offers, the resources and applications it manages, and the grants it gives.
+	// Describes the provider: the credentials it offers, the components and applications it manages, and the grants it gives.
 	Describe(ctx context.Context, in *DescribeRequest, opts ...grpc.CallOption) (*DescribeResponse, error)
 	// Access to the provider as a whole: giving identities a grant, taking it away, and checking
 	// what they hold.
@@ -96,7 +96,7 @@ func (c *providerServiceClient) GetAccess(ctx context.Context, in *ProviderServi
 // Mandatory for every provider. Describe is always served. GrantAccess, RevokeAccess and
 // GetAccess apply only to a provider that declares grants, and answer UNIMPLEMENTED otherwise.
 type ProviderServiceServer interface {
-	// Describes the provider: the credentials it offers, the resources and applications it manages, and the grants it gives.
+	// Describes the provider: the credentials it offers, the components and applications it manages, and the grants it gives.
 	Describe(context.Context, *DescribeRequest) (*DescribeResponse, error)
 	// Access to the provider as a whole: giving identities a grant, taking it away, and checking
 	// what they hold.
@@ -247,297 +247,297 @@ var ProviderService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	ResourceService_GrantAccess_FullMethodName  = "/steward.provider.v1.ResourceService/GrantAccess"
-	ResourceService_RevokeAccess_FullMethodName = "/steward.provider.v1.ResourceService/RevokeAccess"
-	ResourceService_GetAccess_FullMethodName    = "/steward.provider.v1.ResourceService/GetAccess"
-	ResourceService_Provision_FullMethodName    = "/steward.provider.v1.ResourceService/Provision"
-	ResourceService_Deprovision_FullMethodName  = "/steward.provider.v1.ResourceService/Deprovision"
-	ResourceService_List_FullMethodName         = "/steward.provider.v1.ResourceService/List"
+	ComponentService_GrantAccess_FullMethodName  = "/steward.provider.v1.ComponentService/GrantAccess"
+	ComponentService_RevokeAccess_FullMethodName = "/steward.provider.v1.ComponentService/RevokeAccess"
+	ComponentService_GetAccess_FullMethodName    = "/steward.provider.v1.ComponentService/GetAccess"
+	ComponentService_Provision_FullMethodName    = "/steward.provider.v1.ComponentService/Provision"
+	ComponentService_Deprovision_FullMethodName  = "/steward.provider.v1.ComponentService/Deprovision"
+	ComponentService_List_FullMethodName         = "/steward.provider.v1.ComponentService/List"
 )
 
-// ResourceServiceClient is the client API for ResourceService service.
+// ComponentServiceClient is the client API for ComponentService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// For providers that manage resources. A call a resource kind does not offer answers UNIMPLEMENTED.
+// For providers that manage components. A call a component kind does not offer answers UNIMPLEMENTED.
 // GrantAccess, RevokeAccess and GetAccess are offered by kinds that declare roles or permissions.
-type ResourceServiceClient interface {
-	GrantAccess(ctx context.Context, in *ResourceServiceGrantAccessRequest, opts ...grpc.CallOption) (*ResourceServiceGrantAccessResponse, error)
-	RevokeAccess(ctx context.Context, in *ResourceServiceRevokeAccessRequest, opts ...grpc.CallOption) (*ResourceServiceRevokeAccessResponse, error)
-	GetAccess(ctx context.Context, in *ResourceServiceGetAccessRequest, opts ...grpc.CallOption) (*ResourceServiceGetAccessResponse, error)
-	Provision(ctx context.Context, in *ResourceServiceProvisionRequest, opts ...grpc.CallOption) (*ResourceServiceProvisionResponse, error)
-	Deprovision(ctx context.Context, in *ResourceServiceDeprovisionRequest, opts ...grpc.CallOption) (*ResourceServiceDeprovisionResponse, error)
-	List(ctx context.Context, in *ResourceServiceListRequest, opts ...grpc.CallOption) (*ResourceServiceListResponse, error)
+type ComponentServiceClient interface {
+	GrantAccess(ctx context.Context, in *ComponentServiceGrantAccessRequest, opts ...grpc.CallOption) (*ComponentServiceGrantAccessResponse, error)
+	RevokeAccess(ctx context.Context, in *ComponentServiceRevokeAccessRequest, opts ...grpc.CallOption) (*ComponentServiceRevokeAccessResponse, error)
+	GetAccess(ctx context.Context, in *ComponentServiceGetAccessRequest, opts ...grpc.CallOption) (*ComponentServiceGetAccessResponse, error)
+	Provision(ctx context.Context, in *ComponentServiceProvisionRequest, opts ...grpc.CallOption) (*ComponentServiceProvisionResponse, error)
+	Deprovision(ctx context.Context, in *ComponentServiceDeprovisionRequest, opts ...grpc.CallOption) (*ComponentServiceDeprovisionResponse, error)
+	List(ctx context.Context, in *ComponentServiceListRequest, opts ...grpc.CallOption) (*ComponentServiceListResponse, error)
 }
 
-type resourceServiceClient struct {
+type componentServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewResourceServiceClient(cc grpc.ClientConnInterface) ResourceServiceClient {
-	return &resourceServiceClient{cc}
+func NewComponentServiceClient(cc grpc.ClientConnInterface) ComponentServiceClient {
+	return &componentServiceClient{cc}
 }
 
-func (c *resourceServiceClient) GrantAccess(ctx context.Context, in *ResourceServiceGrantAccessRequest, opts ...grpc.CallOption) (*ResourceServiceGrantAccessResponse, error) {
+func (c *componentServiceClient) GrantAccess(ctx context.Context, in *ComponentServiceGrantAccessRequest, opts ...grpc.CallOption) (*ComponentServiceGrantAccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ResourceServiceGrantAccessResponse)
-	err := c.cc.Invoke(ctx, ResourceService_GrantAccess_FullMethodName, in, out, cOpts...)
+	out := new(ComponentServiceGrantAccessResponse)
+	err := c.cc.Invoke(ctx, ComponentService_GrantAccess_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *resourceServiceClient) RevokeAccess(ctx context.Context, in *ResourceServiceRevokeAccessRequest, opts ...grpc.CallOption) (*ResourceServiceRevokeAccessResponse, error) {
+func (c *componentServiceClient) RevokeAccess(ctx context.Context, in *ComponentServiceRevokeAccessRequest, opts ...grpc.CallOption) (*ComponentServiceRevokeAccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ResourceServiceRevokeAccessResponse)
-	err := c.cc.Invoke(ctx, ResourceService_RevokeAccess_FullMethodName, in, out, cOpts...)
+	out := new(ComponentServiceRevokeAccessResponse)
+	err := c.cc.Invoke(ctx, ComponentService_RevokeAccess_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *resourceServiceClient) GetAccess(ctx context.Context, in *ResourceServiceGetAccessRequest, opts ...grpc.CallOption) (*ResourceServiceGetAccessResponse, error) {
+func (c *componentServiceClient) GetAccess(ctx context.Context, in *ComponentServiceGetAccessRequest, opts ...grpc.CallOption) (*ComponentServiceGetAccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ResourceServiceGetAccessResponse)
-	err := c.cc.Invoke(ctx, ResourceService_GetAccess_FullMethodName, in, out, cOpts...)
+	out := new(ComponentServiceGetAccessResponse)
+	err := c.cc.Invoke(ctx, ComponentService_GetAccess_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *resourceServiceClient) Provision(ctx context.Context, in *ResourceServiceProvisionRequest, opts ...grpc.CallOption) (*ResourceServiceProvisionResponse, error) {
+func (c *componentServiceClient) Provision(ctx context.Context, in *ComponentServiceProvisionRequest, opts ...grpc.CallOption) (*ComponentServiceProvisionResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ResourceServiceProvisionResponse)
-	err := c.cc.Invoke(ctx, ResourceService_Provision_FullMethodName, in, out, cOpts...)
+	out := new(ComponentServiceProvisionResponse)
+	err := c.cc.Invoke(ctx, ComponentService_Provision_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *resourceServiceClient) Deprovision(ctx context.Context, in *ResourceServiceDeprovisionRequest, opts ...grpc.CallOption) (*ResourceServiceDeprovisionResponse, error) {
+func (c *componentServiceClient) Deprovision(ctx context.Context, in *ComponentServiceDeprovisionRequest, opts ...grpc.CallOption) (*ComponentServiceDeprovisionResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ResourceServiceDeprovisionResponse)
-	err := c.cc.Invoke(ctx, ResourceService_Deprovision_FullMethodName, in, out, cOpts...)
+	out := new(ComponentServiceDeprovisionResponse)
+	err := c.cc.Invoke(ctx, ComponentService_Deprovision_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *resourceServiceClient) List(ctx context.Context, in *ResourceServiceListRequest, opts ...grpc.CallOption) (*ResourceServiceListResponse, error) {
+func (c *componentServiceClient) List(ctx context.Context, in *ComponentServiceListRequest, opts ...grpc.CallOption) (*ComponentServiceListResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ResourceServiceListResponse)
-	err := c.cc.Invoke(ctx, ResourceService_List_FullMethodName, in, out, cOpts...)
+	out := new(ComponentServiceListResponse)
+	err := c.cc.Invoke(ctx, ComponentService_List_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// ResourceServiceServer is the server API for ResourceService service.
-// All implementations must embed UnimplementedResourceServiceServer
+// ComponentServiceServer is the server API for ComponentService service.
+// All implementations must embed UnimplementedComponentServiceServer
 // for forward compatibility.
 //
-// For providers that manage resources. A call a resource kind does not offer answers UNIMPLEMENTED.
+// For providers that manage components. A call a component kind does not offer answers UNIMPLEMENTED.
 // GrantAccess, RevokeAccess and GetAccess are offered by kinds that declare roles or permissions.
-type ResourceServiceServer interface {
-	GrantAccess(context.Context, *ResourceServiceGrantAccessRequest) (*ResourceServiceGrantAccessResponse, error)
-	RevokeAccess(context.Context, *ResourceServiceRevokeAccessRequest) (*ResourceServiceRevokeAccessResponse, error)
-	GetAccess(context.Context, *ResourceServiceGetAccessRequest) (*ResourceServiceGetAccessResponse, error)
-	Provision(context.Context, *ResourceServiceProvisionRequest) (*ResourceServiceProvisionResponse, error)
-	Deprovision(context.Context, *ResourceServiceDeprovisionRequest) (*ResourceServiceDeprovisionResponse, error)
-	List(context.Context, *ResourceServiceListRequest) (*ResourceServiceListResponse, error)
-	mustEmbedUnimplementedResourceServiceServer()
+type ComponentServiceServer interface {
+	GrantAccess(context.Context, *ComponentServiceGrantAccessRequest) (*ComponentServiceGrantAccessResponse, error)
+	RevokeAccess(context.Context, *ComponentServiceRevokeAccessRequest) (*ComponentServiceRevokeAccessResponse, error)
+	GetAccess(context.Context, *ComponentServiceGetAccessRequest) (*ComponentServiceGetAccessResponse, error)
+	Provision(context.Context, *ComponentServiceProvisionRequest) (*ComponentServiceProvisionResponse, error)
+	Deprovision(context.Context, *ComponentServiceDeprovisionRequest) (*ComponentServiceDeprovisionResponse, error)
+	List(context.Context, *ComponentServiceListRequest) (*ComponentServiceListResponse, error)
+	mustEmbedUnimplementedComponentServiceServer()
 }
 
-// UnimplementedResourceServiceServer must be embedded to have
+// UnimplementedComponentServiceServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedResourceServiceServer struct{}
+type UnimplementedComponentServiceServer struct{}
 
-func (UnimplementedResourceServiceServer) GrantAccess(context.Context, *ResourceServiceGrantAccessRequest) (*ResourceServiceGrantAccessResponse, error) {
+func (UnimplementedComponentServiceServer) GrantAccess(context.Context, *ComponentServiceGrantAccessRequest) (*ComponentServiceGrantAccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GrantAccess not implemented")
 }
-func (UnimplementedResourceServiceServer) RevokeAccess(context.Context, *ResourceServiceRevokeAccessRequest) (*ResourceServiceRevokeAccessResponse, error) {
+func (UnimplementedComponentServiceServer) RevokeAccess(context.Context, *ComponentServiceRevokeAccessRequest) (*ComponentServiceRevokeAccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method RevokeAccess not implemented")
 }
-func (UnimplementedResourceServiceServer) GetAccess(context.Context, *ResourceServiceGetAccessRequest) (*ResourceServiceGetAccessResponse, error) {
+func (UnimplementedComponentServiceServer) GetAccess(context.Context, *ComponentServiceGetAccessRequest) (*ComponentServiceGetAccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetAccess not implemented")
 }
-func (UnimplementedResourceServiceServer) Provision(context.Context, *ResourceServiceProvisionRequest) (*ResourceServiceProvisionResponse, error) {
+func (UnimplementedComponentServiceServer) Provision(context.Context, *ComponentServiceProvisionRequest) (*ComponentServiceProvisionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Provision not implemented")
 }
-func (UnimplementedResourceServiceServer) Deprovision(context.Context, *ResourceServiceDeprovisionRequest) (*ResourceServiceDeprovisionResponse, error) {
+func (UnimplementedComponentServiceServer) Deprovision(context.Context, *ComponentServiceDeprovisionRequest) (*ComponentServiceDeprovisionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Deprovision not implemented")
 }
-func (UnimplementedResourceServiceServer) List(context.Context, *ResourceServiceListRequest) (*ResourceServiceListResponse, error) {
+func (UnimplementedComponentServiceServer) List(context.Context, *ComponentServiceListRequest) (*ComponentServiceListResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method List not implemented")
 }
-func (UnimplementedResourceServiceServer) mustEmbedUnimplementedResourceServiceServer() {}
-func (UnimplementedResourceServiceServer) testEmbeddedByValue()                         {}
+func (UnimplementedComponentServiceServer) mustEmbedUnimplementedComponentServiceServer() {}
+func (UnimplementedComponentServiceServer) testEmbeddedByValue()                          {}
 
-// UnsafeResourceServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to ResourceServiceServer will
+// UnsafeComponentServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ComponentServiceServer will
 // result in compilation errors.
-type UnsafeResourceServiceServer interface {
-	mustEmbedUnimplementedResourceServiceServer()
+type UnsafeComponentServiceServer interface {
+	mustEmbedUnimplementedComponentServiceServer()
 }
 
-func RegisterResourceServiceServer(s grpc.ServiceRegistrar, srv ResourceServiceServer) {
-	// If the following call panics, it indicates UnimplementedResourceServiceServer was
+func RegisterComponentServiceServer(s grpc.ServiceRegistrar, srv ComponentServiceServer) {
+	// If the following call panics, it indicates UnimplementedComponentServiceServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&ResourceService_ServiceDesc, srv)
+	s.RegisterService(&ComponentService_ServiceDesc, srv)
 }
 
-func _ResourceService_GrantAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ResourceServiceGrantAccessRequest)
+func _ComponentService_GrantAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ComponentServiceGrantAccessRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ResourceServiceServer).GrantAccess(ctx, in)
+		return srv.(ComponentServiceServer).GrantAccess(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ResourceService_GrantAccess_FullMethodName,
+		FullMethod: ComponentService_GrantAccess_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ResourceServiceServer).GrantAccess(ctx, req.(*ResourceServiceGrantAccessRequest))
+		return srv.(ComponentServiceServer).GrantAccess(ctx, req.(*ComponentServiceGrantAccessRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ResourceService_RevokeAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ResourceServiceRevokeAccessRequest)
+func _ComponentService_RevokeAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ComponentServiceRevokeAccessRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ResourceServiceServer).RevokeAccess(ctx, in)
+		return srv.(ComponentServiceServer).RevokeAccess(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ResourceService_RevokeAccess_FullMethodName,
+		FullMethod: ComponentService_RevokeAccess_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ResourceServiceServer).RevokeAccess(ctx, req.(*ResourceServiceRevokeAccessRequest))
+		return srv.(ComponentServiceServer).RevokeAccess(ctx, req.(*ComponentServiceRevokeAccessRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ResourceService_GetAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ResourceServiceGetAccessRequest)
+func _ComponentService_GetAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ComponentServiceGetAccessRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ResourceServiceServer).GetAccess(ctx, in)
+		return srv.(ComponentServiceServer).GetAccess(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ResourceService_GetAccess_FullMethodName,
+		FullMethod: ComponentService_GetAccess_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ResourceServiceServer).GetAccess(ctx, req.(*ResourceServiceGetAccessRequest))
+		return srv.(ComponentServiceServer).GetAccess(ctx, req.(*ComponentServiceGetAccessRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ResourceService_Provision_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ResourceServiceProvisionRequest)
+func _ComponentService_Provision_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ComponentServiceProvisionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ResourceServiceServer).Provision(ctx, in)
+		return srv.(ComponentServiceServer).Provision(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ResourceService_Provision_FullMethodName,
+		FullMethod: ComponentService_Provision_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ResourceServiceServer).Provision(ctx, req.(*ResourceServiceProvisionRequest))
+		return srv.(ComponentServiceServer).Provision(ctx, req.(*ComponentServiceProvisionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ResourceService_Deprovision_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ResourceServiceDeprovisionRequest)
+func _ComponentService_Deprovision_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ComponentServiceDeprovisionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ResourceServiceServer).Deprovision(ctx, in)
+		return srv.(ComponentServiceServer).Deprovision(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ResourceService_Deprovision_FullMethodName,
+		FullMethod: ComponentService_Deprovision_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ResourceServiceServer).Deprovision(ctx, req.(*ResourceServiceDeprovisionRequest))
+		return srv.(ComponentServiceServer).Deprovision(ctx, req.(*ComponentServiceDeprovisionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ResourceService_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ResourceServiceListRequest)
+func _ComponentService_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ComponentServiceListRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ResourceServiceServer).List(ctx, in)
+		return srv.(ComponentServiceServer).List(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ResourceService_List_FullMethodName,
+		FullMethod: ComponentService_List_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ResourceServiceServer).List(ctx, req.(*ResourceServiceListRequest))
+		return srv.(ComponentServiceServer).List(ctx, req.(*ComponentServiceListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// ResourceService_ServiceDesc is the grpc.ServiceDesc for ResourceService service.
+// ComponentService_ServiceDesc is the grpc.ServiceDesc for ComponentService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var ResourceService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "steward.provider.v1.ResourceService",
-	HandlerType: (*ResourceServiceServer)(nil),
+var ComponentService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "steward.provider.v1.ComponentService",
+	HandlerType: (*ComponentServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "GrantAccess",
-			Handler:    _ResourceService_GrantAccess_Handler,
+			Handler:    _ComponentService_GrantAccess_Handler,
 		},
 		{
 			MethodName: "RevokeAccess",
-			Handler:    _ResourceService_RevokeAccess_Handler,
+			Handler:    _ComponentService_RevokeAccess_Handler,
 		},
 		{
 			MethodName: "GetAccess",
-			Handler:    _ResourceService_GetAccess_Handler,
+			Handler:    _ComponentService_GetAccess_Handler,
 		},
 		{
 			MethodName: "Provision",
-			Handler:    _ResourceService_Provision_Handler,
+			Handler:    _ComponentService_Provision_Handler,
 		},
 		{
 			MethodName: "Deprovision",
-			Handler:    _ResourceService_Deprovision_Handler,
+			Handler:    _ComponentService_Deprovision_Handler,
 		},
 		{
 			MethodName: "List",
-			Handler:    _ResourceService_List_Handler,
+			Handler:    _ComponentService_List_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

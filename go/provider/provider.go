@@ -3,10 +3,10 @@
 //
 //	p := provider.New(provider.Options{Name: "github", Version: "0.1.0"})
 //	p.Credential("app", provider.CredentialOptions{Inputs: inputs, Resolve: resolve})
-//	p.Resource("repository", provider.ResourceOptions{Provision: provision, Deprovision: deprovision})
+//	p.Component("repository", provider.ComponentOptions{Provision: provision, Deprovision: deprovision})
 //	p.Serve()
 //
-// A provider declares itself and each of its resource or application kinds once, with the handlers
+// A provider declares itself and each of its component or application kinds once, with the handlers
 // attached. The SDK routes every call to the right
 // handler by kind, builds the description Steward asks for, serves the gRPC services, prints the
 // handshake line, answers the health check, and answers any call without a handler with UNIMPLEMENTED.
@@ -28,7 +28,7 @@ import (
 )
 
 // Options declare the provider and, when it supports access as a whole, the handlers for that. A provider has no settings or secrets of
-// its own: the credentials, resources and applications it offers declare theirs.
+// its own: the credentials, components and applications it offers declare theirs.
 type Options struct {
 	Name        string
 	Version     string
@@ -49,13 +49,13 @@ type Options struct {
 	GetAccess    func(context.Context, *ProviderGetAccessRequest) (*ProviderGetAccessResponse, error)
 }
 
-// ResourceOptions describe a kind of resource the provider manages, with its handlers. A call
+// ComponentOptions describe a kind of component the provider manages, with its handlers. A call
 // for something without a handler fails with UNIMPLEMENTED.
-type ResourceOptions struct {
+type ComponentOptions struct {
 	Title       string
 	Description string
 
-	// Inputs is what a resource of this kind takes besides its name, Secrets the secrets it takes, and
+	// Inputs is what a component of this kind takes besides its name, Secrets the secrets it takes, and
 	// Outputs what it produces.
 	Inputs  []*InputDefinition
 	Secrets []*SecretDefinition
@@ -65,13 +65,13 @@ type ResourceOptions struct {
 	Permissions []*PermissionDefinition
 	Roles       []*RoleDefinition
 
-	Provision   func(context.Context, *ResourceProvisionRequest) (*ResourceProvisionResponse, error)
-	Deprovision func(context.Context, *ResourceDeprovisionRequest) (*ResourceDeprovisionResponse, error)
-	List        func(context.Context, *ResourceListRequest) (*ResourceListResponse, error)
+	Provision   func(context.Context, *ComponentProvisionRequest) (*ComponentProvisionResponse, error)
+	Deprovision func(context.Context, *ComponentDeprovisionRequest) (*ComponentDeprovisionResponse, error)
+	List        func(context.Context, *ComponentListRequest) (*ComponentListResponse, error)
 
-	GrantAccess  func(context.Context, *ResourceGrantAccessRequest) (*ResourceGrantAccessResponse, error)
-	RevokeAccess func(context.Context, *ResourceRevokeAccessRequest) (*ResourceRevokeAccessResponse, error)
-	GetAccess    func(context.Context, *ResourceGetAccessRequest) (*ResourceGetAccessResponse, error)
+	GrantAccess  func(context.Context, *ComponentGrantAccessRequest) (*ComponentGrantAccessResponse, error)
+	RevokeAccess func(context.Context, *ComponentRevokeAccessRequest) (*ComponentRevokeAccessResponse, error)
+	GetAccess    func(context.Context, *ComponentGetAccessRequest) (*ComponentGetAccessResponse, error)
 }
 
 // ApplicationOptions describe a kind of application the provider runs, with its handlers.
@@ -110,16 +110,16 @@ type CredentialOptions struct {
 	Resolve func(context.Context, *CredentialResolveRequest) (*CredentialResolveResponse, error)
 }
 
-// Provider is what a provider author builds. Declare its resources, applications and credentials,
+// Provider is what a provider author builds. Declare its components, applications and credentials,
 // then call Serve.
 type Provider struct {
 	options      Options
-	resources    map[string]ResourceOptions
+	components   map[string]ComponentOptions
 	applications map[string]ApplicationOptions
 	credentials  map[string]CredentialOptions
 
 	// Declaration order, so the description lists kinds the way the provider declared them.
-	resourceOrder    []string
+	componentOrder   []string
 	applicationOrder []string
 	credentialOrder  []string
 }
@@ -128,7 +128,7 @@ type Provider struct {
 func New(options Options) *Provider {
 	return &Provider{
 		options:      options,
-		resources:    map[string]ResourceOptions{},
+		components:   map[string]ComponentOptions{},
 		applications: map[string]ApplicationOptions{},
 		credentials:  map[string]CredentialOptions{},
 	}
@@ -145,14 +145,14 @@ func (p *Provider) Credential(name string, options CredentialOptions) *Provider 
 	return p
 }
 
-// Resource declares a kind of resource the provider manages. The kind is unique within the
+// Component declares a kind of component the provider manages. The kind is unique within the
 // provider, such as "repository".
-func (p *Provider) Resource(kind string, options ResourceOptions) *Provider {
-	if _, declared := p.resources[kind]; !declared {
-		p.resourceOrder = append(p.resourceOrder, kind)
+func (p *Provider) Component(kind string, options ComponentOptions) *Provider {
+	if _, declared := p.components[kind]; !declared {
+		p.componentOrder = append(p.componentOrder, kind)
 	}
 
-	p.resources[kind] = options
+	p.components[kind] = options
 
 	return p
 }
@@ -177,8 +177,8 @@ func (p *Provider) describe(ctx context.Context, credential *Credential) *provid
 		Grants:      o.Grants,
 	}
 
-	for _, name := range p.resourceOrder {
-		definition.Resources = append(definition.Resources, resourceDefinition(name, p.resources[name]))
+	for _, name := range p.componentOrder {
+		definition.Components = append(definition.Components, componentDefinition(name, p.components[name]))
 	}
 
 	for _, name := range p.applicationOrder {
@@ -216,8 +216,8 @@ func (p *Provider) describe(ctx context.Context, credential *Credential) *provid
 	return response
 }
 
-func resourceDefinition(kind string, options ResourceOptions) *providerv1.ResourceDefinition {
-	return &providerv1.ResourceDefinition{
+func componentDefinition(kind string, options ComponentOptions) *providerv1.ComponentDefinition {
+	return &providerv1.ComponentDefinition{
 		Kind:        kind,
 		Title:       options.Title,
 		Description: options.Description,
@@ -229,10 +229,10 @@ func resourceDefinition(kind string, options ResourceOptions) *providerv1.Resour
 	}
 }
 
-func (p *Provider) resource(kind string) (ResourceOptions, error) {
-	found, ok := p.resources[kind]
+func (p *Provider) component(kind string) (ComponentOptions, error) {
+	found, ok := p.components[kind]
 	if !ok {
-		return found, status.Error(codes.NotFound, fmt.Sprintf("this provider has no resource %q", kind))
+		return found, status.Error(codes.NotFound, fmt.Sprintf("this provider has no component %q", kind))
 	}
 
 	return found, nil

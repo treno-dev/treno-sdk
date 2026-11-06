@@ -5,10 +5,10 @@ see ../proto) and the functions a provider writes.
 
 
     provider = create_provider(name="github", version="0.1.0", inputs=[...], validate=validate)
-    provider.resource(kind="repository", inputs=[...], provision=provision, deprovision=deprovision)
+    provider.component(kind="repository", inputs=[...], provision=provision, deprovision=deprovision)
     provider.serve()
 
-A provider declares itself and each of its resource or application kinds once, with the handlers
+A provider declares itself and each of its component or application kinds once, with the handlers
 attached. The SDK routes every call to the right handler by kind, builds the description Steward asks
 for, serves the gRPC services, prints the handshake line, answers the health check, and answers any
 call without a handler with UNIMPLEMENTED.
@@ -34,18 +34,18 @@ from steward_sdk.provider._provider import (
     ProviderRevokeAccessResponse,
     ProviderValidateRequest,
     ProviderValidateResponse,
-    ResourceDeprovisionRequest,
-    ResourceDeprovisionResponse,
-    ResourceGetAccessRequest,
-    ResourceGetAccessResponse,
-    ResourceGrantAccessRequest,
-    ResourceGrantAccessResponse,
-    ResourceListRequest,
-    ResourceListResponse,
-    ResourceProvisionRequest,
-    ResourceProvisionResponse,
-    ResourceRevokeAccessRequest,
-    ResourceRevokeAccessResponse,
+    ComponentDeprovisionRequest,
+    ComponentDeprovisionResponse,
+    ComponentGetAccessRequest,
+    ComponentGetAccessResponse,
+    ComponentGrantAccessRequest,
+    ComponentGrantAccessResponse,
+    ComponentListRequest,
+    ComponentListResponse,
+    ComponentProvisionRequest,
+    ComponentProvisionResponse,
+    ComponentRevokeAccessRequest,
+    ComponentRevokeAccessResponse,
     StatusCode,
     create_provider,
     plain,
@@ -68,18 +68,18 @@ __all__ = [
     "ProviderRevokeAccessResponse",
     "ProviderValidateRequest",
     "ProviderValidateResponse",
-    "ResourceDeprovisionRequest",
-    "ResourceDeprovisionResponse",
-    "ResourceGetAccessRequest",
-    "ResourceGetAccessResponse",
-    "ResourceGrantAccessRequest",
-    "ResourceGrantAccessResponse",
-    "ResourceListRequest",
-    "ResourceListResponse",
-    "ResourceProvisionRequest",
-    "ResourceProvisionResponse",
-    "ResourceRevokeAccessRequest",
-    "ResourceRevokeAccessResponse",
+    "ComponentDeprovisionRequest",
+    "ComponentDeprovisionResponse",
+    "ComponentGetAccessRequest",
+    "ComponentGetAccessResponse",
+    "ComponentGrantAccessRequest",
+    "ComponentGrantAccessResponse",
+    "ComponentListRequest",
+    "ComponentListResponse",
+    "ComponentProvisionRequest",
+    "ComponentProvisionResponse",
+    "ComponentRevokeAccessRequest",
+    "ComponentRevokeAccessResponse",
     "StatusCode",
     "create_provider",
     "plain",

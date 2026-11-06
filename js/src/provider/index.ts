@@ -4,10 +4,10 @@
 //   import { createProvider } from '@treno-dev/steward-sdk/provider';
 //
 //   const provider = createProvider({ name: 'github', version: '0.1.0', inputs: [...], validate });
-//   provider.resource({ kind: 'repository', inputs: [...], provision, deprovision, list });
+//   provider.component({ kind: 'repository', inputs: [...], provision, deprovision, list });
 //   provider.serve();
 //
-// A provider declares itself and each of its resource or application kinds once, with the handlers
+// A provider declares itself and each of its component or application kinds once, with the handlers
 // attached. The SDK routes every call to the right handler by kind, builds the description Steward
 // asks for, serves the gRPC services, prints the handshake line, answers the health check, fills in
 // whatever a handler leaves out of its response, and answers any call without a handler with
@@ -32,7 +32,7 @@ import type {
   OutputDefinition,
   PermissionDefinition,
   ProviderDefinition,
-  ResourceDefinition,
+  ComponentDefinition,
   RoleDefinition,
   SecretDefinition,
 } from '../gen/steward/provider/v1/provider.js';
@@ -74,18 +74,18 @@ export type ProviderRevokeAccessRequest = Complete<contract.ProviderServiceRevok
 export type ProviderRevokeAccessResponse = DeepPartial<contract.ProviderServiceRevokeAccessResponse>;
 export type ProviderGetAccessRequest = Complete<contract.ProviderServiceGetAccessRequest>;
 export type ProviderGetAccessResponse = DeepPartial<contract.ProviderServiceGetAccessResponse>;
-export type ResourceProvisionRequest = Complete<contract.ResourceServiceProvisionRequest>;
-export type ResourceProvisionResponse = DeepPartial<contract.ResourceServiceProvisionResponse>;
-export type ResourceDeprovisionRequest = Complete<contract.ResourceServiceDeprovisionRequest>;
-export type ResourceDeprovisionResponse = DeepPartial<contract.ResourceServiceDeprovisionResponse>;
-export type ResourceListRequest = Complete<contract.ResourceServiceListRequest>;
-export type ResourceListResponse = DeepPartial<contract.ResourceServiceListResponse>;
-export type ResourceGrantAccessRequest = Complete<contract.ResourceServiceGrantAccessRequest>;
-export type ResourceGrantAccessResponse = DeepPartial<contract.ResourceServiceGrantAccessResponse>;
-export type ResourceRevokeAccessRequest = Complete<contract.ResourceServiceRevokeAccessRequest>;
-export type ResourceRevokeAccessResponse = DeepPartial<contract.ResourceServiceRevokeAccessResponse>;
-export type ResourceGetAccessRequest = Complete<contract.ResourceServiceGetAccessRequest>;
-export type ResourceGetAccessResponse = DeepPartial<contract.ResourceServiceGetAccessResponse>;
+export type ComponentProvisionRequest = Complete<contract.ComponentServiceProvisionRequest>;
+export type ComponentProvisionResponse = DeepPartial<contract.ComponentServiceProvisionResponse>;
+export type ComponentDeprovisionRequest = Complete<contract.ComponentServiceDeprovisionRequest>;
+export type ComponentDeprovisionResponse = DeepPartial<contract.ComponentServiceDeprovisionResponse>;
+export type ComponentListRequest = Complete<contract.ComponentServiceListRequest>;
+export type ComponentListResponse = DeepPartial<contract.ComponentServiceListResponse>;
+export type ComponentGrantAccessRequest = Complete<contract.ComponentServiceGrantAccessRequest>;
+export type ComponentGrantAccessResponse = DeepPartial<contract.ComponentServiceGrantAccessResponse>;
+export type ComponentRevokeAccessRequest = Complete<contract.ComponentServiceRevokeAccessRequest>;
+export type ComponentRevokeAccessResponse = DeepPartial<contract.ComponentServiceRevokeAccessResponse>;
+export type ComponentGetAccessRequest = Complete<contract.ComponentServiceGetAccessRequest>;
+export type ComponentGetAccessResponse = DeepPartial<contract.ComponentServiceGetAccessResponse>;
 export type ApplicationCreateRequest = Complete<contract.ApplicationServiceCreateRequest>;
 export type ApplicationCreateResponse = DeepPartial<contract.ApplicationServiceCreateResponse>;
 export type ApplicationDestroyRequest = Complete<contract.ApplicationServiceDestroyRequest>;
@@ -124,11 +124,11 @@ export type ProviderOptions = Describe &
     version: string;
   } & Omit<Handlers<typeof contract.ProviderServiceService>, 'describe'>;
 
-export type ResourceOptions = Describe &
+export type ComponentOptions = Describe &
   Access & {
     kind: string;
     outputs?: DeepPartial<OutputDefinition>[];
-  } & Handlers<typeof contract.ResourceServiceService>;
+  } & Handlers<typeof contract.ComponentServiceService>;
 
 export type ApplicationOptions = Describe & {
   kind: string;
@@ -139,11 +139,11 @@ export type ApplicationOptions = Describe & {
 // A request carries the kind or the thing it is about.
 type AnyRequest = {
   kind?: string;
-  resource?: { kind: string };
+  component?: { kind: string };
   application?: { kind: string };
 };
 
-type Target = 'provider' | 'resource' | 'application';
+type Target = 'provider' | 'component' | 'application';
 
 const ACCESS_CALLS = ['grantAccess', 'revokeAccess', 'getAccess'] as const;
 const PROVISIONING_CALLS = ['provision', 'deprovision'] as const;
@@ -152,7 +152,7 @@ function fail(code: grpc.status, message: string): never {
   throw { code, message };
 }
 
-function resourceDefinition(options: ResourceOptions): DeepPartial<ResourceDefinition> {
+function componentDefinition(options: ComponentOptions): DeepPartial<ComponentDefinition> {
   const { kind, title, description, inputs, secrets, outputs, permissions, roles } = options;
 
   return { kind, title, description, inputs, secrets, outputs, permissions, roles };
@@ -165,14 +165,14 @@ function applicationDefinition(options: ApplicationOptions): DeepPartial<Applica
 }
 
 export class Provider {
-  readonly resources = new Map<string, ResourceOptions>();
+  readonly components = new Map<string, ComponentOptions>();
   readonly applications = new Map<string, ApplicationOptions>();
 
   constructor(readonly options: ProviderOptions) {}
 
-  /** Declares a kind of resource the provider manages, with its handlers. */
-  resource(options: ResourceOptions): this {
-    this.resources.set(options.kind, options);
+  /** Declares a kind of component the provider manages, with its handlers. */
+  component(options: ComponentOptions): this {
+    this.components.set(options.kind, options);
 
     return this;
   }
@@ -196,7 +196,7 @@ export class Provider {
   }
 
   // Routes a call to the handler of the same name on whatever the request is about: the
-  // provider itself, or one of its kinds of resource or application.
+  // provider itself, or one of its kinds of component or application.
   route(call: string, target: Target, kindOf: (request: AnyRequest) => string = () => '') {
     return (request: AnyRequest) => {
       const options = target === 'provider' ? this.options : this.kind(target, kindOf(request));
@@ -218,19 +218,19 @@ export class Provider {
       secrets,
       permissions,
       roles,
-      resources: [...this.resources.values()].map(resourceDefinition),
+      components: [...this.components.values()].map(componentDefinition),
       applications: [...this.applications.values()].map(applicationDefinition),
     };
   }
 
-  private kind(target: 'resource' | 'application', kind: string): object {
-    const kinds = target === 'resource' ? this.resources : this.applications;
+  private kind(target: 'component' | 'application', kind: string): object {
+    const kinds = target === 'component' ? this.components : this.applications;
 
     return kinds.get(kind) ?? fail(grpc.status.NOT_FOUND, `this provider has no ${target} "${kind}"`);
   }
 }
 
-/** Creates a provider. Declare its resources, then call `serve()`. */
+/** Creates a provider. Declare its components, then call `serve()`. */
 export function createProvider(options: ProviderOptions): Provider {
   return new Provider(options);
 }
@@ -242,7 +242,7 @@ type Routed = Record<string, (request: AnyRequest) => unknown>;
 type MessageType = { fromPartial(object: unknown): unknown };
 
 // A call's response type is named after the call, optionally prefixed with its service, which is
-// the naming the contract's lint enforces: DescribeResponse, ResourceServiceProvisionResponse.
+// the naming the contract's lint enforces: DescribeResponse, ComponentServiceProvisionResponse.
 function responseType(path: string): MessageType {
   const [, service, method] = /\.([A-Za-z]+)\/([A-Za-z]+)$/.exec(path) ?? [];
   const messages = contract as unknown as Record<string, MessageType | undefined>;
@@ -270,7 +270,7 @@ function toStatus(error: unknown): grpc.ServiceError {
 // empty object.
 const MESSAGES: Record<string, MessageType> = {
   credential: contract.Credential,
-  resource: contract.Resource,
+  component: contract.Component,
   application: contract.Application,
   identity: contract.Identity,
   role: contract.Role,
@@ -395,7 +395,7 @@ function serve(provider: Provider): void {
   }
 
   const server = new grpc.Server();
-  const anyResource = provider.resources.size > 0;
+  const anyComponent = provider.components.size > 0;
   const anyApplication = provider.applications.size > 0;
 
   server.addService(contract.ProviderServiceService, implement(contract.ProviderServiceService, {
@@ -405,14 +405,14 @@ function serve(provider: Provider): void {
     ...routes(provider, ACCESS_CALLS, 'provider'),
   }));
 
-  if (anyResource) {
-    const resourceKind = (request: AnyRequest) => request.resource?.kind ?? request.kind ?? '';
+  if (anyComponent) {
+    const componentKind = (request: AnyRequest) => request.component?.kind ?? request.kind ?? '';
 
     server.addService(
-      contract.ResourceServiceService as unknown as grpc.ServiceDefinition,
+      contract.ComponentServiceService as unknown as grpc.ServiceDefinition,
       implement(
-        contract.ResourceServiceService,
-        routes(provider, [...ACCESS_CALLS, ...PROVISIONING_CALLS, 'list'], 'resource', resourceKind),
+        contract.ComponentServiceService,
+        routes(provider, [...ACCESS_CALLS, ...PROVISIONING_CALLS, 'list'], 'component', componentKind),
       ),
     );
   }

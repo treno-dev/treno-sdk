@@ -32,7 +32,7 @@ SDK it depends on. To work on the SDK and its templates together, point it at a 
 
 ## A provider
 
-`steward provider init --language js` generates a provider with a resource that can be provisioned and given
+`steward provider init --language js` generates a provider with a component that can be provisioned and given
 access to. The whole file, with every call and its comments, is
 [`templates/js/src/provider.js.tmpl`](https://github.com/treno-dev/steward-sdk/blob/main/templates/js/src/provider.js.tmpl).
 In short:
@@ -47,7 +47,7 @@ const provider = createProvider({
   secrets: [{ name: 'API_TOKEN', description: 'The token to call the API with.', required: true }],
 });
 
-provider.resource({
+provider.component({
   kind: 'item',
   outputs: [{ name: 'url', label: 'URL', type: 'string' }],
 
@@ -55,7 +55,7 @@ provider.resource({
     return { outputs: { url: `${credential.inputs.base_url}/items/${name}` } };
   },
 
-  async deprovision({ resource }) {
+  async deprovision({ component }) {
     return {};
   },
 });
@@ -63,7 +63,7 @@ provider.resource({
 provider.serve();
 ```
 
-A provider needs one `createProvider(...)`, any number of `provider.resource(...)` and
+A provider needs one `createProvider(...)`, any number of `provider.component(...)` and
 `provider.application(...)` declarations, and a final `provider.serve()`. If it needs more than one tool,
 for example both Cloudflare and AWS, take a secret for each tool.
 
@@ -80,9 +80,9 @@ for example both Cloudflare and AWS, take a secret for each tool.
 | `validate` | Optional. Checks the secrets, which Steward cannot. Returns `{ errors, inputErrors, secretErrors }`, each a list of `{ field, message }`: `inputErrors` and `secretErrors` name an input or a secret, and `errors` is about the credential as a whole. Without it, every credential is accepted. |
 | `roles`, `permissions`, `grantAccess`, `revokeAccess`, `getAccess` | Access to the provider as a whole, such as membership of an organization. |
 
-**A resource**, with `provider.resource({ kind, ... })`, and **an application**, with
+**A component**, with `provider.component({ kind, ... })`, and **an application**, with
 `provider.application({ kind, ... })`, both have a `kind` that is unique within the provider, a `title`,
-a `description`, `inputs`, `secrets` and `outputs`. Resources also take `roles` and `permissions`. Applications
+a `description`, `inputs`, `secrets` and `outputs`. Components also take `roles` and `permissions`. Applications
 take `sources`, the types they can be deployed from: `'github'`, `'registry'`, `'s3'` or `'raw'`. The
 `source` of an application arrives as `{ type, config, ref }`, where `config` holds the settings of that
 type: `github` `{ owner, name, branch? }`, `registry` `{ image, tag? }`, `s3` `{ bucket, key }` and `raw`
@@ -110,8 +110,8 @@ Access exists at two levels, each with the same three handlers, `grantAccess`, `
 `getAccess`:
 
 - **The provider**, in `createProvider`: membership of the tool as a whole, such as an organization or a
-  site. Steward grants this first, then access to the resources.
-- **A resource kind**, in `provider.resource`: a role on one resource, such as a repository. The
+  site. Steward grants this first, then access to the components.
+- **A component kind**, in `provider.component`: a role on one component, such as a repository. The
   generated provider above shows this.
 
 For the provider it looks like this:
@@ -144,28 +144,28 @@ const provider = createProvider({
 
 `invite`, `removeFromOrganization` and `findMembership` stand for calls to the tool's own API.
 
-A resource kind takes the same three handlers and its own `roles` and `permissions`. Its requests also
-carry the `resource`:
+A component kind takes the same three handlers and its own `roles` and `permissions`. Its requests also
+carry the `component`:
 
 ```js
-provider.resource({
+provider.component({
   kind: 'repository',
 
   permissions: [{ name: 'pull' }, { name: 'push' }],
   roles: [{ name: 'viewer', title: 'Viewer' }, { name: 'editor', title: 'Editor' }],
 
-  grantAccess: async ({ credential, resource, identity, role, permissions }) => {
-    await addCollaborator(credential, resource.name, identity.externalId, role.name);
+  grantAccess: async ({ credential, component, identity, role, permissions }) => {
+    await addCollaborator(credential, component.name, identity.externalId, role.name);
 
     return { role, permissions };
   },
-  revokeAccess: async ({ credential, resource, identity }) => {
-    await removeCollaborator(credential, resource.name, identity.externalId);
+  revokeAccess: async ({ credential, component, identity }) => {
+    await removeCollaborator(credential, component.name, identity.externalId);
 
     return {};
   },
-  getAccess: async ({ credential, resource, identity }) => {
-    const collaborator = await findCollaborator(credential, resource.name, identity);
+  getAccess: async ({ credential, component, identity }) => {
+    const collaborator = await findCollaborator(credential, component.name, identity);
 
     return { roles: collaborator ? [{ name: collaborator.role }] : [] };
   },
@@ -179,8 +179,8 @@ two separate lists:
 - **`permissions`** are the pieces Steward builds its own roles from. A permission is a `name` with an
   optional `level`: `{ name: 'pull_requests', level: 'read' }`, or just `{ name: 's3:GetObject' }`.
 
-Handlers receive the `identity` (`externalId`, `name`, `attrs`) and the `role` to apply, and a resource
-call also gets the `resource` (`kind`, `name`). The `role` is always set. For a role Steward composed
+Handlers receive the `identity` (`externalId`, `name`, `attrs`) and the `role` to apply, and a component
+call also gets the `component` (`kind`, `name`). The `role` is always set. For a role Steward composed
 from your permissions, `permissions` lists its pieces too, for you to apply as far as the tool allows.
 They return:
 
@@ -203,8 +203,8 @@ Steward what can be granted.
 | You write | The kind can |
 |---|---|
 | `provision`, `deprovision` | be created and removed |
-| `list` | be discovered (optional: Steward keeps track of what it creates, so `list` is only for finding resources that already exist) |
-| `roles` or `permissions`, with `grantAccess`, `revokeAccess`, `getAccess` | have access granted (resources and the provider) |
+| `list` | be discovered (optional: Steward keeps track of what it creates, so `list` is only for finding components that already exist) |
+| `roles` or `permissions`, with `grantAccess`, `revokeAccess`, `getAccess` | have access granted (components and the provider) |
 | `create`, `destroy`, `deploy` | be run as an application |
 
 ## Handlers
@@ -215,13 +215,13 @@ responses are typed from the contract.
 
 - **Inputs and secrets.** `credential.inputs` and `inputs` hold the values of the inputs, keyed by input
   name. The values of secrets arrive apart from them, keyed by secret name, in `credential.secrets` (and a
-  resource's or application's `secrets`). Never store them. The SDK always provides these objects,
+  component's or application's `secrets`). Never store them. The SDK always provides these objects,
   empty if nothing was set.
 - **Idempotent, and no report of changes.** Make calls that change something idempotent: creating
   what exists, or removing what is gone, simply succeeds. Return the result of the change (the
   `outputs`, the applied `role`), not a description of what changed: Steward keeps the state and
   works out the difference itself.
-- **Resources and identities.** A resource is identified by its `kind` and `name`, which Steward
+- **Components and identities.** A component is identified by its `kind` and `name`, which Steward
   stores and sends on every later call. `provision` receives them with the `inputs` and returns only
   the `outputs`, such as a URL or an id the tool assigned. An identity has
   `externalId`, `name`, `ulid` and `attrs`.

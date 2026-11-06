@@ -38,7 +38,7 @@ type (
 	Credential        = providerv1.Credential
 	Organization      = providerv1.Organization
 	SetupLink         = providerv1.SetupLink
-	Resource          = providerv1.Resource
+	Component         = providerv1.Component
 	Application       = providerv1.Application
 	ApplicationSource = providerv1.ApplicationSource
 	Variable          = providerv1.Variable
@@ -63,18 +63,18 @@ type (
 	ProviderGetAccessRequest     = providerv1.ProviderServiceGetAccessRequest
 	ProviderGetAccessResponse    = providerv1.ProviderServiceGetAccessResponse
 
-	ResourceProvisionRequest     = providerv1.ResourceServiceProvisionRequest
-	ResourceProvisionResponse    = providerv1.ResourceServiceProvisionResponse
-	ResourceDeprovisionRequest   = providerv1.ResourceServiceDeprovisionRequest
-	ResourceDeprovisionResponse  = providerv1.ResourceServiceDeprovisionResponse
-	ResourceListRequest          = providerv1.ResourceServiceListRequest
-	ResourceListResponse         = providerv1.ResourceServiceListResponse
-	ResourceGrantAccessRequest   = providerv1.ResourceServiceGrantAccessRequest
-	ResourceGrantAccessResponse  = providerv1.ResourceServiceGrantAccessResponse
-	ResourceRevokeAccessRequest  = providerv1.ResourceServiceRevokeAccessRequest
-	ResourceRevokeAccessResponse = providerv1.ResourceServiceRevokeAccessResponse
-	ResourceGetAccessRequest     = providerv1.ResourceServiceGetAccessRequest
-	ResourceGetAccessResponse    = providerv1.ResourceServiceGetAccessResponse
+	ComponentProvisionRequest     = providerv1.ComponentServiceProvisionRequest
+	ComponentProvisionResponse    = providerv1.ComponentServiceProvisionResponse
+	ComponentDeprovisionRequest   = providerv1.ComponentServiceDeprovisionRequest
+	ComponentDeprovisionResponse  = providerv1.ComponentServiceDeprovisionResponse
+	ComponentListRequest          = providerv1.ComponentServiceListRequest
+	ComponentListResponse         = providerv1.ComponentServiceListResponse
+	ComponentGrantAccessRequest   = providerv1.ComponentServiceGrantAccessRequest
+	ComponentGrantAccessResponse  = providerv1.ComponentServiceGrantAccessResponse
+	ComponentRevokeAccessRequest  = providerv1.ComponentServiceRevokeAccessRequest
+	ComponentRevokeAccessResponse = providerv1.ComponentServiceRevokeAccessResponse
+	ComponentGetAccessRequest     = providerv1.ComponentServiceGetAccessRequest
+	ComponentGetAccessResponse    = providerv1.ComponentServiceGetAccessResponse
 
 	ApplicationCreateRequest   = providerv1.ApplicationServiceCreateRequest
 	ApplicationCreateResponse  = providerv1.ApplicationServiceCreateResponse
