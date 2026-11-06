@@ -16,7 +16,7 @@ import (
 
 // Serve starts serving the provider and blocks until the runner stops it. It is hashicorp/go-plugin that
 // does the work the runner depends on: it listens on a unix socket (TCP on Windows), prints the
-// handshake line, answers the health check for the service "provider", and shuts down when asked.
+// handshake line, answers the health check for the service that go-plugin names, and shuts down when asked.
 //
 // A provider must be started by a runner, which sets what Handshake describes in its environment. Started
 // by hand, it says so and exits, so run it with `steward provider validate` instead.

@@ -16,5 +16,6 @@ var Handshake = goplugin.HandshakeConfig{
 	MagicCookieValue: "b6d7a1f2-steward-provider",
 }
 
-// Name is the name a provider is served under, and the name of the service its health check answers for.
-const Name = "provider"
+// Name is the name a provider is served under, and the name of the service its health check answers for. go-plugin registers that
+// service under its own name, so this is its constant and not a word of ours.
+const Name = goplugin.GRPCServiceName
