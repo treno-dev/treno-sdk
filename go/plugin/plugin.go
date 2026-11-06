@@ -2,7 +2,7 @@
 // contract (gRPC, see ../../proto) and the functions a plugin writes.
 //
 //	p := plugin.New(plugin.Options{Name: "github", Version: "0.1.0"})
-//	p.Credential("app", plugin.CredentialOptions{Inputs: inputs, Resolve: resolve})
+//	p.Connector("app", plugin.ConnectorOptions{Inputs: inputs, Resolve: resolve})
 //	p.Resource("repository", plugin.ResourceOptions{Provision: provision, Deprovision: deprovision})
 //	p.Serve()
 //
@@ -28,18 +28,18 @@ import (
 )
 
 // Options declare the plugin and, when it supports access as a whole, the handlers for that. A plugin has no settings or secrets of
-// its own: the credentials, resources and applications it offers declare theirs.
+// its own: the connectors, resources and applications it offers declare theirs.
 type Options struct {
 	Name        string
 	Version     string
 	Title       string
 	Description string
 
-	// SetupLinks says what the person does in another tool before the settings of an integration,
+	// SetupLinks says what the person does in another tool before the settings of a connector,
 	// such as a page that creates a role, as links with the address already filled in. It is given
-	// the integration when a runner installs it, and nothing when the description is read for the
-	// docs, so it has to answer for an integration that is nil.
-	SetupLinks func(context.Context, *Integration) []*SetupLink
+	// the connector when a runner installs it, and nothing when the description is read for the
+	// docs, so it has to answer for a connector that is nil.
+	SetupLinks func(context.Context, *Connector) []*SetupLink
 
 	// What can be given on the plugin as a whole, and the handlers that give it. A grant declares the inputs it wants.
 	Grants []*GrantDefinition
@@ -91,37 +91,37 @@ type ApplicationOptions struct {
 	Deploy  func(context.Context, *ApplicationDeployRequest) (*ApplicationDeployResponse, error)
 }
 
-// CredentialOptions describe a way of reaching the tool, such as a role that is assumed with the identity token of Steward. An
-// integration is an instance of a credential. The runner calls Resolve before a task invokes any plugin, and hands what it returns
+// ConnectorOptions describe a kind of connector, a way of reaching the tool such as a role that is assumed with the identity token of
+// Steward. A connector is an instance of a kind. The runner calls Resolve before a task invokes any plugin, and hands what it returns
 // to the plugin as environment variables and files. A value is a secret of the call: do not persist it or log it.
-type CredentialOptions struct {
+type ConnectorOptions struct {
 	Title       string
 	Description string
 
-	// Inputs are the settings of an integration of this credential, and Secrets its secrets, which are references to a vault that the
+	// Inputs are the settings of a connector of this kind, and Secrets its secrets, which are references to a vault that the
 	// runner resolves for the call.
 	Inputs  []*InputDefinition
 	Secrets []*SecretDefinition
 
-	// IdentityAudience is the audience of the token that proves who the integration is, such as "sts.amazonaws.com". A credential
+	// IdentityAudience is the audience of the token that proves who the connector is, such as "sts.amazonaws.com". A kind
 	// that declares it is sent the token in the request.
 	IdentityAudience string
 
-	Resolve func(context.Context, *CredentialResolveRequest) (*CredentialResolveResponse, error)
+	Resolve func(context.Context, *ConnectorResolveRequest) (*ConnectorResolveResponse, error)
 }
 
-// Plugin is what a plugin author builds. Declare its resources, applications and credentials,
+// Plugin is what a plugin author builds. Declare its resources, applications and connectors,
 // then call Serve.
 type Plugin struct {
 	options      Options
 	resources    map[string]ResourceOptions
 	applications map[string]ApplicationOptions
-	credentials  map[string]CredentialOptions
+	connectors   map[string]ConnectorOptions
 
 	// Declaration order, so the description lists kinds the way the plugin declared them.
 	resourceOrder    []string
 	applicationOrder []string
-	credentialOrder  []string
+	connectorOrder   []string
 }
 
 // New creates a plugin.
@@ -130,17 +130,17 @@ func New(options Options) *Plugin {
 		options:      options,
 		resources:    map[string]ResourceOptions{},
 		applications: map[string]ApplicationOptions{},
-		credentials:  map[string]CredentialOptions{},
+		connectors:   map[string]ConnectorOptions{},
 	}
 }
 
-// Credential declares a way of reaching the tool. The name is unique within the plugin, such as "oidc-role".
-func (p *Plugin) Credential(name string, options CredentialOptions) *Plugin {
-	if _, declared := p.credentials[name]; !declared {
-		p.credentialOrder = append(p.credentialOrder, name)
+// Connector declares a kind of connector, a way of reaching the tool. The name is unique within the plugin, such as "oidc-role".
+func (p *Plugin) Connector(name string, options ConnectorOptions) *Plugin {
+	if _, declared := p.connectors[name]; !declared {
+		p.connectorOrder = append(p.connectorOrder, name)
 	}
 
-	p.credentials[name] = options
+	p.connectors[name] = options
 
 	return p
 }
@@ -169,7 +169,7 @@ func (p *Plugin) Application(kind string, options ApplicationOptions) *Plugin {
 	return p
 }
 
-func (p *Plugin) describe(ctx context.Context, integration *Integration) *pluginv1.DescribeResponse {
+func (p *Plugin) describe(ctx context.Context, connector *Connector) *pluginv1.DescribeResponse {
 	o := p.options
 	definition := &pluginv1.PluginDefinition{
 		Title:       o.Title,
@@ -194,9 +194,9 @@ func (p *Plugin) describe(ctx context.Context, integration *Integration) *plugin
 		})
 	}
 
-	for _, name := range p.credentialOrder {
-		options := p.credentials[name]
-		definition.Credentials = append(definition.Credentials, &pluginv1.CredentialDefinition{
+	for _, name := range p.connectorOrder {
+		options := p.connectors[name]
+		definition.Connectors = append(definition.Connectors, &pluginv1.ConnectorDefinition{
 			Name:             name,
 			Title:            options.Title,
 			Description:      options.Description,
@@ -208,9 +208,9 @@ func (p *Plugin) describe(ctx context.Context, integration *Integration) *plugin
 
 	response := &pluginv1.DescribeResponse{Name: o.Name, Version: o.Version, Definition: definition}
 
-	// The links are for an integration, so a description that was asked for without one has none.
-	if integration != nil && o.SetupLinks != nil {
-		response.SetupLinks = o.SetupLinks(ctx, integration)
+	// The links are for a connector, so a description that was asked for without one has none.
+	if connector != nil && o.SetupLinks != nil {
+		response.SetupLinks = o.SetupLinks(ctx, connector)
 	}
 
 	return response
@@ -247,10 +247,10 @@ func (p *Plugin) application(kind string) (ApplicationOptions, error) {
 	return found, nil
 }
 
-func (p *Plugin) credential(name string) (CredentialOptions, error) {
-	found, ok := p.credentials[name]
+func (p *Plugin) connector(name string) (ConnectorOptions, error) {
+	found, ok := p.connectors[name]
 	if !ok {
-		return found, status.Error(codes.NotFound, fmt.Sprintf("this plugin has no credential %q", name))
+		return found, status.Error(codes.NotFound, fmt.Sprintf("this plugin has no connector %q", name))
 	}
 
 	return found, nil

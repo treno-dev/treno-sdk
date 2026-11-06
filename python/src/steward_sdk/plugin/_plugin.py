@@ -388,7 +388,7 @@ async def _serve(plugin: Plugin) -> None:
     async def describe(_request: Message) -> Message:
         return plugin.describe()
 
-    # Every plugin must answer Validate; without a handler of its own, every integration is accepted.
+    # Every plugin must answer Validate; without a handler of its own, every connector is accepted.
     async def accept(_request: Message) -> None:
         return None
 

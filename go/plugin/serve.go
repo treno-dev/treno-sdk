@@ -49,8 +49,8 @@ func (g *grpcPlugin) GRPCServer(_ *goplugin.GRPCBroker, server *grpc.Server) err
 		pluginv1.RegisterApplicationServiceServer(server, applicationService{plugin: p})
 	}
 
-	if len(p.credentials) > 0 {
-		pluginv1.RegisterCredentialServiceServer(server, credentialService{plugin: p})
+	if len(p.connectors) > 0 {
+		pluginv1.RegisterConnectorServiceServer(server, connectorService{plugin: p})
 	}
 
 	return nil
@@ -90,7 +90,7 @@ type pluginService struct {
 }
 
 func (s pluginService) Describe(ctx context.Context, request *pluginv1.DescribeRequest) (*pluginv1.DescribeResponse, error) {
-	return s.plugin.describe(ctx, request.GetIntegration()), nil
+	return s.plugin.describe(ctx, request.GetConnector()), nil
 }
 
 func (s pluginService) GrantAccess(ctx context.Context, request *PluginGrantAccessRequest) (*PluginGrantAccessResponse, error) {
@@ -244,13 +244,13 @@ func (s applicationService) Deploy(ctx context.Context, request *ApplicationDepl
 	return kind.Deploy(ctx, request)
 }
 
-type credentialService struct {
-	pluginv1.UnimplementedCredentialServiceServer
+type connectorService struct {
+	pluginv1.UnimplementedConnectorServiceServer
 	plugin *Plugin
 }
 
-func (s credentialService) Resolve(ctx context.Context, request *CredentialResolveRequest) (*CredentialResolveResponse, error) {
-	credential, err := s.plugin.credential(request.GetCredential())
+func (s connectorService) Resolve(ctx context.Context, request *ConnectorResolveRequest) (*ConnectorResolveResponse, error) {
+	credential, err := s.plugin.connector(request.GetKind())
 	if err != nil {
 		return nil, err
 	}

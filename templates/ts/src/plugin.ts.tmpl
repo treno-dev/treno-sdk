@@ -26,8 +26,8 @@ import {
 } from '@treno-dev/steward-sdk/plugin';
 
 // Steward builds the plugin's form from `inputs` and `secrets`, so they are also the documentation
-// people see. Settings arrive in `integration.inputs`, and credentials, kept and sent separately, in
-// `integration.secrets`.
+// people see. Settings arrive in `connector.inputs`, and credentials, kept and sent separately, in
+// `connector.secrets`.
 const plugin = createPlugin({
   name: '[[.Name]]',
   version: '0.1.0',
@@ -43,12 +43,12 @@ const plugin = createPlugin({
   secrets: [{ name: 'API_TOKEN', description: 'The token to call the API with.', required: true }],
 
   // Check that the inputs and credentials work. Return an error for each input or secret the user can fix, in the list of what it is
-  // about: `inputErrors`, `secretErrors`, or `errors` for what is about the integration as a whole.
+  // about: `inputErrors`, `secretErrors`, or `errors` for what is about the connector as a whole.
   async validate(request: PluginValidateRequest): Promise<PluginValidateResponse> {
-    const { integration } = request;
+    const { connector } = request;
     const secretErrors: { field: string; message: string }[] = [];
 
-    if (!integration.secrets.API_TOKEN) {
+    if (!connector.secrets.API_TOKEN) {
       secretErrors.push({ field: 'API_TOKEN', message: 'An API token is required.' });
     }
 
@@ -69,15 +69,15 @@ plugin.resource({
   // Create a resource called `name`. Idempotent: if it already exists, succeed anyway. Return what
   // it produced, as declared in `outputs`.
   async provision(request: ResourceProvisionRequest): Promise<ResourceProvisionResponse> {
-    const { integration, name, inputs } = request;
-    const url = `${integration.inputs.base_url}/items/${name}`;
+    const { connector, name, inputs } = request;
+    const url = `${connector.inputs.base_url}/items/${name}`;
 
     return { outputs: { url } };
   },
 
   // Remove a resource. Idempotent: succeed if it is already gone.
   async deprovision(request: ResourceDeprovisionRequest): Promise<ResourceDeprovisionResponse> {
-    const { integration, resource } = request;
+    const { connector, resource } = request;
 
     return {};
   },
@@ -99,14 +99,14 @@ plugin.resource({
   // the tool has one, and `pending: true` if the person has to act first, such as accepting an
   // invitation. `identity` has `externalId`, `name` and `attrs` (an email, say).
   async grantAccess(request: ResourceGrantAccessRequest): Promise<ResourceGrantAccessResponse> {
-    const { integration, resource, identity, role, permissions } = request;
+    const { connector, resource, identity, role, permissions } = request;
 
     return { role, permissions };
   },
 
   // Take a role away. Idempotent: succeed if the identity does not have it.
   async revokeAccess(request: ResourceRevokeAccessRequest): Promise<ResourceRevokeAccessResponse> {
-    const { integration, resource, identity, role, permissions } = request;
+    const { connector, resource, identity, role, permissions } = request;
 
     return {};
   },
@@ -114,7 +114,7 @@ plugin.resource({
   // Report the roles and permissions the identity holds on the resource now, and whether a grant is
   // still pending.
   async getAccess(request: ResourceGetAccessRequest): Promise<ResourceGetAccessResponse> {
-    const { integration, resource, identity } = request;
+    const { connector, resource, identity } = request;
 
     return { roles: [], permissions: [], pending: false };
   },

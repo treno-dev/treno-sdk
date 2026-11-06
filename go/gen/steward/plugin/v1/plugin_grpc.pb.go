@@ -32,7 +32,7 @@ const (
 // Mandatory for every plugin. Describe is always served. GrantAccess, RevokeAccess and
 // GetAccess apply only to a plugin that declares grants, and answer UNIMPLEMENTED otherwise.
 type PluginServiceClient interface {
-	// Describes the plugin: the credentials it offers, the resources and applications it manages, and the grants it gives.
+	// Describes the plugin: the connectors it offers, the resources and applications it manages, and the grants it gives.
 	Describe(ctx context.Context, in *DescribeRequest, opts ...grpc.CallOption) (*DescribeResponse, error)
 	// Access to the plugin as a whole: giving identities a grant, taking it away, and checking
 	// what they hold.
@@ -96,7 +96,7 @@ func (c *pluginServiceClient) GetAccess(ctx context.Context, in *PluginServiceGe
 // Mandatory for every plugin. Describe is always served. GrantAccess, RevokeAccess and
 // GetAccess apply only to a plugin that declares grants, and answer UNIMPLEMENTED otherwise.
 type PluginServiceServer interface {
-	// Describes the plugin: the credentials it offers, the resources and applications it manages, and the grants it gives.
+	// Describes the plugin: the connectors it offers, the resources and applications it manages, and the grants it gives.
 	Describe(context.Context, *DescribeRequest) (*DescribeResponse, error)
 	// Access to the plugin as a whole: giving identities a grant, taking it away, and checking
 	// what they hold.
@@ -729,105 +729,105 @@ var ApplicationService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	CredentialService_Resolve_FullMethodName = "/steward.plugin.v1.CredentialService/Resolve"
+	ConnectorService_Resolve_FullMethodName = "/steward.plugin.v1.ConnectorService/Resolve"
 )
 
-// CredentialServiceClient is the client API for CredentialService service.
+// ConnectorServiceClient is the client API for ConnectorService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// For plugins that offer ways to reach a tool (PluginDefinition.credentials).
-type CredentialServiceClient interface {
-	Resolve(ctx context.Context, in *CredentialServiceResolveRequest, opts ...grpc.CallOption) (*CredentialServiceResolveResponse, error)
+// For plugins that offer ways to reach a tool (PluginDefinition.connectors).
+type ConnectorServiceClient interface {
+	Resolve(ctx context.Context, in *ConnectorServiceResolveRequest, opts ...grpc.CallOption) (*ConnectorServiceResolveResponse, error)
 }
 
-type credentialServiceClient struct {
+type connectorServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewCredentialServiceClient(cc grpc.ClientConnInterface) CredentialServiceClient {
-	return &credentialServiceClient{cc}
+func NewConnectorServiceClient(cc grpc.ClientConnInterface) ConnectorServiceClient {
+	return &connectorServiceClient{cc}
 }
 
-func (c *credentialServiceClient) Resolve(ctx context.Context, in *CredentialServiceResolveRequest, opts ...grpc.CallOption) (*CredentialServiceResolveResponse, error) {
+func (c *connectorServiceClient) Resolve(ctx context.Context, in *ConnectorServiceResolveRequest, opts ...grpc.CallOption) (*ConnectorServiceResolveResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CredentialServiceResolveResponse)
-	err := c.cc.Invoke(ctx, CredentialService_Resolve_FullMethodName, in, out, cOpts...)
+	out := new(ConnectorServiceResolveResponse)
+	err := c.cc.Invoke(ctx, ConnectorService_Resolve_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// CredentialServiceServer is the server API for CredentialService service.
-// All implementations must embed UnimplementedCredentialServiceServer
+// ConnectorServiceServer is the server API for ConnectorService service.
+// All implementations must embed UnimplementedConnectorServiceServer
 // for forward compatibility.
 //
-// For plugins that offer ways to reach a tool (PluginDefinition.credentials).
-type CredentialServiceServer interface {
-	Resolve(context.Context, *CredentialServiceResolveRequest) (*CredentialServiceResolveResponse, error)
-	mustEmbedUnimplementedCredentialServiceServer()
+// For plugins that offer ways to reach a tool (PluginDefinition.connectors).
+type ConnectorServiceServer interface {
+	Resolve(context.Context, *ConnectorServiceResolveRequest) (*ConnectorServiceResolveResponse, error)
+	mustEmbedUnimplementedConnectorServiceServer()
 }
 
-// UnimplementedCredentialServiceServer must be embedded to have
+// UnimplementedConnectorServiceServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedCredentialServiceServer struct{}
+type UnimplementedConnectorServiceServer struct{}
 
-func (UnimplementedCredentialServiceServer) Resolve(context.Context, *CredentialServiceResolveRequest) (*CredentialServiceResolveResponse, error) {
+func (UnimplementedConnectorServiceServer) Resolve(context.Context, *ConnectorServiceResolveRequest) (*ConnectorServiceResolveResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Resolve not implemented")
 }
-func (UnimplementedCredentialServiceServer) mustEmbedUnimplementedCredentialServiceServer() {}
-func (UnimplementedCredentialServiceServer) testEmbeddedByValue()                           {}
+func (UnimplementedConnectorServiceServer) mustEmbedUnimplementedConnectorServiceServer() {}
+func (UnimplementedConnectorServiceServer) testEmbeddedByValue()                          {}
 
-// UnsafeCredentialServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to CredentialServiceServer will
+// UnsafeConnectorServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ConnectorServiceServer will
 // result in compilation errors.
-type UnsafeCredentialServiceServer interface {
-	mustEmbedUnimplementedCredentialServiceServer()
+type UnsafeConnectorServiceServer interface {
+	mustEmbedUnimplementedConnectorServiceServer()
 }
 
-func RegisterCredentialServiceServer(s grpc.ServiceRegistrar, srv CredentialServiceServer) {
-	// If the following call panics, it indicates UnimplementedCredentialServiceServer was
+func RegisterConnectorServiceServer(s grpc.ServiceRegistrar, srv ConnectorServiceServer) {
+	// If the following call panics, it indicates UnimplementedConnectorServiceServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&CredentialService_ServiceDesc, srv)
+	s.RegisterService(&ConnectorService_ServiceDesc, srv)
 }
 
-func _CredentialService_Resolve_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CredentialServiceResolveRequest)
+func _ConnectorService_Resolve_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConnectorServiceResolveRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CredentialServiceServer).Resolve(ctx, in)
+		return srv.(ConnectorServiceServer).Resolve(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: CredentialService_Resolve_FullMethodName,
+		FullMethod: ConnectorService_Resolve_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CredentialServiceServer).Resolve(ctx, req.(*CredentialServiceResolveRequest))
+		return srv.(ConnectorServiceServer).Resolve(ctx, req.(*ConnectorServiceResolveRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// CredentialService_ServiceDesc is the grpc.ServiceDesc for CredentialService service.
+// ConnectorService_ServiceDesc is the grpc.ServiceDesc for ConnectorService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var CredentialService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "steward.plugin.v1.CredentialService",
-	HandlerType: (*CredentialServiceServer)(nil),
+var ConnectorService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "steward.plugin.v1.ConnectorService",
+	HandlerType: (*ConnectorServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Resolve",
-			Handler:    _CredentialService_Resolve_Handler,
+			Handler:    _ConnectorService_Resolve_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

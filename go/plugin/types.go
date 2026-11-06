@@ -35,7 +35,7 @@ func Value(value any) *structpb.Value {
 // The messages a plugin works with, from the generated contract, so a plugin imports one package.
 // Requests and responses are named for what they handle (the entity, then the call).
 type (
-	Integration       = pluginv1.Integration
+	Connector         = pluginv1.Connector
 	Organization      = pluginv1.Organization
 	SetupLink         = pluginv1.SetupLink
 	Resource          = pluginv1.Resource
@@ -52,9 +52,9 @@ type (
 	PermissionDefinition = pluginv1.PermissionDefinition
 	RoleDefinition       = pluginv1.RoleDefinition
 
-	CredentialDefinition = pluginv1.CredentialDefinition
-	CredentialFile       = pluginv1.CredentialFile
-	GrantDefinition      = pluginv1.GrantDefinition
+	ConnectorDefinition = pluginv1.ConnectorDefinition
+	ConnectorFile       = pluginv1.ConnectorFile
+	GrantDefinition     = pluginv1.GrantDefinition
 
 	PluginGrantAccessRequest   = pluginv1.PluginServiceGrantAccessRequest
 	PluginGrantAccessResponse  = pluginv1.PluginServiceGrantAccessResponse
@@ -83,8 +83,8 @@ type (
 	ApplicationDeployRequest   = pluginv1.ApplicationServiceDeployRequest
 	ApplicationDeployResponse  = pluginv1.ApplicationServiceDeployResponse
 
-	CredentialResolveRequest  = pluginv1.CredentialServiceResolveRequest
-	CredentialResolveResponse = pluginv1.CredentialServiceResolveResponse
+	ConnectorResolveRequest  = pluginv1.ConnectorServiceResolveRequest
+	ConnectorResolveResponse = pluginv1.ConnectorServiceResolveResponse
 )
 
 // The types an InputDefinition or OutputDefinition can have.
