@@ -1,6 +1,6 @@
 # [[.Title]]
 
-A Steward plugin for [[.Title]], built with [`treno-dev-steward-sdk`](https://github.com/treno-dev/steward-sdk/tree/main/python).
+A Steward provider for [[.Title]], built with [`treno-dev-steward-sdk`](https://github.com/treno-dev/steward-sdk/tree/main/python).
 
 ## Run
 
@@ -8,18 +8,18 @@ A Steward plugin for [[.Title]], built with [`treno-dev-steward-sdk`](https://gi
 python -m venv .venv
 source .venv/bin/activate
 pip install -e .
-steward plugin validate python src/plugin.py
+steward provider validate python src/provider.py
 ```
 
-With [uv](https://docs.astral.sh/uv/): `uv venv && uv pip install -e . && steward plugin validate uv run src/plugin.py`.
+With [uv](https://docs.astral.sh/uv/): `uv venv && uv pip install -e . && steward provider validate uv run src/provider.py`.
 
-A plugin is started by a runner, not by hand: run directly it says so and exits. Use
-`steward plugin validate` to check it, and `steward plugin run --context context.json python src/plugin.py`
+A provider is started by a runner, not by hand: run directly it says so and exits. Use
+`steward provider validate` to check it, and `steward provider run --context context.json python src/provider.py`
 to invoke it. Write logs to standard error.
 
 ## Test
 
-Save this as `context.json`, the connector and resources to call the plugin with:
+Save this as `context.json`, the connector and resources to call the provider with:
 
 ```json
 {
@@ -34,24 +34,24 @@ Save this as `context.json`, the connector and resources to call the plugin with
 ```
 
 ```sh
-steward plugin run --context context.json python src/plugin.py
-steward plugin run --context context.json --call provision python src/plugin.py
+steward provider run --context context.json python src/provider.py
+steward provider run --context context.json --call provision python src/provider.py
 ```
 
 The first creates each resource, grants and revokes the role, and removes it. It does this for real, in
 whatever your credentials reach, and asks before it starts (`--yes` skips the question). `--call` makes
 only the calls you name, once each and without cleaning up: `provision`, `grant-access`, `get-access`,
-`revoke-access` and `deprovision`. `steward plugin validate` never changes anything.
+`revoke-access` and `deprovision`. `steward provider validate` never changes anything.
 
 ## Where things are
 
-`src/plugin.py` declares the plugin's inputs (what it needs to connect), each kind of resource and the
+`src/provider.py` declares the provider's inputs (what it needs to connect), each kind of resource and the
 handlers Steward calls: `provision`, `deprovision`, `grant_access`, `revoke_access` and `get_access`.
 Each handler is annotated with the request and response types the SDK exports. Delete the handlers
 you do not need: Steward offers only what you implement.
 
-To add a kind of resource, call `plugin.resource(kind=..., ...)` again with its own inputs, outputs and
+To add a kind of resource, call `provider.resource(kind=..., ...)` again with its own inputs, outputs and
 handlers.
 
 See the [SDK README](https://github.com/treno-dev/steward-sdk/blob/main/python/README.md) for
-everything a plugin can declare.
+everything a provider can declare.

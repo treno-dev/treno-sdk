@@ -1,1 +1,1 @@
-"""The Steward SDK for Python. Today it holds `steward_sdk.plugin`, for writing Steward plugins."""
+"""The Steward SDK for Python. Today it holds `steward_sdk.provider`, for writing Steward providers."""

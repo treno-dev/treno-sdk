@@ -1,18 +1,18 @@
-# This is the file you edit. It declares what your plugin offers and implements the calls Steward
+# This is the file you edit. It declares what your provider offers and implements the calls Steward
 # makes. The gRPC plumbing, the handshake and the health check live in the Steward SDK.
 #
-# Declare the plugin and each kind of resource once, with its handlers attached: Steward's forms
+# Declare the provider and each kind of resource once, with its handlers attached: Steward's forms
 # follow from what you write here, and every call is routed to the right handler by kind. If your
-# plugin needs more than one tool, take the credentials for each as inputs.
+# provider needs more than one tool, take the credentials for each as inputs.
 #
 # Each handler is annotated with the request and response types the SDK exports, named for the
 # entity and the call (ResourceProvisionRequest, ResourceProvisionResponse). A request is the
 # generated message, so your editor completes its fields; a response is a message or a plain dict
 # with the fields you have something to say about. Handlers may be async or plain functions.
 
-from steward_sdk.plugin import (
-    PluginValidateRequest,
-    PluginValidateResponse,
+from steward_sdk.provider import (
+    ProviderValidateRequest,
+    ProviderValidateResponse,
     ResourceDeprovisionRequest,
     ResourceDeprovisionResponse,
     ResourceGetAccessRequest,
@@ -23,13 +23,13 @@ from steward_sdk.plugin import (
     ResourceProvisionResponse,
     ResourceRevokeAccessRequest,
     ResourceRevokeAccessResponse,
-    create_plugin,
+    create_provider,
     plain,
 )
 
 
 # Check that the inputs and credentials work. Return an error per input the user can fix.
-async def validate(request: PluginValidateRequest) -> PluginValidateResponse:
+async def validate(request: ProviderValidateRequest) -> ProviderValidateResponse:
     errors = []
 
     if not request.connector.secrets.get("API_TOKEN"):
@@ -72,15 +72,15 @@ async def get_access(request: ResourceGetAccessRequest) -> ResourceGetAccessResp
     return {"roles": [], "permissions": [], "pending": False}
 
 
-# Steward builds the plugin's form from `inputs` and `secrets`, so they are also the documentation
+# Steward builds the provider's form from `inputs` and `secrets`, so they are also the documentation
 # people see. Settings arrive in `request.connector.inputs`, and credentials, kept and sent separately,
 # in `request.connector.secrets`.
-plugin = create_plugin(
+provider = create_provider(
     name="[[.Name]]",
     version="0.1.0",
     title="[[.Title]]",
     description="Connects Steward to [[.Title]].",
-    # The settings this plugin is configured with.
+    # The settings this provider is configured with.
     inputs=[
         {"name": "base_url", "label": "Base URL", "description": "The base URL of the API.", "type": "string", "required": True},
     ],
@@ -89,8 +89,8 @@ plugin = create_plugin(
     validate=validate,
 )
 
-# A kind of resource this plugin manages.
-plugin.resource(
+# A kind of resource this provider manages.
+provider.resource(
     kind="item",
     title="Item",
     description="An example resource.",
@@ -115,4 +115,4 @@ plugin.resource(
     get_access=get_access,
 )
 
-plugin.serve()
+provider.serve()

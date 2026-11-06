@@ -1,18 +1,18 @@
-// This is the file you edit. It declares what your plugin offers and implements the calls Steward
+// This is the file you edit. It declares what your provider offers and implements the calls Steward
 // makes. The gRPC plumbing, the handshake and the health check live in the Steward SDK.
 //
-// Declare the plugin and each kind of resource once, with its handlers attached: Steward's forms
+// Declare the provider and each kind of resource once, with its handlers attached: Steward's forms
 // follow from what you write here, and every call is routed to the right handler by kind. If your
-// plugin needs more than one tool, take the credentials for each as inputs.
+// provider needs more than one tool, take the credentials for each as inputs.
 //
 // Each handler is annotated with the request and response types the SDK exports, named for the
 // entity and the call (ResourceProvisionRequest, ResourceProvisionResponse). Your editor completes
 // the request's fields, and the compiler checks what you return.
 
 import {
-  createPlugin,
-  type PluginValidateRequest,
-  type PluginValidateResponse,
+  createProvider,
+  type ProviderValidateRequest,
+  type ProviderValidateResponse,
   type ResourceDeprovisionRequest,
   type ResourceDeprovisionResponse,
   type ResourceGetAccessRequest,
@@ -23,18 +23,18 @@ import {
   type ResourceProvisionResponse,
   type ResourceRevokeAccessRequest,
   type ResourceRevokeAccessResponse,
-} from '@treno-dev/steward-sdk/plugin';
+} from '@treno-dev/steward-sdk/provider';
 
-// Steward builds the plugin's form from `inputs` and `secrets`, so they are also the documentation
+// Steward builds the provider's form from `inputs` and `secrets`, so they are also the documentation
 // people see. Settings arrive in `connector.inputs`, and credentials, kept and sent separately, in
 // `connector.secrets`.
-const plugin = createPlugin({
+const provider = createProvider({
   name: '[[.Name]]',
   version: '0.1.0',
   title: '[[.Title]]',
   description: 'Connects Steward to [[.Title]].',
 
-  // The settings this plugin is configured with.
+  // The settings this provider is configured with.
   inputs: [
     { name: 'base_url', label: 'Base URL', description: 'The base URL of the API.', type: 'string', required: true },
   ],
@@ -44,7 +44,7 @@ const plugin = createPlugin({
 
   // Check that the inputs and credentials work. Return an error for each input or secret the user can fix, in the list of what it is
   // about: `inputErrors`, `secretErrors`, or `errors` for what is about the connector as a whole.
-  async validate(request: PluginValidateRequest): Promise<PluginValidateResponse> {
+  async validate(request: ProviderValidateRequest): Promise<ProviderValidateResponse> {
     const { connector } = request;
     const secretErrors: { field: string; message: string }[] = [];
 
@@ -56,9 +56,9 @@ const plugin = createPlugin({
   },
 });
 
-// A kind of resource this plugin manages. Handlers receive the request as a plain object and return
+// A kind of resource this provider manages. Handlers receive the request as a plain object and return
 // the response as one, leaving out any field they have nothing to say about.
-plugin.resource({
+provider.resource({
   kind: 'item',
   title: 'Item',
   description: 'An example resource.',
@@ -120,4 +120,4 @@ plugin.resource({
   },
 });
 
-plugin.serve();
+provider.serve();

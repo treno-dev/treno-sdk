@@ -1,19 +1,19 @@
-// The plugin part of the Steward SDK for JavaScript: the plumbing between the plugin contract (gRPC,
-// see ../../../proto) and the plain objects a plugin works with.
+// The provider part of the Steward SDK for JavaScript: the plumbing between the provider contract (gRPC,
+// see ../../../proto) and the plain objects a provider works with.
 //
-//   import { createPlugin } from '@treno-dev/steward-sdk/plugin';
+//   import { createProvider } from '@treno-dev/steward-sdk/provider';
 //
-//   const plugin = createPlugin({ name: 'github', version: '0.1.0', inputs: [...], validate });
-//   plugin.resource({ kind: 'repository', inputs: [...], provision, deprovision, list });
-//   plugin.serve();
+//   const provider = createProvider({ name: 'github', version: '0.1.0', inputs: [...], validate });
+//   provider.resource({ kind: 'repository', inputs: [...], provision, deprovision, list });
+//   provider.serve();
 //
-// A plugin declares itself and each of its resource or application kinds once, with the handlers
+// A provider declares itself and each of its resource or application kinds once, with the handlers
 // attached. The SDK routes every call to the right handler by kind, builds the description Steward
 // asks for, serves the gRPC services, prints the handshake line, answers the health check, fills in
 // whatever a handler leaves out of its response, and answers any call without a handler with
 // UNIMPLEMENTED.
 //
-// Everything a plugin logs must go to stderr: stdout is reserved for the handshake line.
+// Everything a provider logs must go to stderr: stdout is reserved for the handshake line.
 //
 // Messages are generated from the contract, which also turns google.protobuf.Struct into plain
 // objects, so handlers never deal with protobuf values.
@@ -31,24 +31,24 @@ import type {
   InputDefinition,
   OutputDefinition,
   PermissionDefinition,
-  PluginDefinition,
+  ProviderDefinition,
   ResourceDefinition,
   RoleDefinition,
   SecretDefinition,
-} from '../gen/steward/plugin/v1/plugin.js';
-import * as contract from '../gen/steward/plugin/v1/plugin.js';
+} from '../gen/steward/provider/v1/provider.js';
+import * as contract from '../gen/steward/provider/v1/provider.js';
 
-export * from '../gen/steward/plugin/v1/plugin.js';
+export * from '../gen/steward/provider/v1/provider.js';
 
 const { HealthImplementation } = healthCheck;
 
-// The version of the Steward plugin contract this plugin speaks.
+// The version of the Steward provider contract this provider speaks.
 const APP_PROTOCOL_VERSION = 1;
 
-// A runner sets this cookie in the environment of every plugin it starts, as hashicorp/go-plugin does.
-// A plugin that does not find it was started by hand. Kept in step with go/plugin/handshake.go.
-const MAGIC_COOKIE_KEY = 'STEWARD_PLUGIN';
-const MAGIC_COOKIE_VALUE = 'b6d7a1f2-steward-plugin';
+// A runner sets this cookie in the environment of every provider it starts, as hashicorp/go-plugin does.
+// A provider that does not find it was started by hand. Kept in step with go/provider/handshake.go.
+const MAGIC_COOKIE_KEY = 'STEWARD_PROVIDER';
+const MAGIC_COOKIE_VALUE = 'b6d7a1f2-steward-provider';
 
 type MaybePromise<T> = T | Promise<T>;
 
@@ -66,14 +66,14 @@ type Complete<Message> = Message extends (infer Item)[]
 // The request and response of each handler, named for what it handles (the entity, then the call),
 // for annotating your own handlers. A request has its message fields present, and a response may
 // leave fields out.
-export type PluginValidateRequest = Complete<contract.ValidateRequest>;
-export type PluginValidateResponse = DeepPartial<contract.ValidateResponse>;
-export type PluginGrantAccessRequest = Complete<contract.PluginServiceGrantAccessRequest>;
-export type PluginGrantAccessResponse = DeepPartial<contract.PluginServiceGrantAccessResponse>;
-export type PluginRevokeAccessRequest = Complete<contract.PluginServiceRevokeAccessRequest>;
-export type PluginRevokeAccessResponse = DeepPartial<contract.PluginServiceRevokeAccessResponse>;
-export type PluginGetAccessRequest = Complete<contract.PluginServiceGetAccessRequest>;
-export type PluginGetAccessResponse = DeepPartial<contract.PluginServiceGetAccessResponse>;
+export type ProviderValidateRequest = Complete<contract.ValidateRequest>;
+export type ProviderValidateResponse = DeepPartial<contract.ValidateResponse>;
+export type ProviderGrantAccessRequest = Complete<contract.ProviderServiceGrantAccessRequest>;
+export type ProviderGrantAccessResponse = DeepPartial<contract.ProviderServiceGrantAccessResponse>;
+export type ProviderRevokeAccessRequest = Complete<contract.ProviderServiceRevokeAccessRequest>;
+export type ProviderRevokeAccessResponse = DeepPartial<contract.ProviderServiceRevokeAccessResponse>;
+export type ProviderGetAccessRequest = Complete<contract.ProviderServiceGetAccessRequest>;
+export type ProviderGetAccessResponse = DeepPartial<contract.ProviderServiceGetAccessResponse>;
 export type ResourceProvisionRequest = Complete<contract.ResourceServiceProvisionRequest>;
 export type ResourceProvisionResponse = DeepPartial<contract.ResourceServiceProvisionResponse>;
 export type ResourceDeprovisionRequest = Complete<contract.ResourceServiceDeprovisionRequest>;
@@ -116,13 +116,13 @@ type Access = {
   roles?: DeepPartial<RoleDefinition>[];
 };
 
-// The plugin: what is needed to configure it, and, when it supports access as a whole, the handlers
+// The provider: what is needed to configure it, and, when it supports access as a whole, the handlers
 // for that.
-export type PluginOptions = Describe &
+export type ProviderOptions = Describe &
   Access & {
     name: string;
     version: string;
-  } & Omit<Handlers<typeof contract.PluginServiceService>, 'describe'>;
+  } & Omit<Handlers<typeof contract.ProviderServiceService>, 'describe'>;
 
 export type ResourceOptions = Describe &
   Access & {
@@ -143,7 +143,7 @@ type AnyRequest = {
   application?: { kind: string };
 };
 
-type Target = 'plugin' | 'resource' | 'application';
+type Target = 'provider' | 'resource' | 'application';
 
 const ACCESS_CALLS = ['grantAccess', 'revokeAccess', 'getAccess'] as const;
 const PROVISIONING_CALLS = ['provision', 'deprovision'] as const;
@@ -164,27 +164,27 @@ function applicationDefinition(options: ApplicationOptions): DeepPartial<Applica
   return { kind, title, description, inputs, secrets, sources, outputs };
 }
 
-export class Plugin {
+export class Provider {
   readonly resources = new Map<string, ResourceOptions>();
   readonly applications = new Map<string, ApplicationOptions>();
 
-  constructor(readonly options: PluginOptions) {}
+  constructor(readonly options: ProviderOptions) {}
 
-  /** Declares a kind of resource the plugin manages, with its handlers. */
+  /** Declares a kind of resource the provider manages, with its handlers. */
   resource(options: ResourceOptions): this {
     this.resources.set(options.kind, options);
 
     return this;
   }
 
-  /** Declares a kind of application the plugin runs, with its handlers. */
+  /** Declares a kind of application the provider runs, with its handlers. */
   application(options: ApplicationOptions): this {
     this.applications.set(options.kind, options);
 
     return this;
   }
 
-  /** Starts serving the plugin. The runner stops it when it is done. */
+  /** Starts serving the provider. The runner stops it when it is done. */
   serve(): void {
     serve(this);
   }
@@ -196,10 +196,10 @@ export class Plugin {
   }
 
   // Routes a call to the handler of the same name on whatever the request is about: the
-  // plugin itself, or one of its kinds of resource or application.
+  // provider itself, or one of its kinds of resource or application.
   route(call: string, target: Target, kindOf: (request: AnyRequest) => string = () => '') {
     return (request: AnyRequest) => {
-      const options = target === 'plugin' ? this.options : this.kind(target, kindOf(request));
+      const options = target === 'provider' ? this.options : this.kind(target, kindOf(request));
       const handler = (options as Record<string, unknown>)[call] as ((request: AnyRequest) => unknown) | undefined;
 
       return handler
@@ -208,7 +208,7 @@ export class Plugin {
     };
   }
 
-  private definition(): DeepPartial<PluginDefinition> {
+  private definition(): DeepPartial<ProviderDefinition> {
     const { title, description, inputs, secrets, permissions, roles } = this.options;
 
     return {
@@ -226,13 +226,13 @@ export class Plugin {
   private kind(target: 'resource' | 'application', kind: string): object {
     const kinds = target === 'resource' ? this.resources : this.applications;
 
-    return kinds.get(kind) ?? fail(grpc.status.NOT_FOUND, `this plugin has no ${target} "${kind}"`);
+    return kinds.get(kind) ?? fail(grpc.status.NOT_FOUND, `this provider has no ${target} "${kind}"`);
   }
 }
 
-/** Creates a plugin. Declare its resources, then call `serve()`. */
-export function createPlugin(options: PluginOptions): Plugin {
-  return new Plugin(options);
+/** Creates a provider. Declare its resources, then call `serve()`. */
+export function createProvider(options: ProviderOptions): Provider {
+  return new Provider(options);
 }
 
 // Serving --------------------------------------------------------------------------------------
@@ -318,7 +318,7 @@ function unimplemented(path: string): grpc.handleUnaryCall<unknown, unknown> {
   return (_call, callback) =>
     callback({
       code: grpc.status.UNIMPLEMENTED,
-      message: `${path} is not implemented by this plugin`,
+      message: `${path} is not implemented by this provider`,
     } as grpc.ServiceError);
 }
 
@@ -336,17 +336,17 @@ function implement(service: Registered, routed: Routed): grpc.UntypedServiceImpl
   return implementation;
 }
 
-function routes(plugin: Plugin, calls: readonly string[], target: Target, kindOf?: (request: AnyRequest) => string): Routed {
-  return Object.fromEntries(calls.map((call) => [call, plugin.route(call, target, kindOf)]));
+function routes(provider: Provider, calls: readonly string[], target: Target, kindOf?: (request: AnyRequest) => string): Routed {
+  return Object.fromEntries(calls.map((call) => [call, provider.route(call, target, kindOf)]));
 }
 
 // Where to listen: a unix socket in the directory the runner made for it, when it set one, which only the
 // runner's user can open; otherwise a port on the loopback interface.
 function listenAddress(): { bind: string; announce: (port: number) => string } {
-  const directory = process.env.PLUGIN_UNIX_SOCKET_DIR;
+  const directory = process.env.PROVIDER_UNIX_SOCKET_DIR;
 
   if (directory && process.platform !== 'win32') {
-    const path = join(directory, `plugin-${randomBytes(6).toString('hex')}`);
+    const path = join(directory, `provider-${randomBytes(6).toString('hex')}`);
 
     return { bind: `unix:${path}`, announce: () => `unix|${path}` };
   }
@@ -354,7 +354,7 @@ function listenAddress(): { bind: string; announce: (port: number) => string } {
   return { bind: '127.0.0.1:0', announce: (port) => `tcp|127.0.0.1:${port}` };
 }
 
-// Serves the call go-plugin makes to ask a plugin to shut down, so that it exits at once and the
+// Serves the call go-plugin makes to ask a provider to shut down, so that it exits at once and the
 // runner does not wait for it. It has no generated code, since its messages are empty.
 function addShutdown(server: grpc.Server, stop: () => void): void {
   const empty = { serialize: () => Buffer.alloc(0), deserialize: () => ({}) };
@@ -362,7 +362,7 @@ function addShutdown(server: grpc.Server, stop: () => void): void {
   server.addService(
     {
       Shutdown: {
-        path: '/plugin.GRPCController/Shutdown',
+        path: '/provider.GRPCController/Shutdown',
         requestStream: false,
         responseStream: false,
         requestSerialize: empty.serialize,
@@ -380,29 +380,29 @@ function addShutdown(server: grpc.Server, stop: () => void): void {
   );
 }
 
-function serve(plugin: Plugin): void {
+function serve(provider: Provider): void {
   if (process.env[MAGIC_COOKIE_KEY] !== MAGIC_COOKIE_VALUE) {
-    console.error('This program is a Steward plugin. It is started by a runner, not run directly.');
-    console.error('To try it, use `steward plugin validate` or `steward plugin run`.');
+    console.error('This program is a Steward provider. It is started by a runner, not run directly.');
+    console.error('To try it, use `steward provider validate` or `steward provider run`.');
     process.exit(1);
   }
 
   // A runner that has gone leaves these pipes broken, and Node crashes on the error that a direct write to
   // one raises. console.* already ignores it; this covers process.stdout.write and process.stderr.write, so
-  // a plugin outlives its runner and a new runner can reattach to it.
+  // a provider outlives its runner and a new runner can reattach to it.
   for (const stream of [process.stdout, process.stderr]) {
     stream.on('error', () => {});
   }
 
   const server = new grpc.Server();
-  const anyResource = plugin.resources.size > 0;
-  const anyApplication = plugin.applications.size > 0;
+  const anyResource = provider.resources.size > 0;
+  const anyApplication = provider.applications.size > 0;
 
-  server.addService(contract.PluginServiceService, implement(contract.PluginServiceService, {
-    describe: () => plugin.describe(),
-    // Every plugin must answer Validate; without a handler of its own, every connector is accepted.
-    validate: plugin.options.validate ? plugin.route('validate', 'plugin') : () => ({}),
-    ...routes(plugin, ACCESS_CALLS, 'plugin'),
+  server.addService(contract.ProviderServiceService, implement(contract.ProviderServiceService, {
+    describe: () => provider.describe(),
+    // Every provider must answer Validate; without a handler of its own, every connector is accepted.
+    validate: provider.options.validate ? provider.route('validate', 'provider') : () => ({}),
+    ...routes(provider, ACCESS_CALLS, 'provider'),
   }));
 
   if (anyResource) {
@@ -412,7 +412,7 @@ function serve(plugin: Plugin): void {
       contract.ResourceServiceService as unknown as grpc.ServiceDefinition,
       implement(
         contract.ResourceServiceService,
-        routes(plugin, [...ACCESS_CALLS, ...PROVISIONING_CALLS, 'list'], 'resource', resourceKind),
+        routes(provider, [...ACCESS_CALLS, ...PROVISIONING_CALLS, 'list'], 'resource', resourceKind),
       ),
     );
   }
@@ -423,11 +423,11 @@ function serve(plugin: Plugin): void {
 
     server.addService(
       contract.ApplicationServiceService as unknown as grpc.ServiceDefinition,
-      implement(contract.ApplicationServiceService, routes(plugin, calls, 'application', applicationKind)),
+      implement(contract.ApplicationServiceService, routes(provider, calls, 'application', applicationKind)),
     );
   }
 
-  new HealthImplementation({ plugin: 'SERVING' }).addToServer(server);
+  new HealthImplementation({ provider: 'SERVING' }).addToServer(server);
 
   const stop = () => server.tryShutdown(() => process.exit(0));
 

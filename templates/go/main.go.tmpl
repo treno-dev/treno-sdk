@@ -1,9 +1,9 @@
-// This is the file you edit. It declares what your plugin offers and implements the calls Steward
+// This is the file you edit. It declares what your provider offers and implements the calls Steward
 // makes. The gRPC plumbing, the handshake and the health check live in the SDK.
 //
-// Declare the plugin and each kind of resource once, with its handlers attached: Steward's forms
+// Declare the provider and each kind of resource once, with its handlers attached: Steward's forms
 // follow from what you write here, and every call is routed to the right handler by kind. If your
-// plugin needs more than one tool, take the credentials for each as inputs.
+// provider needs more than one tool, take the credentials for each as inputs.
 //
 // Handlers take the request and return the response, both typed from the contract and named for the
 // entity and the call (ResourceProvisionRequest, ResourceProvisionResponse). Request getters are safe
@@ -15,17 +15,17 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/treno-dev/steward-sdk/go/plugin"
+	"github.com/treno-dev/steward-sdk/go/provider"
 )
 
 // Check that the inputs and credentials work. Return an error for each input or secret the user can fix.
-func validate(ctx context.Context, request *plugin.PluginValidateRequest) (*plugin.PluginValidateResponse, error) {
-	response := &plugin.PluginValidateResponse{}
+func validate(ctx context.Context, request *provider.ProviderValidateRequest) (*provider.ProviderValidateResponse, error) {
+	response := &provider.ProviderValidateResponse{}
 
 	// An error goes in the list of what it is about: InputErrors for an input, SecretErrors for a secret, and Errors for what is
 	// about the connector as a whole. Steward marks the field that the list says, and does not guess it from a name.
 	if request.GetConnector().GetSecrets()["API_TOKEN"] == "" {
-		response.SecretErrors = append(response.SecretErrors, &plugin.ValidationError{
+		response.SecretErrors = append(response.SecretErrors, &provider.ValidationError{
 			Field:   "API_TOKEN",
 			Message: "An API token is required.",
 		})
@@ -36,79 +36,79 @@ func validate(ctx context.Context, request *plugin.PluginValidateRequest) (*plug
 
 // Create a resource called request.Name. Idempotent: if it already exists, succeed anyway. Return
 // what it produced, as declared in Outputs. The request also has the Connector and the Inputs.
-func provision(ctx context.Context, request *plugin.ResourceProvisionRequest) (*plugin.ResourceProvisionResponse, error) {
+func provision(ctx context.Context, request *provider.ResourceProvisionRequest) (*provider.ResourceProvisionResponse, error) {
 	baseURL := request.GetConnector().GetInputs().AsMap()["base_url"]
 
-	return &plugin.ResourceProvisionResponse{
-		Outputs: plugin.Struct(map[string]any{"url": fmt.Sprintf("%v/items/%s", baseURL, request.GetName())}),
+	return &provider.ResourceProvisionResponse{
+		Outputs: provider.Struct(map[string]any{"url": fmt.Sprintf("%v/items/%s", baseURL, request.GetName())}),
 	}, nil
 }
 
 // Remove a resource. Idempotent: succeed if it is already gone. The request has the Connector and the
 // Resource (Kind, Name).
-func deprovision(ctx context.Context, request *plugin.ResourceDeprovisionRequest) (*plugin.ResourceDeprovisionResponse, error) {
-	return &plugin.ResourceDeprovisionResponse{}, nil
+func deprovision(ctx context.Context, request *provider.ResourceDeprovisionRequest) (*provider.ResourceDeprovisionResponse, error) {
+	return &provider.ResourceDeprovisionResponse{}, nil
 }
 
 // Give an identity a role on the resource. Idempotent. The Role is always set. For a role Steward
 // composed, Permissions lists its pieces. Return what the tool applied, an Id for the grant if the
 // tool has one, and Pending if the person has to act first, such as accepting an invitation. The
 // request has the Connector, Resource, Identity (ExternalId, Name, Attrs), Role and Permissions.
-func grantAccess(ctx context.Context, request *plugin.ResourceGrantAccessRequest) (*plugin.ResourceGrantAccessResponse, error) {
-	return &plugin.ResourceGrantAccessResponse{Role: request.GetRole(), Permissions: request.GetPermissions()}, nil
+func grantAccess(ctx context.Context, request *provider.ResourceGrantAccessRequest) (*provider.ResourceGrantAccessResponse, error) {
+	return &provider.ResourceGrantAccessResponse{Role: request.GetRole(), Permissions: request.GetPermissions()}, nil
 }
 
 // Take a role away. Idempotent: succeed if the identity does not have it.
-func revokeAccess(ctx context.Context, request *plugin.ResourceRevokeAccessRequest) (*plugin.ResourceRevokeAccessResponse, error) {
-	return &plugin.ResourceRevokeAccessResponse{}, nil
+func revokeAccess(ctx context.Context, request *provider.ResourceRevokeAccessRequest) (*provider.ResourceRevokeAccessResponse, error) {
+	return &provider.ResourceRevokeAccessResponse{}, nil
 }
 
 // Report the roles and permissions the identity holds on the resource now, and whether a grant is
 // still pending.
-func getAccess(ctx context.Context, request *plugin.ResourceGetAccessRequest) (*plugin.ResourceGetAccessResponse, error) {
-	return &plugin.ResourceGetAccessResponse{}, nil
+func getAccess(ctx context.Context, request *provider.ResourceGetAccessRequest) (*provider.ResourceGetAccessResponse, error) {
+	return &provider.ResourceGetAccessResponse{}, nil
 }
 
 func main() {
-	// Steward builds the plugin's form from Inputs and Secrets, so they are also the documentation
+	// Steward builds the provider's form from Inputs and Secrets, so they are also the documentation
 	// people see. Settings arrive in request.Connector.Inputs, and credentials, kept and sent
 	// separately, in request.Connector.Secrets.
-	p := plugin.New(plugin.Options{
+	p := provider.New(provider.Options{
 		Name:        "[[.Name]]",
 		Version:     "0.1.0",
 		Title:       "[[.Title]]",
 		Description: "Connects Steward to [[.Title]].",
 
-		// The settings this plugin is configured with.
-		Inputs: []*plugin.InputDefinition{
-			{Name: "base_url", Label: "Base URL", Description: "The base URL of the API.", Type: plugin.TypeString, Required: true},
+		// The settings this provider is configured with.
+		Inputs: []*provider.InputDefinition{
+			{Name: "base_url", Label: "Base URL", Description: "The base URL of the API.", Type: provider.TypeString, Required: true},
 		},
 
 		// The credentials it is configured with.
-		Secrets: []*plugin.SecretDefinition{
+		Secrets: []*provider.SecretDefinition{
 			{Name: "API_TOKEN", Description: "The token to call the API with.", Required: true},
 		},
 
 		Validate: validate,
 	})
 
-	// A kind of resource this plugin manages.
-	p.Resource("item", plugin.ResourceOptions{
+	// A kind of resource this provider manages.
+	p.Resource("item", provider.ResourceOptions{
 		Title:       "Item",
 		Description: "An example resource.",
 
 		// What a resource of this kind takes besides its name, which Steward stores with the kind.
-		Inputs:  []*plugin.InputDefinition{{Name: "description", Label: "Description", Description: "What the item is for.", Type: plugin.TypeString}},
-		Outputs: []*plugin.OutputDefinition{{Name: "url", Label: "URL", Description: "Where the item can be opened.", Type: plugin.TypeString}},
+		Inputs:  []*provider.InputDefinition{{Name: "description", Label: "Description", Description: "What the item is for.", Type: provider.TypeString}},
+		Outputs: []*provider.OutputDefinition{{Name: "url", Label: "URL", Description: "Where the item can be opened.", Type: provider.TypeString}},
 
 		// What can be granted on this kind. Declaring permissions or roles is what makes the kind
 		// accept access, along with the three access handlers. The permissions are the pieces Steward
 		// builds its own roles from; the roles are the ones the tool defines itself.
-		Permissions: []*plugin.PermissionDefinition{
+		Permissions: []*provider.PermissionDefinition{
 			{Name: "view", Title: "View"},
 			{Name: "edit", Title: "Edit"},
 		},
-		Roles: []*plugin.RoleDefinition{
+		Roles: []*provider.RoleDefinition{
 			{Name: "viewer", Title: "Viewer"},
 			{Name: "editor", Title: "Editor"},
 		},

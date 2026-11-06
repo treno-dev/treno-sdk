@@ -1,39 +1,39 @@
-"""The plugin part of the Steward SDK for Python: the plumbing between the plugin contract (gRPC,
-see ../proto) and the functions a plugin writes.
+"""The provider part of the Steward SDK for Python: the plumbing between the provider contract (gRPC,
+see ../proto) and the functions a provider writes.
 
-    from steward_sdk.plugin import create_plugin
+    from steward_sdk.provider import create_provider
 
 
-    plugin = create_plugin(name="github", version="0.1.0", inputs=[...], validate=validate)
-    plugin.resource(kind="repository", inputs=[...], provision=provision, deprovision=deprovision)
-    plugin.serve()
+    provider = create_provider(name="github", version="0.1.0", inputs=[...], validate=validate)
+    provider.resource(kind="repository", inputs=[...], provision=provision, deprovision=deprovision)
+    provider.serve()
 
-A plugin declares itself and each of its resource or application kinds once, with the handlers
+A provider declares itself and each of its resource or application kinds once, with the handlers
 attached. The SDK routes every call to the right handler by kind, builds the description Steward asks
 for, serves the gRPC services, prints the handshake line, answers the health check, and answers any
 call without a handler with UNIMPLEMENTED.
 
-Everything a plugin logs must go to stderr: stdout is reserved for the handshake line.
+Everything a provider logs must go to stderr: stdout is reserved for the handshake line.
 """
 
-from steward_sdk._gen.steward.plugin.v1.plugin_pb2 import *  # noqa: F401,F403
-from steward_sdk.plugin._plugin import (
+from steward_sdk._gen.steward.provider.v1.provider_pb2 import *  # noqa: F401,F403
+from steward_sdk.provider._provider import (
     ApplicationCreateRequest,
     ApplicationCreateResponse,
     ApplicationDeployRequest,
     ApplicationDeployResponse,
     ApplicationDestroyRequest,
     ApplicationDestroyResponse,
-    Plugin,
-    PluginError,
-    PluginGetAccessRequest,
-    PluginGetAccessResponse,
-    PluginGrantAccessRequest,
-    PluginGrantAccessResponse,
-    PluginRevokeAccessRequest,
-    PluginRevokeAccessResponse,
-    PluginValidateRequest,
-    PluginValidateResponse,
+    Provider,
+    ProviderError,
+    ProviderGetAccessRequest,
+    ProviderGetAccessResponse,
+    ProviderGrantAccessRequest,
+    ProviderGrantAccessResponse,
+    ProviderRevokeAccessRequest,
+    ProviderRevokeAccessResponse,
+    ProviderValidateRequest,
+    ProviderValidateResponse,
     ResourceDeprovisionRequest,
     ResourceDeprovisionResponse,
     ResourceGetAccessRequest,
@@ -47,7 +47,7 @@ from steward_sdk.plugin._plugin import (
     ResourceRevokeAccessRequest,
     ResourceRevokeAccessResponse,
     StatusCode,
-    create_plugin,
+    create_provider,
     plain,
 )
 
@@ -58,16 +58,16 @@ __all__ = [
     "ApplicationDeployResponse",
     "ApplicationDestroyRequest",
     "ApplicationDestroyResponse",
-    "Plugin",
-    "PluginError",
-    "PluginGetAccessRequest",
-    "PluginGetAccessResponse",
-    "PluginGrantAccessRequest",
-    "PluginGrantAccessResponse",
-    "PluginRevokeAccessRequest",
-    "PluginRevokeAccessResponse",
-    "PluginValidateRequest",
-    "PluginValidateResponse",
+    "Provider",
+    "ProviderError",
+    "ProviderGetAccessRequest",
+    "ProviderGetAccessResponse",
+    "ProviderGrantAccessRequest",
+    "ProviderGrantAccessResponse",
+    "ProviderRevokeAccessRequest",
+    "ProviderRevokeAccessResponse",
+    "ProviderValidateRequest",
+    "ProviderValidateResponse",
     "ResourceDeprovisionRequest",
     "ResourceDeprovisionResponse",
     "ResourceGetAccessRequest",
@@ -81,6 +81,6 @@ __all__ = [
     "ResourceRevokeAccessRequest",
     "ResourceRevokeAccessResponse",
     "StatusCode",
-    "create_plugin",
+    "create_provider",
     "plain",
 ]

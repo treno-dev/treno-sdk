@@ -1,7 +1,7 @@
 {
   "name": "@treno-dev/steward-sdk",
   "version": "0.1.0-rc.8",
-  "description": "The Steward SDK for JavaScript and TypeScript: write Steward plugins",
+  "description": "The Steward SDK for JavaScript and TypeScript: write Steward providers",
   "type": "module",
   "repository": {
     "type": "git",
@@ -12,9 +12,9 @@
     "access": "public"
   },
   "exports": {
-    "./plugin": {
-      "types": "./dist/plugin/index.d.ts",
-      "import": "./dist/plugin/index.js"
+    "./provider": {
+      "types": "./dist/provider/index.d.ts",
+      "import": "./dist/provider/index.js"
     }
   },
   "files": [

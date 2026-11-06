@@ -1,12 +1,12 @@
 syntax = "proto3";
 
-package steward.plugin.v1;
+package steward.provider.v1;
 
 import "google/protobuf/struct.proto";
 
-// The plugin contract. Every plugin serves PluginService: it describes itself and, when it declares grants,
-// gives access as a whole. A plugin that offers connectors serves ConnectorService, one that
-// has resources also serves ResourceService, and one that runs applications serves ApplicationService. A plugin
+// The provider contract. Every provider serves ProviderService: it describes itself and, when it declares grants,
+// gives access as a whole. A provider that offers connectors serves ConnectorService, one that
+// has resources also serves ResourceService, and one that runs applications serves ApplicationService. A provider
 // offers a call by implementing it. A call it does not offer fails with UNIMPLEMENTED, and Steward
 // treats that as not offered. Within v1 the contract is additive only.
 //
@@ -20,15 +20,15 @@ import "google/protobuf/struct.proto";
 // Shared messages
 // ---------------------------------------------------------------------------------------------
 
-// A connector is a way of reaching a tool that an organization set up from a kind of connector that a plugin offers, such as a role of
+// A connector is a way of reaching a tool that an organization set up from a kind of connector that a provider offers, such as a role of
 // one AWS account. A call that is made on behalf of a connector says which. What the connector holds, its inputs and its secrets, is
-// handed to the plugin that declared its kind in ConnectorService.Resolve, and a task reads the result as its environment.
+// handed to the provider that declared its kind in ConnectorService.Resolve, and a task reads the result as its environment.
 message Connector {
   // Inputs and secrets belong to a connector kind, and the identity token to its Resolve.
   reserved 1, 2, 6;
   reserved "inputs", "secrets", "identity_token";
 
-  // Who the connector is. A plugin can name what it makes in a tool after it, such as a role.
+  // Who the connector is. A provider can name what it makes in a tool after it, such as a role.
   string ulid = 3;
   string name = 4;
 
@@ -36,12 +36,12 @@ message Connector {
   Organization organization = 5;
 
   // The address of Steward as an issuer of identity tokens: the `iss` of the token, which a cloud is
-  // told to trust. A plugin that sets up trust in it, such as with a link to a guide, uses this
-  // address. It is set in Describe, for the connector the plugin is described for.
+  // told to trust. A provider that sets up trust in it, such as with a link to a guide, uses this
+  // address. It is set in Describe, for the connector the provider is described for.
   string identity_issuer = 7;
 }
 
-// An organization of Steward, as a plugin is told of it.
+// An organization of Steward, as a provider is told of it.
 message Organization {
   string ulid = 1;
   string name = 2;
@@ -49,7 +49,7 @@ message Organization {
 
 // Something in the tool that access can be granted to or that can be provisioned.
 message Resource {
-  // A kind declared in PluginDefinition.resources.
+  // A kind declared in ProviderDefinition.resources.
   string kind = 1;
 
   // The resource's name in the tool, such as a repository's full name. Steward stores it with the
@@ -64,7 +64,7 @@ message Resource {
   map<string, string> secrets = 4;
 
   // Values the resource produced, as declared in ResourceDefinition.outputs, keyed by output name.
-  // Set by the plugin when it lists a resource; ignored on calls. Provision returns its outputs
+  // Set by the provider when it lists a resource; ignored on calls. Provision returns its outputs
   // separately. Values of outputs declared sensitive stay with the runner and are not passed on to
   // Steward.
   google.protobuf.Struct outputs = 5;
@@ -72,7 +72,7 @@ message Resource {
 
 // Something deployed and run in the tool, as opposed to a resource, which is provisioned.
 message Application {
-  // A kind declared in PluginDefinition.applications.
+  // A kind declared in ProviderDefinition.applications.
   string kind = 1;
 
   // The application's identity in the tool.
@@ -90,12 +90,12 @@ message Application {
   // What it is deployed from.
   ApplicationSource source = 6;
 
-  // Its variables. Open-ended: the names are not declared by the plugin.
+  // Its variables. Open-ended: the names are not declared by the provider.
   repeated Variable variables = 7;
 }
 
 // Where an application is deployed from. The source types are a fixed set that Steward defines, each
-// with its own configuration, so every plugin sees the same shapes:
+// with its own configuration, so every provider sees the same shapes:
 //
 //   github    { owner, name, branch? }    a GitHub repository
 //   registry  { image, tag? }             a container image in a registry
@@ -141,7 +141,7 @@ message Variable {
 // more than it was given, such as a grant with neither an external_id nor an attr the tool can
 // invite by, fails with INVALID_ARGUMENT.
 message Identity {
-  // Steward's own opaque identifier for the identity. A plugin does not interpret it; it is there
+  // Steward's own opaque identifier for the identity. A provider does not interpret it; it is there
   // to correlate a call with what Steward recorded.
   optional string ulid = 1;
 
@@ -155,7 +155,7 @@ message Identity {
   google.protobuf.Struct attrs = 4;
 }
 
-// A role: one the tool defines itself, or one Steward composed from the permissions the plugin
+// A role: one the tool defines itself, or one Steward composed from the permissions the provider
 // declares. A call that carries a role always names it. The permissions of a composed role travel
 // beside it, in `permissions`.
 message Role {
@@ -165,23 +165,23 @@ message Role {
 // One permission, in whatever form the tool uses. The name is the permission itself, such as
 // "s3:GetObject", "DescribeStacks" or "pull_requests". The level qualifies it for tools whose
 // permissions come in degrees, such as "read" or "write", and is unset for those whose do not.
-// Steward does not interpret either; the plugin does.
+// Steward does not interpret either; the provider does.
 message Permission {
   string name = 1;
   optional string level = 2;
 
-  // What the permission allows, in words. Filled in when a plugin returns permissions, and ignored
+  // What the permission allows, in words. Filled in when a provider returns permissions, and ignored
   // on calls.
   optional string description = 3;
 }
 
 // ---------------------------------------------------------------------------------------------
-// PluginService messages
+// ProviderService messages
 // ---------------------------------------------------------------------------------------------
 
 message DescribeRequest {
-  // The connector the plugin is being added for, when there is one. Steward sets it when a runner
-  // installs a connector, so that the plugin can say what the person does in the tool before the
+  // The connector the provider is being added for, when there is one. Steward sets it when a runner
+  // installs a connector, so that the provider can say what the person does in the tool before the
   // settings. Tools that only read the description, such as the generator of docs, leave it empty.
   Connector connector = 1;
 }
@@ -190,13 +190,13 @@ message DescribeResponse {
   string name = 1;
   string version = 2;
 
-  // What the plugin offers. A plugin that needs several tools takes the credentials for each as
+  // What the provider offers. A provider that needs several tools takes the credentials for each as
   // secrets.
-  PluginDefinition definition = 3;
+  ProviderDefinition definition = 3;
 
   // Steps the person takes in another tool before the settings of this connector, such as a page
   // that creates a stack. They are for the connector of the request and are kept with it: the
-  // definition is the same for every connector of a version of the plugin, and these are not.
+  // definition is the same for every connector of a version of the provider, and these are not.
   // Empty when the request has no connector.
   repeated SetupLink setup_links = 4;
 }
@@ -210,29 +210,29 @@ message SetupLink {
   string url = 3;
 }
 
-message PluginDefinition {
+message ProviderDefinition {
   string title = 1;
   string description = 2;
 
-  // A plugin has no settings or secrets of its own. They belong to what it offers: each connector, resource and application
+  // A provider has no settings or secrets of its own. They belong to what it offers: each connector, resource and application
   // declares its own inputs and secrets.
   reserved 3, 8;
   reserved "inputs", "secrets";
 
-  // The resource kinds this plugin manages. Kinds are unique within the plugin.
+  // The resource kinds this provider manages. Kinds are unique within the provider.
   repeated ResourceDefinition resources = 4;
 
-  // What can be granted on the plugin as a whole is declared as grants. Roles and permissions are not part of the plugin.
+  // What can be granted on the provider as a whole is declared as grants. Roles and permissions are not part of the provider.
   reserved 5, 6, 12;
   reserved "permissions", "roles", "grant_inputs";
 
-  // The application kinds this plugin can run, such as a Laravel app on a host. Applications are a
+  // The application kinds this provider can run, such as a Laravel app on a host. Applications are a
   // second kind of thing next to resources: they are deployed from a source and have variables that
-  // people edit over time. Kinds are unique within the plugin. Empty when the plugin runs no
+  // people edit over time. Kinds are unique within the provider. Empty when the provider runs no
   // applications.
   repeated ApplicationDefinition applications = 7;
 
-  // Plugins keep no secrets: they are in vaults, and a connector refers to them.
+  // Providers keep no secrets: they are in vaults, and a connector refers to them.
   reserved 9;
   reserved "secret_engines";
 
@@ -240,16 +240,16 @@ message PluginDefinition {
   reserved 10;
   reserved "identity_audience";
 
-  // The kinds of connector this plugin offers, which are the ways it can reach its tool. Empty when the plugin offers none, such as one that
+  // The kinds of connector this provider offers, which are the ways it can reach its tool. Empty when the provider offers none, such as one that
   // only reads the environment its tool reads.
   repeated ConnectorDefinition connectors = 11;
 
   // What a person can be given in the tool as a whole, such as access to an AWS account through a role, or membership of a GitHub
-  // organization. Names are unique within the plugin. Declaring grants is what says the plugin supports access.
+  // organization. Names are unique within the provider. Declaring grants is what says the provider supports access.
   repeated GrantDefinition grants = 13;
 }
 
-// One setting a plugin, a resource or an application takes, declared the way a variable is: a name
+// One setting a provider, a resource or an application takes, declared the way a variable is: a name
 // and a type, with the value passed separately, keyed by `name`, in Connector.inputs,
 // Resource.inputs or Application.inputs.
 message InputDefinition {
@@ -258,7 +258,7 @@ message InputDefinition {
   string description = 3;
 
   // One of "string", "number", "boolean", "select", "list" (of strings) or "map" (string keys and
-  // values). The SDKs export these as constants, and `steward plugin validate` rejects any other.
+  // values). The SDKs export these as constants, and `steward provider validate` rejects any other.
   string type = 4;
 
   bool required = 5;
@@ -274,7 +274,7 @@ message InputDefinition {
   optional double max = 9;
 }
 
-// One credential a plugin, a resource or an application takes, such as an API token or a private
+// One credential a provider, a resource or an application takes, such as an API token or a private
 // key. Secrets are separate from inputs: they are stored, sent and shown differently. The value is
 // passed in the `secrets` map, keyed by `name`, for one call only, and is never shown back once set.
 message SecretDefinition {
@@ -290,14 +290,14 @@ message OutputDefinition {
   string description = 3;
   string type = 4;
 
-  // The value is a secret, such as a generated password. The plugin still returns it in
+  // The value is a secret, such as a generated password. The provider still returns it in
   // Resource.outputs, but the runner writes it to the customer's own secret store and reports only
   // a reference to Steward, which never sees or stores the value.
   bool sensitive = 5;
 }
 
 message ResourceDefinition {
-  // Unique within the plugin, such as "repository".
+  // Unique within the provider, such as "repository".
   string kind = 1;
   string title = 2;
   string description = 3;
@@ -320,11 +320,11 @@ message ResourceDefinition {
 }
 
 // An application is deployable and has open-ended variables, which a resource has neither of. A
-// resource has fixed inputs and outputs that the plugin declares; an application also has a source
+// resource has fixed inputs and outputs that the provider declares; an application also has a source
 // and variables whose names are chosen by the people who run it. Every declared application kind
 // can be deployed and has variables.
 message ApplicationDefinition {
-  // Unique within the plugin, such as "laravel".
+  // Unique within the provider, such as "laravel".
   string kind = 1;
   string title = 2;
   string description = 3;
@@ -343,12 +343,12 @@ message ApplicationDefinition {
   repeated OutputDefinition outputs = 6;
 }
 
-// A kind of connector that a plugin offers: a way of reaching the tool, such as an AWS role assumed with the identity token of Steward, or
-// a pair of access keys. A connector is an instance of a kind. Before a task calls any plugin, the runner calls Resolve on the connectors
-// shared with the task and hands what they return to the plugin as its environment and files, so a plugin that only reads the
-// environment of its tool needs nothing from the connectors of another plugin.
+// A kind of connector that a provider offers: a way of reaching the tool, such as an AWS role assumed with the identity token of Steward, or
+// a pair of access keys. A connector is an instance of a kind. Before a task calls any provider, the runner calls Resolve on the connectors
+// shared with the task and hands what they return to the provider as its environment and files, so a provider that only reads the
+// environment of its tool needs nothing from the connectors of another provider.
 message ConnectorDefinition {
-  // Unique within the plugin, such as "oidc-role".
+  // Unique within the provider, such as "oidc-role".
   string name = 1;
   string title = 2;
   string description = 3;
@@ -366,10 +366,10 @@ message ConnectorDefinition {
 }
 
 // Something a person can be given in the tool, such as access to an account or a seat. A grant is not always a role: it is whatever
-// the plugin can give and take away, and it declares the inputs it wants. An input can be free, such as the ARN of a role, or fixed,
+// the provider can give and take away, and it declares the inputs it wants. An input can be free, such as the ARN of a role, or fixed,
 // such as a "select" of the roles an organization has.
 message GrantDefinition {
-  // Unique within the plugin, such as "access" or "member".
+  // Unique within the provider, such as "access" or "member".
   string name = 1;
   string title = 2;
   string description = 3;
@@ -395,25 +395,25 @@ message RoleDefinition {
   string description = 3;
 }
 
-// Access to the plugin as a whole, such as a role in an AWS account or membership of a GitHub organization. Steward grants it before
-// it grants access to the plugin's resources, and decides when to remove it.
+// Access to the provider as a whole, such as a role in an AWS account or membership of a GitHub organization. Steward grants it before
+// it grants access to the provider's resources, and decides when to remove it.
 //
 // Idempotent: granting what is already granted succeeds.
-message PluginServiceGrantAccessRequest {
+message ProviderServiceGrantAccessRequest {
   reserved 3, 4, 10;
   reserved "role", "permissions", "grant_inputs";
 
   Connector connector = 1;
   Identity identity = 2;
 
-  // A name declared in PluginDefinition.grants.
+  // A name declared in ProviderDefinition.grants.
   string grant = 5;
 
   // The values of the inputs that grant declared, keyed by input name.
   google.protobuf.Struct inputs = 6;
 }
 
-message PluginServiceGrantAccessResponse {
+message ProviderServiceGrantAccessResponse {
   reserved 2, 4;
   reserved "role", "permissions";
 
@@ -427,7 +427,7 @@ message PluginServiceGrantAccessResponse {
 }
 
 // Idempotent: revoking what is already absent succeeds.
-message PluginServiceRevokeAccessRequest {
+message ProviderServiceRevokeAccessRequest {
   reserved 3, 5, 10;
   reserved "role", "permissions", "grant_inputs";
 
@@ -441,11 +441,11 @@ message PluginServiceRevokeAccessRequest {
   google.protobuf.Struct inputs = 7;
 }
 
-message PluginServiceRevokeAccessResponse {}
+message ProviderServiceRevokeAccessResponse {}
 
 // Asks whether an identity holds a grant now, for example to skip an invitation to someone who
 // is already a member, or to find drift.
-message PluginServiceGetAccessRequest {
+message ProviderServiceGetAccessRequest {
   reserved 10;
   reserved "grant_inputs";
 
@@ -456,7 +456,7 @@ message PluginServiceGetAccessRequest {
   google.protobuf.Struct inputs = 4;
 }
 
-message PluginServiceGetAccessResponse {
+message ProviderServiceGetAccessResponse {
   reserved 1, 4;
   reserved "roles", "permissions";
 
@@ -476,7 +476,7 @@ message PluginServiceGetAccessResponse {
 // ---------------------------------------------------------------------------------------------
 
 // Access to one resource, such as a role on a repository. Steward grants it after the identity has
-// access to the plugin.
+// access to the provider.
 //
 // Idempotent: granting what is already granted succeeds.
 message ResourceServiceGrantAccessRequest {
@@ -538,7 +538,7 @@ message ResourceServiceGetAccessResponse {
 message ResourceServiceProvisionRequest {
   Connector connector = 1;
 
-  // The kind to create, as declared in PluginDefinition.resources.
+  // The kind to create, as declared in ProviderDefinition.resources.
   string kind = 2;
 
   // What to call it in the tool. Steward stores the name with the kind.
@@ -588,7 +588,7 @@ message ResourceServiceListResponse {
 message ApplicationServiceCreateRequest {
   Connector connector = 1;
 
-  // A kind declared in PluginDefinition.applications, with its inputs and secrets, where it is
+  // A kind declared in ProviderDefinition.applications, with its inputs and secrets, where it is
   // deployed from, and its starting variables.
   string kind = 2;
   google.protobuf.Struct inputs = 3;
@@ -627,10 +627,10 @@ message ApplicationServiceDeployResponse {
 }
 
 // Turns a connector of a kind into what a tool reads: environment variables and files. The runner calls it before a task
-// invokes any plugin, once for each connector shared with the task, and merges the results. A value is a secret of the call: the
-// plugin must not persist it or write it to a log.
+// invokes any provider, once for each connector shared with the task, and merges the results. A value is a secret of the call: the
+// provider must not persist it or write it to a log.
 message ConnectorServiceResolveRequest {
-  // The name of a kind declared in PluginDefinition.connectors.
+  // The name of a kind declared in ProviderDefinition.connectors.
   string kind = 1;
 
   // The settings of the connector, keyed by the inputs the kind declared.
@@ -642,7 +642,7 @@ message ConnectorServiceResolveRequest {
   // A token that proves who the connector is, for the audience the kind declared. Valid for minutes, and never persisted.
   string identity_token = 4;
 
-  // Who the connector is, and the organization it belongs to, so that a plugin can name what it makes after them.
+  // Who the connector is, and the organization it belongs to, so that a provider can name what it makes after them.
   string connector_ulid = 5;
   string connector_name = 6;
   Organization organization = 7;
@@ -671,20 +671,20 @@ message ConnectorFile {
 // Services
 // ---------------------------------------------------------------------------------------------
 
-// Mandatory for every plugin. Describe is always served. GrantAccess, RevokeAccess and
-// GetAccess apply only to a plugin that declares grants, and answer UNIMPLEMENTED otherwise.
-service PluginService {
-  // Describes the plugin: the connectors it offers, the resources and applications it manages, and the grants it gives.
+// Mandatory for every provider. Describe is always served. GrantAccess, RevokeAccess and
+// GetAccess apply only to a provider that declares grants, and answer UNIMPLEMENTED otherwise.
+service ProviderService {
+  // Describes the provider: the connectors it offers, the resources and applications it manages, and the grants it gives.
   rpc Describe(DescribeRequest) returns (DescribeResponse);
 
-  // Access to the plugin as a whole: giving identities a grant, taking it away, and checking
+  // Access to the provider as a whole: giving identities a grant, taking it away, and checking
   // what they hold.
-  rpc GrantAccess(PluginServiceGrantAccessRequest) returns (PluginServiceGrantAccessResponse);
-  rpc RevokeAccess(PluginServiceRevokeAccessRequest) returns (PluginServiceRevokeAccessResponse);
-  rpc GetAccess(PluginServiceGetAccessRequest) returns (PluginServiceGetAccessResponse);
+  rpc GrantAccess(ProviderServiceGrantAccessRequest) returns (ProviderServiceGrantAccessResponse);
+  rpc RevokeAccess(ProviderServiceRevokeAccessRequest) returns (ProviderServiceRevokeAccessResponse);
+  rpc GetAccess(ProviderServiceGetAccessRequest) returns (ProviderServiceGetAccessResponse);
 }
 
-// For plugins that manage resources. A call a resource kind does not offer answers UNIMPLEMENTED.
+// For providers that manage resources. A call a resource kind does not offer answers UNIMPLEMENTED.
 // GrantAccess, RevokeAccess and GetAccess are offered by kinds that declare roles or permissions.
 service ResourceService {
   rpc GrantAccess(ResourceServiceGrantAccessRequest) returns (ResourceServiceGrantAccessResponse);
@@ -695,7 +695,7 @@ service ResourceService {
   rpc List(ResourceServiceListRequest) returns (ResourceServiceListResponse);
 }
 
-// For plugins that run applications (PluginDefinition.applications): deployable things with a source
+// For providers that run applications (ProviderDefinition.applications): deployable things with a source
 // and open-ended variables.
 service ApplicationService {
   rpc Create(ApplicationServiceCreateRequest) returns (ApplicationServiceCreateResponse);
@@ -703,7 +703,7 @@ service ApplicationService {
   rpc Deploy(ApplicationServiceDeployRequest) returns (ApplicationServiceDeployResponse);
 }
 
-// For plugins that offer ways to reach a tool (PluginDefinition.connectors).
+// For providers that offer ways to reach a tool (ProviderDefinition.connectors).
 service ConnectorService {
   rpc Resolve(ConnectorServiceResolveRequest) returns (ConnectorServiceResolveResponse);
 }

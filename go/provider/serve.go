@@ -1,4 +1,4 @@
-package plugin
+package provider
 
 import (
 	"context"
@@ -11,64 +11,64 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	pluginv1 "github.com/treno-dev/steward-sdk/go/gen/steward/plugin/v1"
+	providerv1 "github.com/treno-dev/steward-sdk/go/gen/steward/provider/v1"
 )
 
-// Serve starts serving the plugin and blocks until the runner stops it. It is hashicorp/go-plugin that
+// Serve starts serving the provider and blocks until the runner stops it. It is hashicorp/go-plugin that
 // does the work the runner depends on: it listens on a unix socket (TCP on Windows), prints the
-// handshake line, answers the health check for the service "plugin", and shuts down when asked.
+// handshake line, answers the health check for the service "provider", and shuts down when asked.
 //
-// A plugin must be started by a runner, which sets what Handshake describes in its environment. Started
-// by hand, it says so and exits, so run it with `steward plugin validate` instead.
-func (p *Plugin) Serve() {
+// A provider must be started by a runner, which sets what Handshake describes in its environment. Started
+// by hand, it says so and exits, so run it with `steward provider validate` instead.
+func (p *Provider) Serve() {
 	goplugin.Serve(&goplugin.ServeConfig{
 		HandshakeConfig: Handshake,
-		Plugins:         goplugin.PluginSet{Name: &grpcPlugin{plugin: p}},
+		Plugins:         goplugin.PluginSet{Name: &grpcProvider{provider: p}},
 		GRPCServer: func(options []grpc.ServerOption) *grpc.Server {
 			return goplugin.DefaultGRPCServer(append(options, grpc.ChainUnaryInterceptor(recoverPanics)))
 		},
 	})
 }
 
-// grpcPlugin registers the services of the plugin with the gRPC server that go-plugin runs.
-type grpcPlugin struct {
+// grpcProvider registers the services of the provider with the gRPC server that go-plugin runs.
+type grpcProvider struct {
 	goplugin.NetRPCUnsupportedPlugin
-	plugin *Plugin
+	provider *Provider
 }
 
-func (g *grpcPlugin) GRPCServer(_ *goplugin.GRPCBroker, server *grpc.Server) error {
-	p := g.plugin
+func (g *grpcProvider) GRPCServer(_ *goplugin.GRPCBroker, server *grpc.Server) error {
+	p := g.provider
 
-	pluginv1.RegisterPluginServiceServer(server, pluginService{plugin: p})
+	providerv1.RegisterProviderServiceServer(server, providerService{provider: p})
 
 	if len(p.resources) > 0 {
-		pluginv1.RegisterResourceServiceServer(server, resourceService{plugin: p})
+		providerv1.RegisterResourceServiceServer(server, resourceService{provider: p})
 	}
 
 	if len(p.applications) > 0 {
-		pluginv1.RegisterApplicationServiceServer(server, applicationService{plugin: p})
+		providerv1.RegisterApplicationServiceServer(server, applicationService{provider: p})
 	}
 
 	if len(p.connectors) > 0 {
-		pluginv1.RegisterConnectorServiceServer(server, connectorService{plugin: p})
+		providerv1.RegisterConnectorServiceServer(server, connectorService{provider: p})
 	}
 
 	return nil
 }
 
 // GRPCClient is the runner's side. A runner uses the connection as it is, with the generated clients.
-func (g *grpcPlugin) GRPCClient(_ context.Context, _ *goplugin.GRPCBroker, conn *grpc.ClientConn) (any, error) {
+func (g *grpcProvider) GRPCClient(_ context.Context, _ *goplugin.GRPCBroker, conn *grpc.ClientConn) (any, error) {
 	return conn, nil
 }
 
-// ClientPlugin is what a runner passes to go-plugin, under Name, so that it gets the gRPC connection
+// ClientProvider is what a runner passes to go-plugin, under Name, so that it gets the gRPC connection
 // back from Dispense.
-func ClientPlugin() goplugin.Plugin {
-	return &grpcPlugin{}
+func ClientProvider() goplugin.Plugin {
+	return &grpcProvider{}
 }
 
 // recoverPanics reports a panic in a handler as an INTERNAL error, with its stack on stderr, instead
-// of letting it take the whole plugin down.
+// of letting it take the whole provider down.
 func recoverPanics(ctx context.Context, request any, _ *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (response any, err error) {
 	defer func() {
 		if recovered := recover(); recovered != nil {
@@ -80,50 +80,50 @@ func recoverPanics(ctx context.Context, request any, _ *grpc.UnaryServerInfo, ha
 	return handler(ctx, request)
 }
 
-// The services route each call to the handler of the same name on the plugin or on the kind the
+// The services route each call to the handler of the same name on the provider or on the kind the
 // request is about, and answer a call without a handler with UNIMPLEMENTED. The generated Unimplemented
-// servers keep the plugin compatible when the contract gains calls.
+// servers keep the provider compatible when the contract gains calls.
 
-type pluginService struct {
-	pluginv1.UnimplementedPluginServiceServer
-	plugin *Plugin
+type providerService struct {
+	providerv1.UnimplementedProviderServiceServer
+	provider *Provider
 }
 
-func (s pluginService) Describe(ctx context.Context, request *pluginv1.DescribeRequest) (*pluginv1.DescribeResponse, error) {
-	return s.plugin.describe(ctx, request.GetConnector()), nil
+func (s providerService) Describe(ctx context.Context, request *providerv1.DescribeRequest) (*providerv1.DescribeResponse, error) {
+	return s.provider.describe(ctx, request.GetConnector()), nil
 }
 
-func (s pluginService) GrantAccess(ctx context.Context, request *PluginGrantAccessRequest) (*PluginGrantAccessResponse, error) {
-	if s.plugin.options.GrantAccess == nil {
-		return nil, unimplemented("grant_access", "plugin")
+func (s providerService) GrantAccess(ctx context.Context, request *ProviderGrantAccessRequest) (*ProviderGrantAccessResponse, error) {
+	if s.provider.options.GrantAccess == nil {
+		return nil, unimplemented("grant_access", "provider")
 	}
 
-	return s.plugin.options.GrantAccess(ctx, request)
+	return s.provider.options.GrantAccess(ctx, request)
 }
 
-func (s pluginService) RevokeAccess(ctx context.Context, request *PluginRevokeAccessRequest) (*PluginRevokeAccessResponse, error) {
-	if s.plugin.options.RevokeAccess == nil {
-		return nil, unimplemented("revoke_access", "plugin")
+func (s providerService) RevokeAccess(ctx context.Context, request *ProviderRevokeAccessRequest) (*ProviderRevokeAccessResponse, error) {
+	if s.provider.options.RevokeAccess == nil {
+		return nil, unimplemented("revoke_access", "provider")
 	}
 
-	return s.plugin.options.RevokeAccess(ctx, request)
+	return s.provider.options.RevokeAccess(ctx, request)
 }
 
-func (s pluginService) GetAccess(ctx context.Context, request *PluginGetAccessRequest) (*PluginGetAccessResponse, error) {
-	if s.plugin.options.GetAccess == nil {
-		return nil, unimplemented("get_access", "plugin")
+func (s providerService) GetAccess(ctx context.Context, request *ProviderGetAccessRequest) (*ProviderGetAccessResponse, error) {
+	if s.provider.options.GetAccess == nil {
+		return nil, unimplemented("get_access", "provider")
 	}
 
-	return s.plugin.options.GetAccess(ctx, request)
+	return s.provider.options.GetAccess(ctx, request)
 }
 
 type resourceService struct {
-	pluginv1.UnimplementedResourceServiceServer
-	plugin *Plugin
+	providerv1.UnimplementedResourceServiceServer
+	provider *Provider
 }
 
 func (s resourceService) Provision(ctx context.Context, request *ResourceProvisionRequest) (*ResourceProvisionResponse, error) {
-	kind, err := s.plugin.resource(request.GetKind())
+	kind, err := s.provider.resource(request.GetKind())
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func (s resourceService) Provision(ctx context.Context, request *ResourceProvisi
 }
 
 func (s resourceService) Deprovision(ctx context.Context, request *ResourceDeprovisionRequest) (*ResourceDeprovisionResponse, error) {
-	kind, err := s.plugin.resource(request.GetResource().GetKind())
+	kind, err := s.provider.resource(request.GetResource().GetKind())
 	if err != nil {
 		return nil, err
 	}
@@ -149,7 +149,7 @@ func (s resourceService) Deprovision(ctx context.Context, request *ResourceDepro
 }
 
 func (s resourceService) List(ctx context.Context, request *ResourceListRequest) (*ResourceListResponse, error) {
-	kind, err := s.plugin.resource(request.GetKind())
+	kind, err := s.provider.resource(request.GetKind())
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +162,7 @@ func (s resourceService) List(ctx context.Context, request *ResourceListRequest)
 }
 
 func (s resourceService) GrantAccess(ctx context.Context, request *ResourceGrantAccessRequest) (*ResourceGrantAccessResponse, error) {
-	kind, err := s.plugin.resource(request.GetResource().GetKind())
+	kind, err := s.provider.resource(request.GetResource().GetKind())
 	if err != nil {
 		return nil, err
 	}
@@ -175,7 +175,7 @@ func (s resourceService) GrantAccess(ctx context.Context, request *ResourceGrant
 }
 
 func (s resourceService) RevokeAccess(ctx context.Context, request *ResourceRevokeAccessRequest) (*ResourceRevokeAccessResponse, error) {
-	kind, err := s.plugin.resource(request.GetResource().GetKind())
+	kind, err := s.provider.resource(request.GetResource().GetKind())
 	if err != nil {
 		return nil, err
 	}
@@ -188,7 +188,7 @@ func (s resourceService) RevokeAccess(ctx context.Context, request *ResourceRevo
 }
 
 func (s resourceService) GetAccess(ctx context.Context, request *ResourceGetAccessRequest) (*ResourceGetAccessResponse, error) {
-	kind, err := s.plugin.resource(request.GetResource().GetKind())
+	kind, err := s.provider.resource(request.GetResource().GetKind())
 	if err != nil {
 		return nil, err
 	}
@@ -201,12 +201,12 @@ func (s resourceService) GetAccess(ctx context.Context, request *ResourceGetAcce
 }
 
 type applicationService struct {
-	pluginv1.UnimplementedApplicationServiceServer
-	plugin *Plugin
+	providerv1.UnimplementedApplicationServiceServer
+	provider *Provider
 }
 
 func (s applicationService) Create(ctx context.Context, request *ApplicationCreateRequest) (*ApplicationCreateResponse, error) {
-	kind, err := s.plugin.application(request.GetKind())
+	kind, err := s.provider.application(request.GetKind())
 	if err != nil {
 		return nil, err
 	}
@@ -219,7 +219,7 @@ func (s applicationService) Create(ctx context.Context, request *ApplicationCrea
 }
 
 func (s applicationService) Destroy(ctx context.Context, request *ApplicationDestroyRequest) (*ApplicationDestroyResponse, error) {
-	kind, err := s.plugin.application(request.GetApplication().GetKind())
+	kind, err := s.provider.application(request.GetApplication().GetKind())
 	if err != nil {
 		return nil, err
 	}
@@ -232,7 +232,7 @@ func (s applicationService) Destroy(ctx context.Context, request *ApplicationDes
 }
 
 func (s applicationService) Deploy(ctx context.Context, request *ApplicationDeployRequest) (*ApplicationDeployResponse, error) {
-	kind, err := s.plugin.application(request.GetApplication().GetKind())
+	kind, err := s.provider.application(request.GetApplication().GetKind())
 	if err != nil {
 		return nil, err
 	}
@@ -245,12 +245,12 @@ func (s applicationService) Deploy(ctx context.Context, request *ApplicationDepl
 }
 
 type connectorService struct {
-	pluginv1.UnimplementedConnectorServiceServer
-	plugin *Plugin
+	providerv1.UnimplementedConnectorServiceServer
+	provider *Provider
 }
 
 func (s connectorService) Resolve(ctx context.Context, request *ConnectorResolveRequest) (*ConnectorResolveResponse, error) {
-	credential, err := s.plugin.connector(request.GetKind())
+	credential, err := s.provider.connector(request.GetKind())
 	if err != nil {
 		return nil, err
 	}

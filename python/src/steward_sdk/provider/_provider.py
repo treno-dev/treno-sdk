@@ -17,23 +17,23 @@ from google.protobuf.message import Message
 from grpc import StatusCode
 from grpc_health.v1 import health, health_pb2, health_pb2_grpc
 
-from steward_sdk._gen.steward.plugin.v1 import plugin_pb2 as contract
+from steward_sdk._gen.steward.provider.v1 import provider_pb2 as contract
 
-# The version of the Steward plugin contract this plugin speaks.
+# The version of the Steward provider contract this provider speaks.
 APP_PROTOCOL_VERSION = 1
 
-# A runner sets this cookie in the environment of every plugin it starts, as hashicorp/go-plugin does.
-# A plugin that does not find it was started by hand. Kept in step with go/plugin/handshake.go.
-MAGIC_COOKIE_KEY = "STEWARD_PLUGIN"
-MAGIC_COOKIE_VALUE = "b6d7a1f2-steward-plugin"
+# A runner sets this cookie in the environment of every provider it starts, as hashicorp/go-plugin does.
+# A provider that does not find it was started by hand. Kept in step with go/provider/handshake.go.
+MAGIC_COOKIE_KEY = "STEWARD_PROVIDER"
+MAGIC_COOKIE_VALUE = "b6d7a1f2-steward-provider"
 
 # The request of each handler, named for what it handles (the entity, then the call), for annotating
 # your own handlers. They are the generated messages: fields are snake_case, a message that was not
 # sent reads as empty, and a Struct (such as `inputs`) supports `[]`, `in` and `dict()`.
-PluginValidateRequest = contract.ValidateRequest
-PluginGrantAccessRequest = contract.PluginServiceGrantAccessRequest
-PluginRevokeAccessRequest = contract.PluginServiceRevokeAccessRequest
-PluginGetAccessRequest = contract.PluginServiceGetAccessRequest
+ProviderValidateRequest = contract.ValidateRequest
+ProviderGrantAccessRequest = contract.ProviderServiceGrantAccessRequest
+ProviderRevokeAccessRequest = contract.ProviderServiceRevokeAccessRequest
+ProviderGetAccessRequest = contract.ProviderServiceGetAccessRequest
 ResourceProvisionRequest = contract.ResourceServiceProvisionRequest
 ResourceDeprovisionRequest = contract.ResourceServiceDeprovisionRequest
 ResourceListRequest = contract.ResourceServiceListRequest
@@ -46,10 +46,10 @@ ApplicationDeployRequest = contract.ApplicationServiceDeployRequest
 
 # A handler returns the generated response message, or a plain dict with the fields it has
 # something to say about (names may be snake_case or camelCase), or nothing at all.
-PluginValidateResponse = Union[contract.ValidateResponse, Mapping[str, Any], None]
-PluginGrantAccessResponse = Union[contract.PluginServiceGrantAccessResponse, Mapping[str, Any], None]
-PluginRevokeAccessResponse = Union[contract.PluginServiceRevokeAccessResponse, Mapping[str, Any], None]
-PluginGetAccessResponse = Union[contract.PluginServiceGetAccessResponse, Mapping[str, Any], None]
+ProviderValidateResponse = Union[contract.ValidateResponse, Mapping[str, Any], None]
+ProviderGrantAccessResponse = Union[contract.ProviderServiceGrantAccessResponse, Mapping[str, Any], None]
+ProviderRevokeAccessResponse = Union[contract.ProviderServiceRevokeAccessResponse, Mapping[str, Any], None]
+ProviderGetAccessResponse = Union[contract.ProviderServiceGetAccessResponse, Mapping[str, Any], None]
 ResourceProvisionResponse = Union[contract.ResourceServiceProvisionResponse, Mapping[str, Any], None]
 ResourceDeprovisionResponse = Union[contract.ResourceServiceDeprovisionResponse, Mapping[str, Any], None]
 ResourceListResponse = Union[contract.ResourceServiceListResponse, Mapping[str, Any], None]
@@ -70,7 +70,7 @@ RESOURCE_CALLS = (*ACCESS_CALLS, *PROVISIONING_CALLS, "list")
 APPLICATION_CALLS = ("create", "destroy", "deploy")
 
 
-class PluginError(Exception):
+class ProviderError(Exception):
     """Fails a call with a specific gRPC status, such as FAILED_PRECONDITION or NOT_FOUND.
 
     Any other exception a handler raises is reported as INTERNAL.
@@ -102,8 +102,8 @@ def _handlers(**calls: Handler | None) -> dict[str, Handler]:
     return {call: handler for call, handler in calls.items() if handler is not None}
 
 
-class Plugin:
-    """A plugin. Declare its resources, then call `serve()`."""
+class Provider:
+    """A provider. Declare its resources, then call `serve()`."""
 
     def __init__(self, name: str, version: str, definition: dict[str, Any], handlers: dict[str, Handler]) -> None:
         self.name = name
@@ -130,8 +130,8 @@ class Plugin:
         grant_access: Handler | None = None,
         revoke_access: Handler | None = None,
         get_access: Handler | None = None,
-    ) -> Plugin:
-        """Declares a kind of resource the plugin manages, with its handlers."""
+    ) -> Provider:
+        """Declares a kind of resource the provider manages, with its handlers."""
         handlers = _handlers(
             provision=provision,
             deprovision=deprovision,
@@ -167,8 +167,8 @@ class Plugin:
         create: Handler | None = None,
         destroy: Handler | None = None,
         deploy: Handler | None = None,
-    ) -> Plugin:
-        """Declares a kind of application the plugin runs, with its handlers."""
+    ) -> Provider:
+        """Declares a kind of application the provider runs, with its handlers."""
         handlers = _handlers(create=create, destroy=destroy, deploy=deploy)
         definition = _defined(
             kind=kind,
@@ -196,20 +196,20 @@ class Plugin:
         )
 
     def serve(self) -> None:
-        """Starts serving the plugin. The runner stops it when it is done.
+        """Starts serving the provider. The runner stops it when it is done.
 
-        A plugin is started by a runner, which sets the environment this checks. Started by hand, it says
-        so and exits, so try it with `steward plugin validate` instead.
+        A provider is started by a runner, which sets the environment this checks. Started by hand, it says
+        so and exits, so try it with `steward provider validate` instead.
         """
         if os.environ.get(MAGIC_COOKIE_KEY) != MAGIC_COOKIE_VALUE:
-            print("This program is a Steward plugin. It is started by a runner, not run directly.", file=sys.stderr)
-            print("To try it, use `steward plugin validate` or `steward plugin run`.", file=sys.stderr)
+            print("This program is a Steward provider. It is started by a runner, not run directly.", file=sys.stderr)
+            print("To try it, use `steward provider validate` or `steward provider run`.", file=sys.stderr)
             sys.exit(1)
 
         asyncio.run(_serve(self))
 
 
-def create_plugin(
+def create_provider(
     *,
     name: str,
     version: str,
@@ -223,8 +223,8 @@ def create_plugin(
     grant_access: Handler | None = None,
     revoke_access: Handler | None = None,
     get_access: Handler | None = None,
-) -> Plugin:
-    """Creates a plugin. Declare its resources, then call `serve()`."""
+) -> Provider:
+    """Creates a provider. Declare its resources, then call `serve()`."""
     definition = _defined(
         title=title,
         description=description,
@@ -240,7 +240,7 @@ def create_plugin(
         get_access=get_access,
     )
 
-    return Plugin(name, version, definition, handlers)
+    return Provider(name, version, definition, handlers)
 
 
 # Serving --------------------------------------------------------------------------------------
@@ -289,28 +289,28 @@ async def _invoke(handler: Handler, request: Message) -> Any:
     return await result if inspect.isawaitable(result) else result
 
 
-def _route(plugin: Plugin, call: str, target: str) -> Callable[[Message], Awaitable[Any]]:
+def _route(provider: Provider, call: str, target: str) -> Callable[[Message], Awaitable[Any]]:
     async def routed(request: Message) -> Any:
-        owner = _owner(plugin, target, request)
+        owner = _owner(provider, target, request)
         handler = owner.get(call)
 
         if handler is None:
-            raise PluginError(StatusCode.UNIMPLEMENTED, f"{call} is not implemented for this {target}")
+            raise ProviderError(StatusCode.UNIMPLEMENTED, f"{call} is not implemented for this {target}")
 
         return await _invoke(handler, request)
 
     return routed
 
 
-def _owner(plugin: Plugin, target: str, request: Message) -> Mapping[str, Handler]:
-    if target == "plugin":
-        return plugin.handlers
+def _owner(provider: Provider, target: str, request: Message) -> Mapping[str, Handler]:
+    if target == "provider":
+        return provider.handlers
 
-    kinds = plugin.resources if target == "resource" else plugin.applications
+    kinds = provider.resources if target == "resource" else provider.applications
     kind = _kind_of(request, target)
 
     if kind not in kinds:
-        raise PluginError(StatusCode.NOT_FOUND, f'this plugin has no {target} "{kind}"')
+        raise ProviderError(StatusCode.NOT_FOUND, f'this provider has no {target} "{kind}"')
 
     return kinds[kind].handlers
 
@@ -322,7 +322,7 @@ def _handler(descriptor: Any, routed: Callable[[Message], Awaitable[Any]]) -> gr
     async def method(message: Message, context: grpc.aio.ServicerContext) -> Message:
         try:
             return _response(await routed(message), response)
-        except PluginError as error:
+        except ProviderError as error:
             await context.abort(error.code, error.message)
         except Exception as error:
             traceback.print_exc(file=sys.stderr)
@@ -349,18 +349,18 @@ def _register(server: grpc.aio.Server, service: str, routes: Mapping[str, Callab
     server.add_generic_rpc_handlers((grpc.method_handlers_generic_handler(descriptor.full_name, handlers),))
 
 
-def _routes(plugin: Plugin, calls: Sequence[str], target: str) -> dict[str, Callable[[Message], Awaitable[Any]]]:
-    return {call: _route(plugin, call, target) for call in calls}
+def _routes(provider: Provider, calls: Sequence[str], target: str) -> dict[str, Callable[[Message], Awaitable[Any]]]:
+    return {call: _route(provider, call, target) for call in calls}
 
 
 def _listen() -> tuple[str, str]:
     """Where to listen, and what to announce: a unix socket in the directory the runner made for it, when
     it set one, which only the runner's user can open; otherwise a port on the loopback interface, which
     is announced once it is known."""
-    directory = os.environ.get("PLUGIN_UNIX_SOCKET_DIR")
+    directory = os.environ.get("PROVIDER_UNIX_SOCKET_DIR")
 
     if directory and sys.platform != "win32":
-        path = os.path.join(directory, f"plugin-{secrets.token_hex(6)}")
+        path = os.path.join(directory, f"provider-{secrets.token_hex(6)}")
 
         return f"unix:{path}", f"unix|{path}"
 
@@ -368,7 +368,7 @@ def _listen() -> tuple[str, str]:
 
 
 def _shutdown(server: grpc.aio.Server) -> grpc.GenericRpcHandler:
-    """Serves the call go-plugin makes to ask a plugin to shut down, so that it exits at once and the
+    """Serves the call go-plugin makes to ask a provider to shut down, so that it exits at once and the
     runner does not wait for it. It has no generated code, since its messages are empty."""
 
     async def shutdown(_request: bytes, _context: grpc.aio.ServicerContext) -> bytes:
@@ -377,38 +377,38 @@ def _shutdown(server: grpc.aio.Server) -> grpc.GenericRpcHandler:
         return b""
 
     return grpc.method_handlers_generic_handler(
-        "plugin.GRPCController",
+        "provider.GRPCController",
         {"Shutdown": grpc.unary_unary_rpc_method_handler(shutdown)},
     )
 
 
-async def _serve(plugin: Plugin) -> None:
+async def _serve(provider: Provider) -> None:
     server = grpc.aio.server()
 
     async def describe(_request: Message) -> Message:
-        return plugin.describe()
+        return provider.describe()
 
-    # Every plugin must answer Validate; without a handler of its own, every connector is accepted.
+    # Every provider must answer Validate; without a handler of its own, every connector is accepted.
     async def accept(_request: Message) -> None:
         return None
 
-    validate = _route(plugin, "validate", "plugin") if "validate" in plugin.handlers else accept
+    validate = _route(provider, "validate", "provider") if "validate" in provider.handlers else accept
 
     _register(
         server,
-        "PluginService",
-        {"describe": describe, "validate": validate, **_routes(plugin, ACCESS_CALLS, "plugin")},
+        "ProviderService",
+        {"describe": describe, "validate": validate, **_routes(provider, ACCESS_CALLS, "provider")},
     )
 
-    if plugin.resources:
-        _register(server, "ResourceService", _routes(plugin, RESOURCE_CALLS, "resource"))
+    if provider.resources:
+        _register(server, "ResourceService", _routes(provider, RESOURCE_CALLS, "resource"))
 
-    if plugin.applications:
-        _register(server, "ApplicationService", _routes(plugin, APPLICATION_CALLS, "application"))
+    if provider.applications:
+        _register(server, "ApplicationService", _routes(provider, APPLICATION_CALLS, "application"))
 
     status = health.aio.HealthServicer()
     health_pb2_grpc.add_HealthServicer_to_server(status, server)
-    await status.set("plugin", health_pb2.HealthCheckResponse.SERVING)
+    await status.set("provider", health_pb2.HealthCheckResponse.SERVING)
 
     server.add_generic_rpc_handlers((_shutdown(server),))
 

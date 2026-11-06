@@ -1,7 +1,7 @@
 # treno-dev-steward-sdk
 
-The Steward SDK for Python. Today it holds the part for writing Steward plugins, imported from
-`steward_sdk.plugin`. A plugin declares what it needs to connect to the tools it works with and what it
+The Steward SDK for Python. Today it holds the part for writing Steward providers, imported from
+`steward_sdk.provider`. A provider declares what it needs to connect to the tools it works with and what it
 manages there, and implements the calls Steward makes. The SDK handles everything else: the gRPC
 services, the handshake with the runner, the health check, and routing each call to your handler by
 kind.
@@ -11,34 +11,34 @@ pip install treno-dev-steward-sdk
 ```
 
 ```python
-from steward_sdk.plugin import create_plugin
+from steward_sdk.provider import create_provider
 ```
 
 Requires Python 3.10 or newer. The package ships its type hints.
 
-## Start a plugin
+## Start a provider
 
 ```sh
-steward plugin init my-plugin --language python
-cd my-plugin
+steward provider init my-provider --language python
+cd my-provider
 python -m venv .venv && source .venv/bin/activate
 pip install -e .
-steward plugin validate python src/plugin.py
+steward provider validate python src/provider.py
 ```
 
-`steward plugin init` takes its templates from the SDK release, so the project always matches the
+`steward provider init` takes its templates from the SDK release, so the project always matches the
 SDK it depends on. To work on the SDK and its templates together, point it at a local checkout with
 `--sdk-path /path/to/steward-sdk`. The template lives next to the SDKs, in `../templates/python`.
 
-## A plugin
+## A provider
 
-`steward plugin init --language python` generates a plugin with a resource that can be provisioned and
+`steward provider init --language python` generates a provider with a resource that can be provisioned and
 given access to. The whole file, with every call and its comments, is
-[`templates/python/src/plugin.py.tmpl`](https://github.com/treno-dev/steward-sdk/blob/main/templates/python/src/plugin.py.tmpl).
+[`templates/python/src/provider.py.tmpl`](https://github.com/treno-dev/steward-sdk/blob/main/templates/python/src/provider.py.tmpl).
 In short:
 
 ```python
-from steward_sdk.plugin import create_plugin
+from steward_sdk.provider import create_provider
 
 
 async def provision(request):
@@ -51,42 +51,42 @@ async def deprovision(request):
     return {}
 
 
-plugin = create_plugin(
-    name="my-plugin",
+provider = create_provider(
+    name="my-provider",
     version="0.1.0",
     inputs=[{"name": "base_url", "label": "Base URL", "type": "string", "required": True}],
     secrets=[{"name": "API_TOKEN", "description": "The token to call the API with.", "required": True}],
 )
 
-plugin.resource(
+provider.resource(
     kind="item",
     outputs=[{"name": "url", "label": "URL", "type": "string"}],
     provision=provision,
     deprovision=deprovision,
 )
 
-plugin.serve()
+provider.serve()
 ```
 
-A plugin needs one `create_plugin(...)`, any number of `plugin.resource(...)` and
-`plugin.application(...)` declarations, and a final `plugin.serve()`. If it needs more than one tool,
+A provider needs one `create_provider(...)`, any number of `provider.resource(...)` and
+`provider.application(...)` declarations, and a final `provider.serve()`. If it needs more than one tool,
 for example both Cloudflare and AWS, take the credentials for each as secrets.
 
 ## What you declare
 
-**The plugin**, in `create_plugin`:
+**The provider**, in `create_provider`:
 
 | Argument                                                              |                                                                                                                                                      |
 | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `name`, `version`                                                     | Required.                                                                                                                                            |
 | `title`, `description`                                                | Shown in Steward.                                                                                                                                    |
-| `inputs`                                                              | The settings the plugin is configured with.                                                                                                          |
+| `inputs`                                                              | The settings the provider is configured with.                                                                                                          |
 | `secrets`                                                             | The credentials it is configured with, such as an API token.                                                                                         |
 | `validate`                                                            | Optional. Checks the credentials, which Steward cannot. Returns `{"errors": [...], "input_errors": [...], "secret_errors": [...]}`, each a list of `{"field": ..., "message": ...}`: `input_errors` and `secret_errors` name an input or a secret, and `errors` is about the connector as a whole. Without it, every connector is accepted. |
-| `roles`, `permissions`, `grant_access`, `revoke_access`, `get_access` | Access to the plugin as a whole, such as membership of an organization.                                                                              |
+| `roles`, `permissions`, `grant_access`, `revoke_access`, `get_access` | Access to the provider as a whole, such as membership of an organization.                                                                              |
 
-**A resource**, with `plugin.resource(kind=..., ...)`, and **an application**, with
-`plugin.application(kind=..., ...)`, both have a `kind` that is unique within the plugin, a `title`, a
+**A resource**, with `provider.resource(kind=..., ...)`, and **an application**, with
+`provider.application(kind=..., ...)`, both have a `kind` that is unique within the provider, a `title`, a
 `description`, `inputs`, `secrets` and `outputs`. Resources also take `roles` and `permissions`. Applications take
 `sources`, the types they can be deployed from: `"github"`, `"registry"`, `"s3"` or `"raw"`. The `source`
 of an application arrives as `type`, `config` and `ref`, where `config` holds the settings of that type:
@@ -114,15 +114,15 @@ it is, a `description` and whether it is `required`. Its value is never shown ba
 Access exists at two levels, each with the same three handlers, `grant_access`, `revoke_access` and
 `get_access`:
 
-- **The plugin**, in `create_plugin`: membership of the tool as a whole, such as an organization or a
+- **The provider**, in `create_provider`: membership of the tool as a whole, such as an organization or a
   site. Steward grants this first, then access to the resources.
-- **A resource kind**, in `plugin.resource`: a role on one resource, such as a repository. The
-  generated plugin above shows this.
+- **A resource kind**, in `provider.resource`: a role on one resource, such as a repository. The
+  generated provider above shows this.
 
-For the plugin it looks like this:
+For the provider it looks like this:
 
 ```python
-async def grant_access(request: PluginGrantAccessRequest) -> PluginGrantAccessResponse:
+async def grant_access(request: ProviderGrantAccessRequest) -> ProviderGrantAccessResponse:
     identity = request.identity
     email = identity.external_id or plain(identity.attrs)["email"]
     invitation = await invite(request.connector, email, request.role.name)
@@ -130,7 +130,7 @@ async def grant_access(request: PluginGrantAccessRequest) -> PluginGrantAccessRe
     return {"id": invitation.id, "role": request.role, "pending": True}  # an invitation is not access until accepted
 
 
-plugin = create_plugin(
+provider = create_provider(
     name="github",
     version="0.1.0",
     inputs=[...],
@@ -153,7 +153,7 @@ async def grant_access(request: ResourceGrantAccessRequest) -> ResourceGrantAcce
     return {"role": plain(request.role), "permissions": [plain(item) for item in request.permissions]}
 
 
-plugin.resource(
+provider.resource(
     kind="repository",
     permissions=[{"name": "pull"}, {"name": "push"}],
     roles=[{"name": "viewer", "title": "Viewer"}, {"name": "editor", "title": "Editor"}],
@@ -163,7 +163,7 @@ plugin.resource(
 )
 ```
 
-Declaring `roles` or `permissions` is what says that the plugin, or the kind, supports access. They are
+Declaring `roles` or `permissions` is what says that the provider, or the kind, supports access. They are
 two separate lists:
 
 - **`roles`** are the ones the tool defines itself, each with a `name`, `title` and `description`.
@@ -195,13 +195,13 @@ what can be granted.
 | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | `provision`, `deprovision`                                     | be created and removed                                                                                                       |
 | `list`                                                         | be discovered (optional: Steward keeps track of what it creates, so `list` is only for finding resources that already exist) |
-| `roles` or `permissions`, with `grant_access`, `revoke_access`, `get_access` | have access granted (resources and the plugin)                                                                 |
+| `roles` or `permissions`, with `grant_access`, `revoke_access`, `get_access` | have access granted (resources and the provider)                                                                 |
 | `create`, `destroy`, `deploy`                                  | be run as an application                                                                                                     |
 
 ## Handlers
 
 A handler takes the request and returns the response. It may be `async def` or a plain function (a
-plain one runs in a thread, so blocking calls do not stall the plugin).
+plain one runs in a thread, so blocking calls do not stall the provider).
 
 - **Requests** are the generated protobuf messages, so fields are snake_case and your editor completes
   them. A message the runner did not send reads as empty. A Struct such as `inputs` supports `[]`,
@@ -227,12 +227,12 @@ plain one runs in a thread, so blocking calls do not stall the plugin).
 
 ## Errors
 
-Raise a `PluginError` with a gRPC status code to report a specific failure:
+Raise a `ProviderError` with a gRPC status code to report a specific failure:
 
 ```python
-from steward_sdk.plugin import PluginError, StatusCode
+from steward_sdk.provider import ProviderError, StatusCode
 
-raise PluginError(StatusCode.FAILED_PRECONDITION, "APP_KEY is locked and cannot be removed")
+raise ProviderError(StatusCode.FAILED_PRECONDITION, "APP_KEY is locked and cannot be removed")
 ```
 
 Common codes: `INVALID_ARGUMENT`, `NOT_FOUND`, `FAILED_PRECONDITION`, `UNIMPLEMENTED`. Any other
@@ -242,12 +242,12 @@ answered with `NOT_FOUND` by the SDK.
 ## Logging
 
 Write logs to standard error (the `logging` module does by default), which the runner collects. What a
-plugin prints to standard output after the handshake is not shown.
+provider prints to standard output after the handshake is not shown.
 
 ## Developing the SDK
 
 The messages and gRPC services are generated from `../proto` with `buf` (`buf.gen.yaml`, using
-buf's remote plugins, so it needs network access), and the generated code is not committed. The plugin
+buf's remote providers, so it needs network access), and the generated code is not committed. The provider
 versions in `buf.gen.yaml` decide the minimum `protobuf` and `grpcio` the package requires.
 
 ```sh

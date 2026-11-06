@@ -1,21 +1,21 @@
-// Package plugin is the plugin part of the Steward SDK for Go: the plumbing between the plugin
-// contract (gRPC, see ../../proto) and the functions a plugin writes.
+// Package provider is the provider part of the Steward SDK for Go: the plumbing between the provider
+// contract (gRPC, see ../../proto) and the functions a provider writes.
 //
-//	p := plugin.New(plugin.Options{Name: "github", Version: "0.1.0"})
-//	p.Connector("app", plugin.ConnectorOptions{Inputs: inputs, Resolve: resolve})
-//	p.Resource("repository", plugin.ResourceOptions{Provision: provision, Deprovision: deprovision})
+//	p := provider.New(provider.Options{Name: "github", Version: "0.1.0"})
+//	p.Connector("app", provider.ConnectorOptions{Inputs: inputs, Resolve: resolve})
+//	p.Resource("repository", provider.ResourceOptions{Provision: provision, Deprovision: deprovision})
 //	p.Serve()
 //
-// A plugin declares itself and each of its resource or application kinds once, with the handlers
+// A provider declares itself and each of its resource or application kinds once, with the handlers
 // attached. The SDK routes every call to the right
 // handler by kind, builds the description Steward asks for, serves the gRPC services, prints the
 // handshake line, answers the health check, and answers any call without a handler with UNIMPLEMENTED.
 //
-// Everything a plugin logs must go to stderr: stdout is reserved for the handshake line.
+// Everything a provider logs must go to stderr: stdout is reserved for the handshake line.
 //
 // Handlers receive and return the generated contract messages. Fail a call with a gRPC status, for
 // example status.Error(codes.FailedPrecondition, "..."); any other error is reported as INTERNAL.
-package plugin
+package provider
 
 import (
 	"context"
@@ -24,10 +24,10 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	pluginv1 "github.com/treno-dev/steward-sdk/go/gen/steward/plugin/v1"
+	providerv1 "github.com/treno-dev/steward-sdk/go/gen/steward/provider/v1"
 )
 
-// Options declare the plugin and, when it supports access as a whole, the handlers for that. A plugin has no settings or secrets of
+// Options declare the provider and, when it supports access as a whole, the handlers for that. A provider has no settings or secrets of
 // its own: the connectors, resources and applications it offers declare theirs.
 type Options struct {
 	Name        string
@@ -41,15 +41,15 @@ type Options struct {
 	// docs, so it has to answer for a connector that is nil.
 	SetupLinks func(context.Context, *Connector) []*SetupLink
 
-	// What can be given on the plugin as a whole, and the handlers that give it. A grant declares the inputs it wants.
+	// What can be given on the provider as a whole, and the handlers that give it. A grant declares the inputs it wants.
 	Grants []*GrantDefinition
 
-	GrantAccess  func(context.Context, *PluginGrantAccessRequest) (*PluginGrantAccessResponse, error)
-	RevokeAccess func(context.Context, *PluginRevokeAccessRequest) (*PluginRevokeAccessResponse, error)
-	GetAccess    func(context.Context, *PluginGetAccessRequest) (*PluginGetAccessResponse, error)
+	GrantAccess  func(context.Context, *ProviderGrantAccessRequest) (*ProviderGrantAccessResponse, error)
+	RevokeAccess func(context.Context, *ProviderRevokeAccessRequest) (*ProviderRevokeAccessResponse, error)
+	GetAccess    func(context.Context, *ProviderGetAccessRequest) (*ProviderGetAccessResponse, error)
 }
 
-// ResourceOptions describe a kind of resource the plugin manages, with its handlers. A call
+// ResourceOptions describe a kind of resource the provider manages, with its handlers. A call
 // for something without a handler fails with UNIMPLEMENTED.
 type ResourceOptions struct {
 	Title       string
@@ -74,7 +74,7 @@ type ResourceOptions struct {
 	GetAccess    func(context.Context, *ResourceGetAccessRequest) (*ResourceGetAccessResponse, error)
 }
 
-// ApplicationOptions describe a kind of application the plugin runs, with its handlers.
+// ApplicationOptions describe a kind of application the provider runs, with its handlers.
 type ApplicationOptions struct {
 	Title       string
 	Description string
@@ -92,8 +92,8 @@ type ApplicationOptions struct {
 }
 
 // ConnectorOptions describe a kind of connector, a way of reaching the tool such as a role that is assumed with the identity token of
-// Steward. A connector is an instance of a kind. The runner calls Resolve before a task invokes any plugin, and hands what it returns
-// to the plugin as environment variables and files. A value is a secret of the call: do not persist it or log it.
+// Steward. A connector is an instance of a kind. The runner calls Resolve before a task invokes any provider, and hands what it returns
+// to the provider as environment variables and files. A value is a secret of the call: do not persist it or log it.
 type ConnectorOptions struct {
 	Title       string
 	Description string
@@ -110,23 +110,23 @@ type ConnectorOptions struct {
 	Resolve func(context.Context, *ConnectorResolveRequest) (*ConnectorResolveResponse, error)
 }
 
-// Plugin is what a plugin author builds. Declare its resources, applications and connectors,
+// Provider is what a provider author builds. Declare its resources, applications and connectors,
 // then call Serve.
-type Plugin struct {
+type Provider struct {
 	options      Options
 	resources    map[string]ResourceOptions
 	applications map[string]ApplicationOptions
 	connectors   map[string]ConnectorOptions
 
-	// Declaration order, so the description lists kinds the way the plugin declared them.
+	// Declaration order, so the description lists kinds the way the provider declared them.
 	resourceOrder    []string
 	applicationOrder []string
 	connectorOrder   []string
 }
 
-// New creates a plugin.
-func New(options Options) *Plugin {
-	return &Plugin{
+// New creates a provider.
+func New(options Options) *Provider {
+	return &Provider{
 		options:      options,
 		resources:    map[string]ResourceOptions{},
 		applications: map[string]ApplicationOptions{},
@@ -134,8 +134,8 @@ func New(options Options) *Plugin {
 	}
 }
 
-// Connector declares a kind of connector, a way of reaching the tool. The name is unique within the plugin, such as "oidc-role".
-func (p *Plugin) Connector(name string, options ConnectorOptions) *Plugin {
+// Connector declares a kind of connector, a way of reaching the tool. The name is unique within the provider, such as "oidc-role".
+func (p *Provider) Connector(name string, options ConnectorOptions) *Provider {
 	if _, declared := p.connectors[name]; !declared {
 		p.connectorOrder = append(p.connectorOrder, name)
 	}
@@ -145,9 +145,9 @@ func (p *Plugin) Connector(name string, options ConnectorOptions) *Plugin {
 	return p
 }
 
-// Resource declares a kind of resource the plugin manages. The kind is unique within the
-// plugin, such as "repository".
-func (p *Plugin) Resource(kind string, options ResourceOptions) *Plugin {
+// Resource declares a kind of resource the provider manages. The kind is unique within the
+// provider, such as "repository".
+func (p *Provider) Resource(kind string, options ResourceOptions) *Provider {
 	if _, declared := p.resources[kind]; !declared {
 		p.resourceOrder = append(p.resourceOrder, kind)
 	}
@@ -157,9 +157,9 @@ func (p *Plugin) Resource(kind string, options ResourceOptions) *Plugin {
 	return p
 }
 
-// Application declares a kind of application the plugin runs. The kind is unique within the
-// plugin, such as "laravel".
-func (p *Plugin) Application(kind string, options ApplicationOptions) *Plugin {
+// Application declares a kind of application the provider runs. The kind is unique within the
+// provider, such as "laravel".
+func (p *Provider) Application(kind string, options ApplicationOptions) *Provider {
 	if _, declared := p.applications[kind]; !declared {
 		p.applicationOrder = append(p.applicationOrder, kind)
 	}
@@ -169,9 +169,9 @@ func (p *Plugin) Application(kind string, options ApplicationOptions) *Plugin {
 	return p
 }
 
-func (p *Plugin) describe(ctx context.Context, connector *Connector) *pluginv1.DescribeResponse {
+func (p *Provider) describe(ctx context.Context, connector *Connector) *providerv1.DescribeResponse {
 	o := p.options
-	definition := &pluginv1.PluginDefinition{
+	definition := &providerv1.ProviderDefinition{
 		Title:       o.Title,
 		Description: o.Description,
 		Grants:      o.Grants,
@@ -183,7 +183,7 @@ func (p *Plugin) describe(ctx context.Context, connector *Connector) *pluginv1.D
 
 	for _, name := range p.applicationOrder {
 		options := p.applications[name]
-		definition.Applications = append(definition.Applications, &pluginv1.ApplicationDefinition{
+		definition.Applications = append(definition.Applications, &providerv1.ApplicationDefinition{
 			Kind:        name,
 			Title:       options.Title,
 			Description: options.Description,
@@ -196,7 +196,7 @@ func (p *Plugin) describe(ctx context.Context, connector *Connector) *pluginv1.D
 
 	for _, name := range p.connectorOrder {
 		options := p.connectors[name]
-		definition.Connectors = append(definition.Connectors, &pluginv1.ConnectorDefinition{
+		definition.Connectors = append(definition.Connectors, &providerv1.ConnectorDefinition{
 			Name:             name,
 			Title:            options.Title,
 			Description:      options.Description,
@@ -206,7 +206,7 @@ func (p *Plugin) describe(ctx context.Context, connector *Connector) *pluginv1.D
 		})
 	}
 
-	response := &pluginv1.DescribeResponse{Name: o.Name, Version: o.Version, Definition: definition}
+	response := &providerv1.DescribeResponse{Name: o.Name, Version: o.Version, Definition: definition}
 
 	// The links are for a connector, so a description that was asked for without one has none.
 	if connector != nil && o.SetupLinks != nil {
@@ -216,8 +216,8 @@ func (p *Plugin) describe(ctx context.Context, connector *Connector) *pluginv1.D
 	return response
 }
 
-func resourceDefinition(kind string, options ResourceOptions) *pluginv1.ResourceDefinition {
-	return &pluginv1.ResourceDefinition{
+func resourceDefinition(kind string, options ResourceOptions) *providerv1.ResourceDefinition {
+	return &providerv1.ResourceDefinition{
 		Kind:        kind,
 		Title:       options.Title,
 		Description: options.Description,
@@ -229,28 +229,28 @@ func resourceDefinition(kind string, options ResourceOptions) *pluginv1.Resource
 	}
 }
 
-func (p *Plugin) resource(kind string) (ResourceOptions, error) {
+func (p *Provider) resource(kind string) (ResourceOptions, error) {
 	found, ok := p.resources[kind]
 	if !ok {
-		return found, status.Error(codes.NotFound, fmt.Sprintf("this plugin has no resource %q", kind))
+		return found, status.Error(codes.NotFound, fmt.Sprintf("this provider has no resource %q", kind))
 	}
 
 	return found, nil
 }
 
-func (p *Plugin) application(kind string) (ApplicationOptions, error) {
+func (p *Provider) application(kind string) (ApplicationOptions, error) {
 	found, ok := p.applications[kind]
 	if !ok {
-		return found, status.Error(codes.NotFound, fmt.Sprintf("this plugin has no application %q", kind))
+		return found, status.Error(codes.NotFound, fmt.Sprintf("this provider has no application %q", kind))
 	}
 
 	return found, nil
 }
 
-func (p *Plugin) connector(name string) (ConnectorOptions, error) {
+func (p *Provider) connector(name string) (ConnectorOptions, error) {
 	found, ok := p.connectors[name]
 	if !ok {
-		return found, status.Error(codes.NotFound, fmt.Sprintf("this plugin has no connector %q", name))
+		return found, status.Error(codes.NotFound, fmt.Sprintf("this provider has no connector %q", name))
 	}
 
 	return found, nil

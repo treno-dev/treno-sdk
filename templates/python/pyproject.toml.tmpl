@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "[[.Name]]"
 version = "0.1.0"
-description = "[[.Title]] plugin for Steward"
+description = "[[.Title]] provider for Steward"
 requires-python = ">=3.10"
 dependencies = [
   "[[if .SDKPath]]treno-dev-steward-sdk @ file://[[.SDKPath]][[else]]treno-dev-steward-sdk>=[[.SDKVersion]][[end]]",
@@ -13,4 +13,4 @@ dependencies = [
 
 [tool.setuptools]
 package-dir = { "" = "src" }
-py-modules = ["plugin"]
+py-modules = ["provider"]

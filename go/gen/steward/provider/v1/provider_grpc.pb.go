@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.6.2
 // - protoc             (unknown)
-// source: steward/plugin/v1/plugin.proto
+// source: steward/provider/v1/provider.proto
 
-package pluginv1
+package providerv1
 
 import (
 	context "context"
@@ -19,247 +19,247 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	PluginService_Describe_FullMethodName     = "/steward.plugin.v1.PluginService/Describe"
-	PluginService_GrantAccess_FullMethodName  = "/steward.plugin.v1.PluginService/GrantAccess"
-	PluginService_RevokeAccess_FullMethodName = "/steward.plugin.v1.PluginService/RevokeAccess"
-	PluginService_GetAccess_FullMethodName    = "/steward.plugin.v1.PluginService/GetAccess"
+	ProviderService_Describe_FullMethodName     = "/steward.provider.v1.ProviderService/Describe"
+	ProviderService_GrantAccess_FullMethodName  = "/steward.provider.v1.ProviderService/GrantAccess"
+	ProviderService_RevokeAccess_FullMethodName = "/steward.provider.v1.ProviderService/RevokeAccess"
+	ProviderService_GetAccess_FullMethodName    = "/steward.provider.v1.ProviderService/GetAccess"
 )
 
-// PluginServiceClient is the client API for PluginService service.
+// ProviderServiceClient is the client API for ProviderService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// Mandatory for every plugin. Describe is always served. GrantAccess, RevokeAccess and
-// GetAccess apply only to a plugin that declares grants, and answer UNIMPLEMENTED otherwise.
-type PluginServiceClient interface {
-	// Describes the plugin: the connectors it offers, the resources and applications it manages, and the grants it gives.
+// Mandatory for every provider. Describe is always served. GrantAccess, RevokeAccess and
+// GetAccess apply only to a provider that declares grants, and answer UNIMPLEMENTED otherwise.
+type ProviderServiceClient interface {
+	// Describes the provider: the connectors it offers, the resources and applications it manages, and the grants it gives.
 	Describe(ctx context.Context, in *DescribeRequest, opts ...grpc.CallOption) (*DescribeResponse, error)
-	// Access to the plugin as a whole: giving identities a grant, taking it away, and checking
+	// Access to the provider as a whole: giving identities a grant, taking it away, and checking
 	// what they hold.
-	GrantAccess(ctx context.Context, in *PluginServiceGrantAccessRequest, opts ...grpc.CallOption) (*PluginServiceGrantAccessResponse, error)
-	RevokeAccess(ctx context.Context, in *PluginServiceRevokeAccessRequest, opts ...grpc.CallOption) (*PluginServiceRevokeAccessResponse, error)
-	GetAccess(ctx context.Context, in *PluginServiceGetAccessRequest, opts ...grpc.CallOption) (*PluginServiceGetAccessResponse, error)
+	GrantAccess(ctx context.Context, in *ProviderServiceGrantAccessRequest, opts ...grpc.CallOption) (*ProviderServiceGrantAccessResponse, error)
+	RevokeAccess(ctx context.Context, in *ProviderServiceRevokeAccessRequest, opts ...grpc.CallOption) (*ProviderServiceRevokeAccessResponse, error)
+	GetAccess(ctx context.Context, in *ProviderServiceGetAccessRequest, opts ...grpc.CallOption) (*ProviderServiceGetAccessResponse, error)
 }
 
-type pluginServiceClient struct {
+type providerServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewPluginServiceClient(cc grpc.ClientConnInterface) PluginServiceClient {
-	return &pluginServiceClient{cc}
+func NewProviderServiceClient(cc grpc.ClientConnInterface) ProviderServiceClient {
+	return &providerServiceClient{cc}
 }
 
-func (c *pluginServiceClient) Describe(ctx context.Context, in *DescribeRequest, opts ...grpc.CallOption) (*DescribeResponse, error) {
+func (c *providerServiceClient) Describe(ctx context.Context, in *DescribeRequest, opts ...grpc.CallOption) (*DescribeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(DescribeResponse)
-	err := c.cc.Invoke(ctx, PluginService_Describe_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, ProviderService_Describe_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *pluginServiceClient) GrantAccess(ctx context.Context, in *PluginServiceGrantAccessRequest, opts ...grpc.CallOption) (*PluginServiceGrantAccessResponse, error) {
+func (c *providerServiceClient) GrantAccess(ctx context.Context, in *ProviderServiceGrantAccessRequest, opts ...grpc.CallOption) (*ProviderServiceGrantAccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(PluginServiceGrantAccessResponse)
-	err := c.cc.Invoke(ctx, PluginService_GrantAccess_FullMethodName, in, out, cOpts...)
+	out := new(ProviderServiceGrantAccessResponse)
+	err := c.cc.Invoke(ctx, ProviderService_GrantAccess_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *pluginServiceClient) RevokeAccess(ctx context.Context, in *PluginServiceRevokeAccessRequest, opts ...grpc.CallOption) (*PluginServiceRevokeAccessResponse, error) {
+func (c *providerServiceClient) RevokeAccess(ctx context.Context, in *ProviderServiceRevokeAccessRequest, opts ...grpc.CallOption) (*ProviderServiceRevokeAccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(PluginServiceRevokeAccessResponse)
-	err := c.cc.Invoke(ctx, PluginService_RevokeAccess_FullMethodName, in, out, cOpts...)
+	out := new(ProviderServiceRevokeAccessResponse)
+	err := c.cc.Invoke(ctx, ProviderService_RevokeAccess_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *pluginServiceClient) GetAccess(ctx context.Context, in *PluginServiceGetAccessRequest, opts ...grpc.CallOption) (*PluginServiceGetAccessResponse, error) {
+func (c *providerServiceClient) GetAccess(ctx context.Context, in *ProviderServiceGetAccessRequest, opts ...grpc.CallOption) (*ProviderServiceGetAccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(PluginServiceGetAccessResponse)
-	err := c.cc.Invoke(ctx, PluginService_GetAccess_FullMethodName, in, out, cOpts...)
+	out := new(ProviderServiceGetAccessResponse)
+	err := c.cc.Invoke(ctx, ProviderService_GetAccess_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// PluginServiceServer is the server API for PluginService service.
-// All implementations must embed UnimplementedPluginServiceServer
+// ProviderServiceServer is the server API for ProviderService service.
+// All implementations must embed UnimplementedProviderServiceServer
 // for forward compatibility.
 //
-// Mandatory for every plugin. Describe is always served. GrantAccess, RevokeAccess and
-// GetAccess apply only to a plugin that declares grants, and answer UNIMPLEMENTED otherwise.
-type PluginServiceServer interface {
-	// Describes the plugin: the connectors it offers, the resources and applications it manages, and the grants it gives.
+// Mandatory for every provider. Describe is always served. GrantAccess, RevokeAccess and
+// GetAccess apply only to a provider that declares grants, and answer UNIMPLEMENTED otherwise.
+type ProviderServiceServer interface {
+	// Describes the provider: the connectors it offers, the resources and applications it manages, and the grants it gives.
 	Describe(context.Context, *DescribeRequest) (*DescribeResponse, error)
-	// Access to the plugin as a whole: giving identities a grant, taking it away, and checking
+	// Access to the provider as a whole: giving identities a grant, taking it away, and checking
 	// what they hold.
-	GrantAccess(context.Context, *PluginServiceGrantAccessRequest) (*PluginServiceGrantAccessResponse, error)
-	RevokeAccess(context.Context, *PluginServiceRevokeAccessRequest) (*PluginServiceRevokeAccessResponse, error)
-	GetAccess(context.Context, *PluginServiceGetAccessRequest) (*PluginServiceGetAccessResponse, error)
-	mustEmbedUnimplementedPluginServiceServer()
+	GrantAccess(context.Context, *ProviderServiceGrantAccessRequest) (*ProviderServiceGrantAccessResponse, error)
+	RevokeAccess(context.Context, *ProviderServiceRevokeAccessRequest) (*ProviderServiceRevokeAccessResponse, error)
+	GetAccess(context.Context, *ProviderServiceGetAccessRequest) (*ProviderServiceGetAccessResponse, error)
+	mustEmbedUnimplementedProviderServiceServer()
 }
 
-// UnimplementedPluginServiceServer must be embedded to have
+// UnimplementedProviderServiceServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedPluginServiceServer struct{}
+type UnimplementedProviderServiceServer struct{}
 
-func (UnimplementedPluginServiceServer) Describe(context.Context, *DescribeRequest) (*DescribeResponse, error) {
+func (UnimplementedProviderServiceServer) Describe(context.Context, *DescribeRequest) (*DescribeResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Describe not implemented")
 }
-func (UnimplementedPluginServiceServer) GrantAccess(context.Context, *PluginServiceGrantAccessRequest) (*PluginServiceGrantAccessResponse, error) {
+func (UnimplementedProviderServiceServer) GrantAccess(context.Context, *ProviderServiceGrantAccessRequest) (*ProviderServiceGrantAccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GrantAccess not implemented")
 }
-func (UnimplementedPluginServiceServer) RevokeAccess(context.Context, *PluginServiceRevokeAccessRequest) (*PluginServiceRevokeAccessResponse, error) {
+func (UnimplementedProviderServiceServer) RevokeAccess(context.Context, *ProviderServiceRevokeAccessRequest) (*ProviderServiceRevokeAccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method RevokeAccess not implemented")
 }
-func (UnimplementedPluginServiceServer) GetAccess(context.Context, *PluginServiceGetAccessRequest) (*PluginServiceGetAccessResponse, error) {
+func (UnimplementedProviderServiceServer) GetAccess(context.Context, *ProviderServiceGetAccessRequest) (*ProviderServiceGetAccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetAccess not implemented")
 }
-func (UnimplementedPluginServiceServer) mustEmbedUnimplementedPluginServiceServer() {}
-func (UnimplementedPluginServiceServer) testEmbeddedByValue()                       {}
+func (UnimplementedProviderServiceServer) mustEmbedUnimplementedProviderServiceServer() {}
+func (UnimplementedProviderServiceServer) testEmbeddedByValue()                         {}
 
-// UnsafePluginServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to PluginServiceServer will
+// UnsafeProviderServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ProviderServiceServer will
 // result in compilation errors.
-type UnsafePluginServiceServer interface {
-	mustEmbedUnimplementedPluginServiceServer()
+type UnsafeProviderServiceServer interface {
+	mustEmbedUnimplementedProviderServiceServer()
 }
 
-func RegisterPluginServiceServer(s grpc.ServiceRegistrar, srv PluginServiceServer) {
-	// If the following call panics, it indicates UnimplementedPluginServiceServer was
+func RegisterProviderServiceServer(s grpc.ServiceRegistrar, srv ProviderServiceServer) {
+	// If the following call panics, it indicates UnimplementedProviderServiceServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&PluginService_ServiceDesc, srv)
+	s.RegisterService(&ProviderService_ServiceDesc, srv)
 }
 
-func _PluginService_Describe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ProviderService_Describe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DescribeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PluginServiceServer).Describe(ctx, in)
+		return srv.(ProviderServiceServer).Describe(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: PluginService_Describe_FullMethodName,
+		FullMethod: ProviderService_Describe_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PluginServiceServer).Describe(ctx, req.(*DescribeRequest))
+		return srv.(ProviderServiceServer).Describe(ctx, req.(*DescribeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PluginService_GrantAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PluginServiceGrantAccessRequest)
+func _ProviderService_GrantAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProviderServiceGrantAccessRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PluginServiceServer).GrantAccess(ctx, in)
+		return srv.(ProviderServiceServer).GrantAccess(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: PluginService_GrantAccess_FullMethodName,
+		FullMethod: ProviderService_GrantAccess_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PluginServiceServer).GrantAccess(ctx, req.(*PluginServiceGrantAccessRequest))
+		return srv.(ProviderServiceServer).GrantAccess(ctx, req.(*ProviderServiceGrantAccessRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PluginService_RevokeAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PluginServiceRevokeAccessRequest)
+func _ProviderService_RevokeAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProviderServiceRevokeAccessRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PluginServiceServer).RevokeAccess(ctx, in)
+		return srv.(ProviderServiceServer).RevokeAccess(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: PluginService_RevokeAccess_FullMethodName,
+		FullMethod: ProviderService_RevokeAccess_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PluginServiceServer).RevokeAccess(ctx, req.(*PluginServiceRevokeAccessRequest))
+		return srv.(ProviderServiceServer).RevokeAccess(ctx, req.(*ProviderServiceRevokeAccessRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PluginService_GetAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PluginServiceGetAccessRequest)
+func _ProviderService_GetAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProviderServiceGetAccessRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PluginServiceServer).GetAccess(ctx, in)
+		return srv.(ProviderServiceServer).GetAccess(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: PluginService_GetAccess_FullMethodName,
+		FullMethod: ProviderService_GetAccess_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PluginServiceServer).GetAccess(ctx, req.(*PluginServiceGetAccessRequest))
+		return srv.(ProviderServiceServer).GetAccess(ctx, req.(*ProviderServiceGetAccessRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// PluginService_ServiceDesc is the grpc.ServiceDesc for PluginService service.
+// ProviderService_ServiceDesc is the grpc.ServiceDesc for ProviderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var PluginService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "steward.plugin.v1.PluginService",
-	HandlerType: (*PluginServiceServer)(nil),
+var ProviderService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "steward.provider.v1.ProviderService",
+	HandlerType: (*ProviderServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Describe",
-			Handler:    _PluginService_Describe_Handler,
+			Handler:    _ProviderService_Describe_Handler,
 		},
 		{
 			MethodName: "GrantAccess",
-			Handler:    _PluginService_GrantAccess_Handler,
+			Handler:    _ProviderService_GrantAccess_Handler,
 		},
 		{
 			MethodName: "RevokeAccess",
-			Handler:    _PluginService_RevokeAccess_Handler,
+			Handler:    _ProviderService_RevokeAccess_Handler,
 		},
 		{
 			MethodName: "GetAccess",
-			Handler:    _PluginService_GetAccess_Handler,
+			Handler:    _ProviderService_GetAccess_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "steward/plugin/v1/plugin.proto",
+	Metadata: "steward/provider/v1/provider.proto",
 }
 
 const (
-	ResourceService_GrantAccess_FullMethodName  = "/steward.plugin.v1.ResourceService/GrantAccess"
-	ResourceService_RevokeAccess_FullMethodName = "/steward.plugin.v1.ResourceService/RevokeAccess"
-	ResourceService_GetAccess_FullMethodName    = "/steward.plugin.v1.ResourceService/GetAccess"
-	ResourceService_Provision_FullMethodName    = "/steward.plugin.v1.ResourceService/Provision"
-	ResourceService_Deprovision_FullMethodName  = "/steward.plugin.v1.ResourceService/Deprovision"
-	ResourceService_List_FullMethodName         = "/steward.plugin.v1.ResourceService/List"
+	ResourceService_GrantAccess_FullMethodName  = "/steward.provider.v1.ResourceService/GrantAccess"
+	ResourceService_RevokeAccess_FullMethodName = "/steward.provider.v1.ResourceService/RevokeAccess"
+	ResourceService_GetAccess_FullMethodName    = "/steward.provider.v1.ResourceService/GetAccess"
+	ResourceService_Provision_FullMethodName    = "/steward.provider.v1.ResourceService/Provision"
+	ResourceService_Deprovision_FullMethodName  = "/steward.provider.v1.ResourceService/Deprovision"
+	ResourceService_List_FullMethodName         = "/steward.provider.v1.ResourceService/List"
 )
 
 // ResourceServiceClient is the client API for ResourceService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// For plugins that manage resources. A call a resource kind does not offer answers UNIMPLEMENTED.
+// For providers that manage resources. A call a resource kind does not offer answers UNIMPLEMENTED.
 // GrantAccess, RevokeAccess and GetAccess are offered by kinds that declare roles or permissions.
 type ResourceServiceClient interface {
 	GrantAccess(ctx context.Context, in *ResourceServiceGrantAccessRequest, opts ...grpc.CallOption) (*ResourceServiceGrantAccessResponse, error)
@@ -342,7 +342,7 @@ func (c *resourceServiceClient) List(ctx context.Context, in *ResourceServiceLis
 // All implementations must embed UnimplementedResourceServiceServer
 // for forward compatibility.
 //
-// For plugins that manage resources. A call a resource kind does not offer answers UNIMPLEMENTED.
+// For providers that manage resources. A call a resource kind does not offer answers UNIMPLEMENTED.
 // GrantAccess, RevokeAccess and GetAccess are offered by kinds that declare roles or permissions.
 type ResourceServiceServer interface {
 	GrantAccess(context.Context, *ResourceServiceGrantAccessRequest) (*ResourceServiceGrantAccessResponse, error)
@@ -512,7 +512,7 @@ func _ResourceService_List_Handler(srv interface{}, ctx context.Context, dec fun
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ResourceService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "steward.plugin.v1.ResourceService",
+	ServiceName: "steward.provider.v1.ResourceService",
 	HandlerType: (*ResourceServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -541,20 +541,20 @@ var ResourceService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "steward/plugin/v1/plugin.proto",
+	Metadata: "steward/provider/v1/provider.proto",
 }
 
 const (
-	ApplicationService_Create_FullMethodName  = "/steward.plugin.v1.ApplicationService/Create"
-	ApplicationService_Destroy_FullMethodName = "/steward.plugin.v1.ApplicationService/Destroy"
-	ApplicationService_Deploy_FullMethodName  = "/steward.plugin.v1.ApplicationService/Deploy"
+	ApplicationService_Create_FullMethodName  = "/steward.provider.v1.ApplicationService/Create"
+	ApplicationService_Destroy_FullMethodName = "/steward.provider.v1.ApplicationService/Destroy"
+	ApplicationService_Deploy_FullMethodName  = "/steward.provider.v1.ApplicationService/Deploy"
 )
 
 // ApplicationServiceClient is the client API for ApplicationService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// For plugins that run applications (PluginDefinition.applications): deployable things with a source
+// For providers that run applications (ProviderDefinition.applications): deployable things with a source
 // and open-ended variables.
 type ApplicationServiceClient interface {
 	Create(ctx context.Context, in *ApplicationServiceCreateRequest, opts ...grpc.CallOption) (*ApplicationServiceCreateResponse, error)
@@ -604,7 +604,7 @@ func (c *applicationServiceClient) Deploy(ctx context.Context, in *ApplicationSe
 // All implementations must embed UnimplementedApplicationServiceServer
 // for forward compatibility.
 //
-// For plugins that run applications (PluginDefinition.applications): deployable things with a source
+// For providers that run applications (ProviderDefinition.applications): deployable things with a source
 // and open-ended variables.
 type ApplicationServiceServer interface {
 	Create(context.Context, *ApplicationServiceCreateRequest) (*ApplicationServiceCreateResponse, error)
@@ -708,7 +708,7 @@ func _ApplicationService_Deploy_Handler(srv interface{}, ctx context.Context, de
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ApplicationService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "steward.plugin.v1.ApplicationService",
+	ServiceName: "steward.provider.v1.ApplicationService",
 	HandlerType: (*ApplicationServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -725,18 +725,18 @@ var ApplicationService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "steward/plugin/v1/plugin.proto",
+	Metadata: "steward/provider/v1/provider.proto",
 }
 
 const (
-	ConnectorService_Resolve_FullMethodName = "/steward.plugin.v1.ConnectorService/Resolve"
+	ConnectorService_Resolve_FullMethodName = "/steward.provider.v1.ConnectorService/Resolve"
 )
 
 // ConnectorServiceClient is the client API for ConnectorService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// For plugins that offer ways to reach a tool (PluginDefinition.connectors).
+// For providers that offer ways to reach a tool (ProviderDefinition.connectors).
 type ConnectorServiceClient interface {
 	Resolve(ctx context.Context, in *ConnectorServiceResolveRequest, opts ...grpc.CallOption) (*ConnectorServiceResolveResponse, error)
 }
@@ -763,7 +763,7 @@ func (c *connectorServiceClient) Resolve(ctx context.Context, in *ConnectorServi
 // All implementations must embed UnimplementedConnectorServiceServer
 // for forward compatibility.
 //
-// For plugins that offer ways to reach a tool (PluginDefinition.connectors).
+// For providers that offer ways to reach a tool (ProviderDefinition.connectors).
 type ConnectorServiceServer interface {
 	Resolve(context.Context, *ConnectorServiceResolveRequest) (*ConnectorServiceResolveResponse, error)
 	mustEmbedUnimplementedConnectorServiceServer()
@@ -822,7 +822,7 @@ func _ConnectorService_Resolve_Handler(srv interface{}, ctx context.Context, dec
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ConnectorService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "steward.plugin.v1.ConnectorService",
+	ServiceName: "steward.provider.v1.ConnectorService",
 	HandlerType: (*ConnectorServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -831,5 +831,5 @@ var ConnectorService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "steward/plugin/v1/plugin.proto",
+	Metadata: "steward/provider/v1/provider.proto",
 }

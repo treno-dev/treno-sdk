@@ -1,7 +1,7 @@
 # @treno-dev/steward-sdk
 
-The Steward SDK for JavaScript and TypeScript. Today it holds the part for writing Steward plugins,
-imported from `@treno-dev/steward-sdk/plugin`. A plugin declares what it needs to connect to the tools
+The Steward SDK for JavaScript and TypeScript. Today it holds the part for writing Steward providers,
+imported from `@treno-dev/steward-sdk/provider`. A provider declares what it needs to connect to the tools
 it works with and what it manages there, and implements the calls Steward makes. The SDK handles
 everything else: the gRPC services, the handshake with the runner, the health check, and routing each
 call to your handler by kind.
@@ -11,43 +11,43 @@ npm install @treno-dev/steward-sdk
 ```
 
 ```js
-import { createPlugin } from '@treno-dev/steward-sdk/plugin';
+import { createProvider } from '@treno-dev/steward-sdk/provider';
 ```
 
 Requires Node.js (tested on 24). The package is ES modules and ships its TypeScript types.
 
-## Start a plugin
+## Start a provider
 
 ```sh
-steward plugin init my-plugin --language js    # or --language ts
-cd my-plugin
+steward provider init my-provider --language js    # or --language ts
+cd my-provider
 npm install
-steward plugin validate node src/plugin.js
+steward provider validate node src/provider.js
 ```
 
-`steward plugin init` takes its templates from the SDK release, so the project always matches the
+`steward provider init` takes its templates from the SDK release, so the project always matches the
 SDK it depends on. To work on the SDK and its templates together, point it at a local checkout with
 `--sdk-path /path/to/steward-sdk`. The templates live next to the SDKs, in `../templates/js` and
 `../templates/ts`.
 
-## A plugin
+## A provider
 
-`steward plugin init --language js` generates a plugin with a resource that can be provisioned and given
+`steward provider init --language js` generates a provider with a resource that can be provisioned and given
 access to. The whole file, with every call and its comments, is
-[`templates/js/src/plugin.js.tmpl`](https://github.com/treno-dev/steward-sdk/blob/main/templates/js/src/plugin.js.tmpl).
+[`templates/js/src/provider.js.tmpl`](https://github.com/treno-dev/steward-sdk/blob/main/templates/js/src/provider.js.tmpl).
 In short:
 
 ```js
-import { createPlugin } from '@treno-dev/steward-sdk/plugin';
+import { createProvider } from '@treno-dev/steward-sdk/provider';
 
-const plugin = createPlugin({
-  name: 'my-plugin',
+const provider = createProvider({
+  name: 'my-provider',
   version: '0.1.0',
   inputs: [{ name: 'base_url', label: 'Base URL', type: 'string', required: true }],
   secrets: [{ name: 'API_TOKEN', description: 'The token to call the API with.', required: true }],
 });
 
-plugin.resource({
+provider.resource({
   kind: 'item',
   outputs: [{ name: 'url', label: 'URL', type: 'string' }],
 
@@ -60,28 +60,28 @@ plugin.resource({
   },
 });
 
-plugin.serve();
+provider.serve();
 ```
 
-A plugin needs one `createPlugin(...)`, any number of `plugin.resource(...)` and
-`plugin.application(...)` declarations, and a final `plugin.serve()`. If it needs more than one tool,
+A provider needs one `createProvider(...)`, any number of `provider.resource(...)` and
+`provider.application(...)` declarations, and a final `provider.serve()`. If it needs more than one tool,
 for example both Cloudflare and AWS, take the credentials for each as secrets.
 
 ## What you declare
 
-**The plugin**, in `createPlugin`:
+**The provider**, in `createProvider`:
 
 | Option | |
 |---|---|
 | `name`, `version` | Required. |
 | `title`, `description` | Shown in Steward. |
-| `inputs` | The settings the plugin is configured with. |
+| `inputs` | The settings the provider is configured with. |
 | `secrets` | The credentials it is configured with, such as an API token. |
 | `validate` | Optional. Checks the credentials, which Steward cannot. Returns `{ errors, inputErrors, secretErrors }`, each a list of `{ field, message }`: `inputErrors` and `secretErrors` name an input or a secret, and `errors` is about the connector as a whole. Without it, every connector is accepted. |
-| `roles`, `permissions`, `grantAccess`, `revokeAccess`, `getAccess` | Access to the plugin as a whole, such as membership of an organization. |
+| `roles`, `permissions`, `grantAccess`, `revokeAccess`, `getAccess` | Access to the provider as a whole, such as membership of an organization. |
 
-**A resource**, with `plugin.resource({ kind, ... })`, and **an application**, with
-`plugin.application({ kind, ... })`, both have a `kind` that is unique within the plugin, a `title`,
+**A resource**, with `provider.resource({ kind, ... })`, and **an application**, with
+`provider.application({ kind, ... })`, both have a `kind` that is unique within the provider, a `title`,
 a `description`, `inputs`, `secrets` and `outputs`. Resources also take `roles` and `permissions`. Applications
 take `sources`, the types they can be deployed from: `'github'`, `'registry'`, `'s3'` or `'raw'`. The
 `source` of an application arrives as `{ type, config, ref }`, where `config` holds the settings of that
@@ -109,15 +109,15 @@ as it is, a `description` and whether it is `required`. Its value is never shown
 Access exists at two levels, each with the same three handlers, `grantAccess`, `revokeAccess` and
 `getAccess`:
 
-- **The plugin**, in `createPlugin`: membership of the tool as a whole, such as an organization or a
+- **The provider**, in `createProvider`: membership of the tool as a whole, such as an organization or a
   site. Steward grants this first, then access to the resources.
-- **A resource kind**, in `plugin.resource`: a role on one resource, such as a repository. The
-  generated plugin above shows this.
+- **A resource kind**, in `provider.resource`: a role on one resource, such as a repository. The
+  generated provider above shows this.
 
-For the plugin it looks like this:
+For the provider it looks like this:
 
 ```js
-const plugin = createPlugin({
+const provider = createProvider({
   name: 'github',
   version: '0.1.0',
   inputs: [/* ... */],
@@ -148,7 +148,7 @@ A resource kind takes the same three handlers and its own `roles` and `permissio
 carry the `resource`:
 
 ```js
-plugin.resource({
+provider.resource({
   kind: 'repository',
 
   permissions: [{ name: 'pull' }, { name: 'push' }],
@@ -172,7 +172,7 @@ plugin.resource({
 });
 ```
 
-Declaring `roles` or `permissions` is what says that the plugin, or the kind, supports access. They are
+Declaring `roles` or `permissions` is what says that the provider, or the kind, supports access. They are
 two separate lists:
 
 - **`roles`** are the ones the tool defines itself, each with a `name`, `title` and `description`.
@@ -204,7 +204,7 @@ Steward what can be granted.
 |---|---|
 | `provision`, `deprovision` | be created and removed |
 | `list` | be discovered (optional: Steward keeps track of what it creates, so `list` is only for finding resources that already exist) |
-| `roles` or `permissions`, with `grantAccess`, `revokeAccess`, `getAccess` | have access granted (resources and the plugin) |
+| `roles` or `permissions`, with `grantAccess`, `revokeAccess`, `getAccess` | have access granted (resources and the provider) |
 | `create`, `destroy`, `deploy` | be run as an application |
 
 ## Handlers
@@ -246,7 +246,7 @@ Anything else you throw is reported as an internal error. A call for an unknown 
 
 ## Logging
 
-Write logs to standard error (`console.error`), which the runner collects. What a plugin prints to
+Write logs to standard error (`console.error`), which the runner collects. What a provider prints to
 standard output after the handshake is not shown.
 
 ## Developing the SDK

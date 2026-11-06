@@ -1,21 +1,21 @@
 # [[.Title]]
 
-A Steward plugin for [[.Title]], built with the [Go SDK](https://github.com/treno-dev/steward-sdk/tree/main/go).
+A Steward provider for [[.Title]], built with the [Go SDK](https://github.com/treno-dev/steward-sdk/tree/main/go).
 
 ## Run
 
 ```sh
 go mod tidy
-steward plugin validate go run .
+steward provider validate go run .
 ```
 
-A plugin is started by a runner, not by hand: run directly it says so and exits. Use
-`steward plugin validate` to check it, and `steward plugin run --context context.json go run .` to invoke
+A provider is started by a runner, not by hand: run directly it says so and exits. Use
+`steward provider validate` to check it, and `steward provider run --context context.json go run .` to invoke
 it. Write logs to standard error.
 
 ## Test
 
-Save this as `context.json`, the connector and resources to call the plugin with:
+Save this as `context.json`, the connector and resources to call the provider with:
 
 ```json
 {
@@ -30,24 +30,24 @@ Save this as `context.json`, the connector and resources to call the plugin with
 ```
 
 ```sh
-steward plugin run --context context.json go run .
-steward plugin run --context context.json --call provision go run .
+steward provider run --context context.json go run .
+steward provider run --context context.json --call provision go run .
 ```
 
 The first creates each resource, grants and revokes the role, and removes it. It does this for real, in
 whatever your credentials reach, and asks before it starts (`--yes` skips the question). `--call` makes
 only the calls you name, once each and without cleaning up: `provision`, `grant-access`, `get-access`,
-`revoke-access` and `deprovision`. `steward plugin validate` never changes anything.
+`revoke-access` and `deprovision`. `steward provider validate` never changes anything.
 
 ## Where things are
 
-`main.go` declares the plugin's inputs (what it needs to connect), each kind of resource and the handlers
+`main.go` declares the provider's inputs (what it needs to connect), each kind of resource and the handlers
 Steward calls: `Provision`, `Deprovision`, `GrantAccess`, `RevokeAccess` and `GetAccess`. Handlers take
 and return the typed messages of the contract. Leave out the handlers you do not need: Steward offers
 only what you implement.
 
-To add a kind of resource, call `p.Resource("kind", plugin.ResourceOptions{...})` again with its own
+To add a kind of resource, call `p.Resource("kind", provider.ResourceOptions{...})` again with its own
 inputs, outputs and handlers.
 
 See the [SDK README](https://github.com/treno-dev/steward-sdk/blob/main/go/README.md) for
-everything a plugin can declare.
+everything a provider can declare.

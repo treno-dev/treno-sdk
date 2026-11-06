@@ -1,21 +1,21 @@
 # [[.Title]]
 
-A Steward plugin for [[.Title]], built with [`@treno-dev/steward-sdk`](https://github.com/treno-dev/steward-sdk/tree/main/js).
+A Steward provider for [[.Title]], built with [`@treno-dev/steward-sdk`](https://github.com/treno-dev/steward-sdk/tree/main/js).
 
 ## Run
 
 ```sh
 npm install
-steward plugin validate node src/plugin.js
+steward provider validate node src/provider.js
 ```
 
-A plugin is started by a runner, not by hand: run directly it says so and exits. Use
-`steward plugin validate` to check it, and `steward plugin run --context context.json node src/plugin.js`
+A provider is started by a runner, not by hand: run directly it says so and exits. Use
+`steward provider validate` to check it, and `steward provider run --context context.json node src/provider.js`
 to invoke it. Write logs to standard error.
 
 ## Test
 
-Save this as `context.json`, the connector and resources to call the plugin with:
+Save this as `context.json`, the connector and resources to call the provider with:
 
 ```json
 {
@@ -30,23 +30,23 @@ Save this as `context.json`, the connector and resources to call the plugin with
 ```
 
 ```sh
-steward plugin run --context context.json node src/plugin.js
-steward plugin run --context context.json --call provision node src/plugin.js
+steward provider run --context context.json node src/provider.js
+steward provider run --context context.json --call provision node src/provider.js
 ```
 
 The first creates each resource, grants and revokes the role, and removes it. It does this for real, in
 whatever your credentials reach, and asks before it starts (`--yes` skips the question). `--call` makes
 only the calls you name, once each and without cleaning up: `provision`, `grant-access`, `get-access`,
-`revoke-access` and `deprovision`. `steward plugin validate` never changes anything.
+`revoke-access` and `deprovision`. `steward provider validate` never changes anything.
 
 ## Where things are
 
-`src/plugin.js` declares the plugin's inputs (what it needs to connect), each kind of resource and the
+`src/provider.js` declares the provider's inputs (what it needs to connect), each kind of resource and the
 handlers Steward calls: `provision`, `deprovision`, `grantAccess`, `revokeAccess` and `getAccess`.
 Delete the handlers you do not need: Steward offers only what you implement.
 
-To add a kind of resource, call `plugin.resource({ kind, ... })` again with its own inputs, outputs and
+To add a kind of resource, call `provider.resource({ kind, ... })` again with its own inputs, outputs and
 handlers.
 
 See the [SDK README](https://github.com/treno-dev/steward-sdk/blob/main/js/README.md) for
-everything a plugin can declare.
+everything a provider can declare.
