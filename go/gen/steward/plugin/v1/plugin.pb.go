@@ -22,26 +22,16 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// An integration is an instance of a plugin: the plugin with the inputs and the secrets it was set up with, such as a
-// GitHub plugin for one organization. Every call carries the integration it is for. The inputs and the secrets are kept,
-// sent and logged separately, and a plugin must not persist the secrets.
+// An integration is a way of reaching a tool that was set up with a credential of a plugin, such as a role of one AWS account.
+// A call that is made on behalf of an integration says which. What the integration holds, its inputs and its secrets, is
+// handed to the plugin that declared the credential in CredentialService.Resolve, and a task reads the result as its environment.
 type Integration struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Values for the inputs declared in PluginDefinition.inputs, keyed by input name.
-	Inputs *structpb.Struct `protobuf:"bytes,1,opt,name=inputs,proto3" json:"inputs,omitempty"`
-	// Values for the secrets declared in PluginDefinition.secrets, keyed by secret name. Resolved by
-	// the runner for this call only.
-	Secrets map[string]string `protobuf:"bytes,2,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	// Who the integration is. A plugin can name what it makes in a tool after it, such as a role.
 	Ulid string `protobuf:"bytes,3,opt,name=ulid,proto3" json:"ulid,omitempty"`
 	Name string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
 	// The organization the integration belongs to.
 	Organization *Organization `protobuf:"bytes,5,opt,name=organization,proto3" json:"organization,omitempty"`
-	// A token that proves who the integration is, signed by Steward, for the cloud named by
-	// PluginDefinition.identity_audience. The plugin exchanges it for credentials of the cloud. It is
-	// set only when the plugin declares an audience, it is valid for minutes, and a plugin must not
-	// persist it.
-	IdentityToken string `protobuf:"bytes,6,opt,name=identity_token,json=identityToken,proto3" json:"identity_token,omitempty"`
 	// The address of Steward as an issuer of identity tokens: the `iss` of the token, which a cloud is
 	// told to trust. A plugin that sets up trust in it, such as with a link to a guide, uses this
 	// address. It is set in Describe, for the integration the plugin is described for.
@@ -80,20 +70,6 @@ func (*Integration) Descriptor() ([]byte, []int) {
 	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Integration) GetInputs() *structpb.Struct {
-	if x != nil {
-		return x.Inputs
-	}
-	return nil
-}
-
-func (x *Integration) GetSecrets() map[string]string {
-	if x != nil {
-		return x.Secrets
-	}
-	return nil
-}
-
 func (x *Integration) GetUlid() string {
 	if x != nil {
 		return x.Ulid
@@ -113,13 +89,6 @@ func (x *Integration) GetOrganization() *Organization {
 		return x.Organization
 	}
 	return nil
-}
-
-func (x *Integration) GetIdentityToken() string {
-	if x != nil {
-		return x.IdentityToken
-	}
-	return ""
 }
 
 func (x *Integration) GetIdentityIssuer() string {
@@ -901,34 +870,21 @@ type PluginDefinition struct {
 	state       protoimpl.MessageState `protogen:"open.v1"`
 	Title       string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
 	Description string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	// The settings this plugin is configured with, such as a base URL or an organization name.
-	Inputs []*InputDefinition `protobuf:"bytes,3,rep,name=inputs,proto3" json:"inputs,omitempty"`
-	// The credentials this plugin is configured with, such as an API token or a private key.
-	Secrets []*SecretDefinition `protobuf:"bytes,8,rep,name=secrets,proto3" json:"secrets,omitempty"`
 	// The resource kinds this plugin manages. Kinds are unique within the plugin.
 	Resources []*ResourceDefinition `protobuf:"bytes,4,rep,name=resources,proto3" json:"resources,omitempty"`
-	// What can be granted on the plugin as a whole, such as membership of a GitHub organization, a
-	// user in a Jira site or an IAM user in an AWS account. Declaring permissions or roles is what
-	// says the plugin supports access. They are separate lists: the permissions are the pieces
-	// Steward composes its own roles from, and the roles are the ones the tool defines itself.
-	Permissions []*PermissionDefinition `protobuf:"bytes,5,rep,name=permissions,proto3" json:"permissions,omitempty"`
-	Roles       []*RoleDefinition       `protobuf:"bytes,6,rep,name=roles,proto3" json:"roles,omitempty"`
 	// The application kinds this plugin can run, such as a Laravel app on a host. Applications are a
 	// second kind of thing next to resources: they are deployed from a source and have variables that
 	// people edit over time. Kinds are unique within the plugin. Empty when the plugin runs no
 	// applications.
 	Applications []*ApplicationDefinition `protobuf:"bytes,7,rep,name=applications,proto3" json:"applications,omitempty"`
-	// The places this plugin can keep secrets for an organization, such as a parameter store or a
-	// secrets manager. Names are unique within the plugin. A store is made with an engine of an
-	// integration, and the plugin reaches the place with the credentials of that integration. Empty
-	// when the plugin keeps no secrets.
-	SecretEngines []*SecretEngineDefinition `protobuf:"bytes,9,rep,name=secret_engines,json=secretEngines,proto3" json:"secret_engines,omitempty"`
-	// The audience of the token that proves who an integration is, such as `sts.amazonaws.com`. A
-	// plugin that reaches its tool with a token of Steward declares it, and the runner sends the token
-	// in Integration.identity_token. Empty when the plugin takes no token.
-	IdentityAudience string `protobuf:"bytes,10,opt,name=identity_audience,json=identityAudience,proto3" json:"identity_audience,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	// The ways this plugin can reach its tool, which integrations are instances of. Empty when the plugin offers none, such as one that
+	// only reads the environment its tool reads.
+	Credentials []*CredentialDefinition `protobuf:"bytes,11,rep,name=credentials,proto3" json:"credentials,omitempty"`
+	// What a person can be given in the tool as a whole, such as access to an AWS account through a role, or membership of a GitHub
+	// organization. Names are unique within the plugin. Declaring grants is what says the plugin supports access.
+	Grants        []*GrantDefinition `protobuf:"bytes,13,rep,name=grants,proto3" json:"grants,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *PluginDefinition) Reset() {
@@ -975,37 +931,9 @@ func (x *PluginDefinition) GetDescription() string {
 	return ""
 }
 
-func (x *PluginDefinition) GetInputs() []*InputDefinition {
-	if x != nil {
-		return x.Inputs
-	}
-	return nil
-}
-
-func (x *PluginDefinition) GetSecrets() []*SecretDefinition {
-	if x != nil {
-		return x.Secrets
-	}
-	return nil
-}
-
 func (x *PluginDefinition) GetResources() []*ResourceDefinition {
 	if x != nil {
 		return x.Resources
-	}
-	return nil
-}
-
-func (x *PluginDefinition) GetPermissions() []*PermissionDefinition {
-	if x != nil {
-		return x.Permissions
-	}
-	return nil
-}
-
-func (x *PluginDefinition) GetRoles() []*RoleDefinition {
-	if x != nil {
-		return x.Roles
 	}
 	return nil
 }
@@ -1017,18 +945,18 @@ func (x *PluginDefinition) GetApplications() []*ApplicationDefinition {
 	return nil
 }
 
-func (x *PluginDefinition) GetSecretEngines() []*SecretEngineDefinition {
+func (x *PluginDefinition) GetCredentials() []*CredentialDefinition {
 	if x != nil {
-		return x.SecretEngines
+		return x.Credentials
 	}
 	return nil
 }
 
-func (x *PluginDefinition) GetIdentityAudience() string {
+func (x *PluginDefinition) GetGrants() []*GrantDefinition {
 	if x != nil {
-		return x.IdentityAudience
+		return x.Grants
 	}
-	return ""
+	return nil
 }
 
 // One setting a plugin, a resource or an application takes, declared the way a variable is: a name
@@ -1046,7 +974,10 @@ type InputDefinition struct {
 	// Used when no value is given.
 	Default *structpb.Value `protobuf:"bytes,6,opt,name=default,proto3" json:"default,omitempty"`
 	// The choices for a "select".
-	Options       []string `protobuf:"bytes,7,rep,name=options,proto3" json:"options,omitempty"`
+	Options []string `protobuf:"bytes,7,rep,name=options,proto3" json:"options,omitempty"`
+	// For a "number": the least and the greatest value it can have. Left out, there is no limit on that side.
+	Min           *float64 `protobuf:"fixed64,8,opt,name=min,proto3,oneof" json:"min,omitempty"`
+	Max           *float64 `protobuf:"fixed64,9,opt,name=max,proto3,oneof" json:"max,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1128,6 +1059,20 @@ func (x *InputDefinition) GetOptions() []string {
 		return x.Options
 	}
 	return nil
+}
+
+func (x *InputDefinition) GetMin() float64 {
+	if x != nil && x.Min != nil {
+		return *x.Min
+	}
+	return 0
+}
+
+func (x *InputDefinition) GetMax() float64 {
+	if x != nil && x.Max != nil {
+		return *x.Max
+	}
+	return 0
 }
 
 // One credential a plugin, a resource or an application takes, such as an API token or a private
@@ -1483,41 +1428,42 @@ func (x *ApplicationDefinition) GetOutputs() []*OutputDefinition {
 	return nil
 }
 
-// A place a plugin can keep secrets, such as a parameter store. Values are write-only: there is no
-// call that reads one back for a person.
-type SecretEngineDefinition struct {
+// A way of reaching the tool that a plugin offers, such as an AWS role assumed with the identity token of Steward, or a pair of access
+// keys. An integration is an instance of a credential. Before a task calls any plugin, the runner calls Resolve on the credentials
+// shared with the task and hands what they return to the plugin as its environment and files, so a plugin that only reads the
+// environment of its tool needs nothing from the credentials of another plugin.
+type CredentialDefinition struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Unique within the plugin, such as "parameter-store". A store keeps its settings under it.
+	// Unique within the plugin, such as "oidc-role".
 	Name        string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Title       string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
 	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	// The name of an icon for the engine, such as "database" or "vault".
-	Icon string `protobuf:"bytes,4,opt,name=icon,proto3" json:"icon,omitempty"`
-	// The settings of a store made with this engine, such as a prefix. Not the credentials, which are
-	// the integration's.
-	Inputs []*InputDefinition `protobuf:"bytes,5,rep,name=inputs,proto3" json:"inputs,omitempty"`
-	// Where each secret is placed in the backend, such as the region of an AWS secret, which differs
-	// from one secret to the next and is chosen when the secret is made. The values are sent in the
-	// metadata of every call about the secret.
-	Placement     []*InputDefinition `protobuf:"bytes,6,rep,name=placement,proto3" json:"placement,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	// The settings of an integration of this credential, such as the ARN of a role. Not secrets.
+	Inputs []*InputDefinition `protobuf:"bytes,4,rep,name=inputs,proto3" json:"inputs,omitempty"`
+	// The secrets of an integration of this credential, such as an access key. A value is a reference to a vault that the runner
+	// resolves for the call; it is never kept in the integration.
+	Secrets []*SecretDefinition `protobuf:"bytes,5,rep,name=secrets,proto3" json:"secrets,omitempty"`
+	// The audience of the identity token of Steward that the runner sends in CredentialServiceResolveRequest.identity_token, such as
+	// `sts.amazonaws.com`. Empty when the credential takes no token.
+	IdentityAudience string `protobuf:"bytes,6,opt,name=identity_audience,json=identityAudience,proto3" json:"identity_audience,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
-func (x *SecretEngineDefinition) Reset() {
-	*x = SecretEngineDefinition{}
+func (x *CredentialDefinition) Reset() {
+	*x = CredentialDefinition{}
 	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *SecretEngineDefinition) String() string {
+func (x *CredentialDefinition) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SecretEngineDefinition) ProtoMessage() {}
+func (*CredentialDefinition) ProtoMessage() {}
 
-func (x *SecretEngineDefinition) ProtoReflect() protoreflect.Message {
+func (x *CredentialDefinition) ProtoReflect() protoreflect.Message {
 	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1529,49 +1475,122 @@ func (x *SecretEngineDefinition) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SecretEngineDefinition.ProtoReflect.Descriptor instead.
-func (*SecretEngineDefinition) Descriptor() ([]byte, []int) {
+// Deprecated: Use CredentialDefinition.ProtoReflect.Descriptor instead.
+func (*CredentialDefinition) Descriptor() ([]byte, []int) {
 	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{18}
 }
 
-func (x *SecretEngineDefinition) GetName() string {
+func (x *CredentialDefinition) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-func (x *SecretEngineDefinition) GetTitle() string {
+func (x *CredentialDefinition) GetTitle() string {
 	if x != nil {
 		return x.Title
 	}
 	return ""
 }
 
-func (x *SecretEngineDefinition) GetDescription() string {
+func (x *CredentialDefinition) GetDescription() string {
 	if x != nil {
 		return x.Description
 	}
 	return ""
 }
 
-func (x *SecretEngineDefinition) GetIcon() string {
-	if x != nil {
-		return x.Icon
-	}
-	return ""
-}
-
-func (x *SecretEngineDefinition) GetInputs() []*InputDefinition {
+func (x *CredentialDefinition) GetInputs() []*InputDefinition {
 	if x != nil {
 		return x.Inputs
 	}
 	return nil
 }
 
-func (x *SecretEngineDefinition) GetPlacement() []*InputDefinition {
+func (x *CredentialDefinition) GetSecrets() []*SecretDefinition {
 	if x != nil {
-		return x.Placement
+		return x.Secrets
+	}
+	return nil
+}
+
+func (x *CredentialDefinition) GetIdentityAudience() string {
+	if x != nil {
+		return x.IdentityAudience
+	}
+	return ""
+}
+
+// Something a person can be given in the tool, such as access to an account or a seat. A grant is not always a role: it is whatever
+// the plugin can give and take away, and it declares the inputs it wants. An input can be free, such as the ARN of a role, or fixed,
+// such as a "select" of the roles an organization has.
+type GrantDefinition struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Unique within the plugin, such as "access" or "member".
+	Name        string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Title       string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	// What a grant of this kind asks to know about. The values are sent in the `inputs` of every access call.
+	Inputs        []*InputDefinition `protobuf:"bytes,4,rep,name=inputs,proto3" json:"inputs,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GrantDefinition) Reset() {
+	*x = GrantDefinition{}
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GrantDefinition) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GrantDefinition) ProtoMessage() {}
+
+func (x *GrantDefinition) ProtoReflect() protoreflect.Message {
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GrantDefinition.ProtoReflect.Descriptor instead.
+func (*GrantDefinition) Descriptor() ([]byte, []int) {
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *GrantDefinition) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *GrantDefinition) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *GrantDefinition) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *GrantDefinition) GetInputs() []*InputDefinition {
+	if x != nil {
+		return x.Inputs
 	}
 	return nil
 }
@@ -1590,7 +1609,7 @@ type PermissionDefinition struct {
 
 func (x *PermissionDefinition) Reset() {
 	*x = PermissionDefinition{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[19]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1602,7 +1621,7 @@ func (x *PermissionDefinition) String() string {
 func (*PermissionDefinition) ProtoMessage() {}
 
 func (x *PermissionDefinition) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[19]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1615,7 +1634,7 @@ func (x *PermissionDefinition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PermissionDefinition.ProtoReflect.Descriptor instead.
 func (*PermissionDefinition) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{19}
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *PermissionDefinition) GetName() string {
@@ -1658,7 +1677,7 @@ type RoleDefinition struct {
 
 func (x *RoleDefinition) Reset() {
 	*x = RoleDefinition{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[20]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1670,7 +1689,7 @@ func (x *RoleDefinition) String() string {
 func (*RoleDefinition) ProtoMessage() {}
 
 func (x *RoleDefinition) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[20]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1683,7 +1702,7 @@ func (x *RoleDefinition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleDefinition.ProtoReflect.Descriptor instead.
 func (*RoleDefinition) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{20}
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *RoleDefinition) GetName() string {
@@ -1707,188 +1726,25 @@ func (x *RoleDefinition) GetDescription() string {
 	return ""
 }
 
-type ValidateRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Integration   *Integration           `protobuf:"bytes,1,opt,name=integration,proto3" json:"integration,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ValidateRequest) Reset() {
-	*x = ValidateRequest{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[21]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ValidateRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ValidateRequest) ProtoMessage() {}
-
-func (x *ValidateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[21]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ValidateRequest.ProtoReflect.Descriptor instead.
-func (*ValidateRequest) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{21}
-}
-
-func (x *ValidateRequest) GetIntegration() *Integration {
-	if x != nil {
-		return x.Integration
-	}
-	return nil
-}
-
-type ValidateResponse struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Problems with the integration as a whole, which the user can fix but which are not about one input or secret. Empty when
-	// the integration is good. Failures of the call itself are returned as gRPC errors instead.
-	Errors []*ValidationError `protobuf:"bytes,1,rep,name=errors,proto3" json:"errors,omitempty"`
-	// Problems with one input, each naming the input in `field`. Inputs and secrets are separate lists, so which list an error is in
-	// says which of them it is about.
-	InputErrors []*ValidationError `protobuf:"bytes,2,rep,name=input_errors,json=inputErrors,proto3" json:"input_errors,omitempty"`
-	// Problems with one secret, each naming the secret in `field`, such as a token that the tool does not accept.
-	SecretErrors  []*ValidationError `protobuf:"bytes,3,rep,name=secret_errors,json=secretErrors,proto3" json:"secret_errors,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ValidateResponse) Reset() {
-	*x = ValidateResponse{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[22]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ValidateResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ValidateResponse) ProtoMessage() {}
-
-func (x *ValidateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[22]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ValidateResponse.ProtoReflect.Descriptor instead.
-func (*ValidateResponse) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{22}
-}
-
-func (x *ValidateResponse) GetErrors() []*ValidationError {
-	if x != nil {
-		return x.Errors
-	}
-	return nil
-}
-
-func (x *ValidateResponse) GetInputErrors() []*ValidationError {
-	if x != nil {
-		return x.InputErrors
-	}
-	return nil
-}
-
-func (x *ValidateResponse) GetSecretErrors() []*ValidationError {
-	if x != nil {
-		return x.SecretErrors
-	}
-	return nil
-}
-
-type ValidationError struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// The name of the input or the secret the error is about, as the list it is in says. Empty in `errors`, which is about the
-	// integration as a whole.
-	Field         string `protobuf:"bytes,1,opt,name=field,proto3" json:"field,omitempty"`
-	Message       string `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ValidationError) Reset() {
-	*x = ValidationError{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[23]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ValidationError) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ValidationError) ProtoMessage() {}
-
-func (x *ValidationError) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[23]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ValidationError.ProtoReflect.Descriptor instead.
-func (*ValidationError) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{23}
-}
-
-func (x *ValidationError) GetField() string {
-	if x != nil {
-		return x.Field
-	}
-	return ""
-}
-
-func (x *ValidationError) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
-// Access to the plugin as a whole, such as membership of a GitHub organization. Steward grants it
-// before it grants access to the plugin's resources, and decides when to remove it.
+// Access to the plugin as a whole, such as a role in an AWS account or membership of a GitHub organization. Steward grants it before
+// it grants access to the plugin's resources, and decides when to remove it.
 //
 // Idempotent: granting what is already granted succeeds.
 type PluginServiceGrantAccessRequest struct {
 	state       protoimpl.MessageState `protogen:"open.v1"`
 	Integration *Integration           `protobuf:"bytes,1,opt,name=integration,proto3" json:"integration,omitempty"`
 	Identity    *Identity              `protobuf:"bytes,2,opt,name=identity,proto3" json:"identity,omitempty"`
-	// Always set. For a role Steward composed, `permissions` are its pieces, which the plugin
-	// applies as far as the tool allows. Empty for a role the tool defines.
-	Role          *Role         `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"`
-	Permissions   []*Permission `protobuf:"bytes,4,rep,name=permissions,proto3" json:"permissions,omitempty"`
+	// A name declared in PluginDefinition.grants.
+	Grant string `protobuf:"bytes,5,opt,name=grant,proto3" json:"grant,omitempty"`
+	// The values of the inputs that grant declared, keyed by input name.
+	Inputs        *structpb.Struct `protobuf:"bytes,6,opt,name=inputs,proto3" json:"inputs,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *PluginServiceGrantAccessRequest) Reset() {
 	*x = PluginServiceGrantAccessRequest{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[24]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1900,7 +1756,7 @@ func (x *PluginServiceGrantAccessRequest) String() string {
 func (*PluginServiceGrantAccessRequest) ProtoMessage() {}
 
 func (x *PluginServiceGrantAccessRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[24]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1913,7 +1769,7 @@ func (x *PluginServiceGrantAccessRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PluginServiceGrantAccessRequest.ProtoReflect.Descriptor instead.
 func (*PluginServiceGrantAccessRequest) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{24}
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *PluginServiceGrantAccessRequest) GetIntegration() *Integration {
@@ -1930,16 +1786,16 @@ func (x *PluginServiceGrantAccessRequest) GetIdentity() *Identity {
 	return nil
 }
 
-func (x *PluginServiceGrantAccessRequest) GetRole() *Role {
+func (x *PluginServiceGrantAccessRequest) GetGrant() string {
 	if x != nil {
-		return x.Role
+		return x.Grant
 	}
-	return nil
+	return ""
 }
 
-func (x *PluginServiceGrantAccessRequest) GetPermissions() []*Permission {
+func (x *PluginServiceGrantAccessRequest) GetInputs() *structpb.Struct {
 	if x != nil {
-		return x.Permissions
+		return x.Inputs
 	}
 	return nil
 }
@@ -1949,10 +1805,6 @@ type PluginServiceGrantAccessResponse struct {
 	// The grant's own identity in the tool, such as a membership or invitation id. Empty when the
 	// tool has none. Steward records it and sends it back on revoke.
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	// What the tool actually applied. It can differ from what was requested: a composed role may land
-	// as a native role, or as only the permissions the tool supports.
-	Role        *Role         `protobuf:"bytes,2,opt,name=role,proto3" json:"role,omitempty"`
-	Permissions []*Permission `protobuf:"bytes,4,rep,name=permissions,proto3" json:"permissions,omitempty"`
 	// True when the grant needs the identity to act before it takes effect, such as accepting an
 	// invitation. The access is not in effect yet.
 	Pending       bool `protobuf:"varint,3,opt,name=pending,proto3" json:"pending,omitempty"`
@@ -1962,7 +1814,7 @@ type PluginServiceGrantAccessResponse struct {
 
 func (x *PluginServiceGrantAccessResponse) Reset() {
 	*x = PluginServiceGrantAccessResponse{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[25]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1974,7 +1826,7 @@ func (x *PluginServiceGrantAccessResponse) String() string {
 func (*PluginServiceGrantAccessResponse) ProtoMessage() {}
 
 func (x *PluginServiceGrantAccessResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[25]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1987,7 +1839,7 @@ func (x *PluginServiceGrantAccessResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PluginServiceGrantAccessResponse.ProtoReflect.Descriptor instead.
 func (*PluginServiceGrantAccessResponse) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{25}
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *PluginServiceGrantAccessResponse) GetId() string {
@@ -1997,20 +1849,6 @@ func (x *PluginServiceGrantAccessResponse) GetId() string {
 	return ""
 }
 
-func (x *PluginServiceGrantAccessResponse) GetRole() *Role {
-	if x != nil {
-		return x.Role
-	}
-	return nil
-}
-
-func (x *PluginServiceGrantAccessResponse) GetPermissions() []*Permission {
-	if x != nil {
-		return x.Permissions
-	}
-	return nil
-}
-
 func (x *PluginServiceGrantAccessResponse) GetPending() bool {
 	if x != nil {
 		return x.Pending
@@ -2018,23 +1856,22 @@ func (x *PluginServiceGrantAccessResponse) GetPending() bool {
 	return false
 }
 
-// Idempotent: revoking what is already absent succeeds. Steward works out overlap between roles
-// before it sends a revoke, so the role here is safe to remove in full.
+// Idempotent: revoking what is already absent succeeds.
 type PluginServiceRevokeAccessRequest struct {
 	state       protoimpl.MessageState `protogen:"open.v1"`
 	Integration *Integration           `protobuf:"bytes,1,opt,name=integration,proto3" json:"integration,omitempty"`
 	Identity    *Identity              `protobuf:"bytes,2,opt,name=identity,proto3" json:"identity,omitempty"`
-	Role        *Role                  `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"`
-	Permissions []*Permission          `protobuf:"bytes,5,rep,name=permissions,proto3" json:"permissions,omitempty"`
 	// The id GrantAccess returned for this grant, when it returned one.
-	Id            string `protobuf:"bytes,4,opt,name=id,proto3" json:"id,omitempty"`
+	Id            string           `protobuf:"bytes,4,opt,name=id,proto3" json:"id,omitempty"`
+	Grant         string           `protobuf:"bytes,6,opt,name=grant,proto3" json:"grant,omitempty"`
+	Inputs        *structpb.Struct `protobuf:"bytes,7,opt,name=inputs,proto3" json:"inputs,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *PluginServiceRevokeAccessRequest) Reset() {
 	*x = PluginServiceRevokeAccessRequest{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[26]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2046,7 +1883,7 @@ func (x *PluginServiceRevokeAccessRequest) String() string {
 func (*PluginServiceRevokeAccessRequest) ProtoMessage() {}
 
 func (x *PluginServiceRevokeAccessRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[26]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2059,7 +1896,7 @@ func (x *PluginServiceRevokeAccessRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PluginServiceRevokeAccessRequest.ProtoReflect.Descriptor instead.
 func (*PluginServiceRevokeAccessRequest) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{26}
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *PluginServiceRevokeAccessRequest) GetIntegration() *Integration {
@@ -2076,25 +1913,25 @@ func (x *PluginServiceRevokeAccessRequest) GetIdentity() *Identity {
 	return nil
 }
 
-func (x *PluginServiceRevokeAccessRequest) GetRole() *Role {
-	if x != nil {
-		return x.Role
-	}
-	return nil
-}
-
-func (x *PluginServiceRevokeAccessRequest) GetPermissions() []*Permission {
-	if x != nil {
-		return x.Permissions
-	}
-	return nil
-}
-
 func (x *PluginServiceRevokeAccessRequest) GetId() string {
 	if x != nil {
 		return x.Id
 	}
 	return ""
+}
+
+func (x *PluginServiceRevokeAccessRequest) GetGrant() string {
+	if x != nil {
+		return x.Grant
+	}
+	return ""
+}
+
+func (x *PluginServiceRevokeAccessRequest) GetInputs() *structpb.Struct {
+	if x != nil {
+		return x.Inputs
+	}
+	return nil
 }
 
 type PluginServiceRevokeAccessResponse struct {
@@ -2105,7 +1942,7 @@ type PluginServiceRevokeAccessResponse struct {
 
 func (x *PluginServiceRevokeAccessResponse) Reset() {
 	*x = PluginServiceRevokeAccessResponse{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[27]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2117,7 +1954,7 @@ func (x *PluginServiceRevokeAccessResponse) String() string {
 func (*PluginServiceRevokeAccessResponse) ProtoMessage() {}
 
 func (x *PluginServiceRevokeAccessResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[27]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2130,22 +1967,24 @@ func (x *PluginServiceRevokeAccessResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use PluginServiceRevokeAccessResponse.ProtoReflect.Descriptor instead.
 func (*PluginServiceRevokeAccessResponse) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{27}
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{25}
 }
 
-// Asks what an identity holds on the plugin now, for example to skip an invitation to someone who
+// Asks whether an identity holds a grant now, for example to skip an invitation to someone who
 // is already a member, or to find drift.
 type PluginServiceGetAccessRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Integration   *Integration           `protobuf:"bytes,1,opt,name=integration,proto3" json:"integration,omitempty"`
 	Identity      *Identity              `protobuf:"bytes,2,opt,name=identity,proto3" json:"identity,omitempty"`
+	Grant         string                 `protobuf:"bytes,3,opt,name=grant,proto3" json:"grant,omitempty"`
+	Inputs        *structpb.Struct       `protobuf:"bytes,4,opt,name=inputs,proto3" json:"inputs,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *PluginServiceGetAccessRequest) Reset() {
 	*x = PluginServiceGetAccessRequest{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[28]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2157,7 +1996,7 @@ func (x *PluginServiceGetAccessRequest) String() string {
 func (*PluginServiceGetAccessRequest) ProtoMessage() {}
 
 func (x *PluginServiceGetAccessRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[28]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2170,7 +2009,7 @@ func (x *PluginServiceGetAccessRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PluginServiceGetAccessRequest.ProtoReflect.Descriptor instead.
 func (*PluginServiceGetAccessRequest) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{28}
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *PluginServiceGetAccessRequest) GetIntegration() *Integration {
@@ -2187,11 +2026,24 @@ func (x *PluginServiceGetAccessRequest) GetIdentity() *Identity {
 	return nil
 }
 
+func (x *PluginServiceGetAccessRequest) GetGrant() string {
+	if x != nil {
+		return x.Grant
+	}
+	return ""
+}
+
+func (x *PluginServiceGetAccessRequest) GetInputs() *structpb.Struct {
+	if x != nil {
+		return x.Inputs
+	}
+	return nil
+}
+
 type PluginServiceGetAccessResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The roles and permissions the identity holds. Empty when it has none.
-	Roles       []*Role       `protobuf:"bytes,1,rep,name=roles,proto3" json:"roles,omitempty"`
-	Permissions []*Permission `protobuf:"bytes,4,rep,name=permissions,proto3" json:"permissions,omitempty"`
+	// True when the identity holds the grant.
+	Granted bool `protobuf:"varint,5,opt,name=granted,proto3" json:"granted,omitempty"`
 	// True when an invitation or similar is outstanding and the access is not yet in effect.
 	Pending bool `protobuf:"varint,2,opt,name=pending,proto3" json:"pending,omitempty"`
 	// The identity as the tool knows it, with whatever the tool could resolve, such as the
@@ -2203,7 +2055,7 @@ type PluginServiceGetAccessResponse struct {
 
 func (x *PluginServiceGetAccessResponse) Reset() {
 	*x = PluginServiceGetAccessResponse{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[29]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2215,7 +2067,7 @@ func (x *PluginServiceGetAccessResponse) String() string {
 func (*PluginServiceGetAccessResponse) ProtoMessage() {}
 
 func (x *PluginServiceGetAccessResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[29]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2228,21 +2080,14 @@ func (x *PluginServiceGetAccessResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PluginServiceGetAccessResponse.ProtoReflect.Descriptor instead.
 func (*PluginServiceGetAccessResponse) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{29}
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{27}
 }
 
-func (x *PluginServiceGetAccessResponse) GetRoles() []*Role {
+func (x *PluginServiceGetAccessResponse) GetGranted() bool {
 	if x != nil {
-		return x.Roles
+		return x.Granted
 	}
-	return nil
-}
-
-func (x *PluginServiceGetAccessResponse) GetPermissions() []*Permission {
-	if x != nil {
-		return x.Permissions
-	}
-	return nil
+	return false
 }
 
 func (x *PluginServiceGetAccessResponse) GetPending() bool {
@@ -2276,7 +2121,7 @@ type ResourceServiceGrantAccessRequest struct {
 
 func (x *ResourceServiceGrantAccessRequest) Reset() {
 	*x = ResourceServiceGrantAccessRequest{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[30]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2288,7 +2133,7 @@ func (x *ResourceServiceGrantAccessRequest) String() string {
 func (*ResourceServiceGrantAccessRequest) ProtoMessage() {}
 
 func (x *ResourceServiceGrantAccessRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[30]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2301,7 +2146,7 @@ func (x *ResourceServiceGrantAccessRequest) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use ResourceServiceGrantAccessRequest.ProtoReflect.Descriptor instead.
 func (*ResourceServiceGrantAccessRequest) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{30}
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *ResourceServiceGrantAccessRequest) GetIntegration() *Integration {
@@ -2357,7 +2202,7 @@ type ResourceServiceGrantAccessResponse struct {
 
 func (x *ResourceServiceGrantAccessResponse) Reset() {
 	*x = ResourceServiceGrantAccessResponse{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[31]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2369,7 +2214,7 @@ func (x *ResourceServiceGrantAccessResponse) String() string {
 func (*ResourceServiceGrantAccessResponse) ProtoMessage() {}
 
 func (x *ResourceServiceGrantAccessResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[31]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2382,7 +2227,7 @@ func (x *ResourceServiceGrantAccessResponse) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use ResourceServiceGrantAccessResponse.ProtoReflect.Descriptor instead.
 func (*ResourceServiceGrantAccessResponse) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{31}
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *ResourceServiceGrantAccessResponse) GetId() string {
@@ -2430,7 +2275,7 @@ type ResourceServiceRevokeAccessRequest struct {
 
 func (x *ResourceServiceRevokeAccessRequest) Reset() {
 	*x = ResourceServiceRevokeAccessRequest{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[32]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2442,7 +2287,7 @@ func (x *ResourceServiceRevokeAccessRequest) String() string {
 func (*ResourceServiceRevokeAccessRequest) ProtoMessage() {}
 
 func (x *ResourceServiceRevokeAccessRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[32]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2455,7 +2300,7 @@ func (x *ResourceServiceRevokeAccessRequest) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use ResourceServiceRevokeAccessRequest.ProtoReflect.Descriptor instead.
 func (*ResourceServiceRevokeAccessRequest) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{32}
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *ResourceServiceRevokeAccessRequest) GetIntegration() *Integration {
@@ -2508,7 +2353,7 @@ type ResourceServiceRevokeAccessResponse struct {
 
 func (x *ResourceServiceRevokeAccessResponse) Reset() {
 	*x = ResourceServiceRevokeAccessResponse{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[33]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2520,7 +2365,7 @@ func (x *ResourceServiceRevokeAccessResponse) String() string {
 func (*ResourceServiceRevokeAccessResponse) ProtoMessage() {}
 
 func (x *ResourceServiceRevokeAccessResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[33]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2533,7 +2378,7 @@ func (x *ResourceServiceRevokeAccessResponse) ProtoReflect() protoreflect.Messag
 
 // Deprecated: Use ResourceServiceRevokeAccessResponse.ProtoReflect.Descriptor instead.
 func (*ResourceServiceRevokeAccessResponse) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{33}
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{31}
 }
 
 // Asks what an identity holds on a resource now.
@@ -2548,7 +2393,7 @@ type ResourceServiceGetAccessRequest struct {
 
 func (x *ResourceServiceGetAccessRequest) Reset() {
 	*x = ResourceServiceGetAccessRequest{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[34]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2560,7 +2405,7 @@ func (x *ResourceServiceGetAccessRequest) String() string {
 func (*ResourceServiceGetAccessRequest) ProtoMessage() {}
 
 func (x *ResourceServiceGetAccessRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[34]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2573,7 +2418,7 @@ func (x *ResourceServiceGetAccessRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResourceServiceGetAccessRequest.ProtoReflect.Descriptor instead.
 func (*ResourceServiceGetAccessRequest) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{34}
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *ResourceServiceGetAccessRequest) GetIntegration() *Integration {
@@ -2610,7 +2455,7 @@ type ResourceServiceGetAccessResponse struct {
 
 func (x *ResourceServiceGetAccessResponse) Reset() {
 	*x = ResourceServiceGetAccessResponse{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[35]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2622,7 +2467,7 @@ func (x *ResourceServiceGetAccessResponse) String() string {
 func (*ResourceServiceGetAccessResponse) ProtoMessage() {}
 
 func (x *ResourceServiceGetAccessResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[35]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2635,7 +2480,7 @@ func (x *ResourceServiceGetAccessResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResourceServiceGetAccessResponse.ProtoReflect.Descriptor instead.
 func (*ResourceServiceGetAccessResponse) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{35}
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *ResourceServiceGetAccessResponse) GetRoles() []*Role {
@@ -2679,7 +2524,7 @@ type ResourceServiceProvisionRequest struct {
 
 func (x *ResourceServiceProvisionRequest) Reset() {
 	*x = ResourceServiceProvisionRequest{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[36]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2691,7 +2536,7 @@ func (x *ResourceServiceProvisionRequest) String() string {
 func (*ResourceServiceProvisionRequest) ProtoMessage() {}
 
 func (x *ResourceServiceProvisionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[36]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2704,7 +2549,7 @@ func (x *ResourceServiceProvisionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResourceServiceProvisionRequest.ProtoReflect.Descriptor instead.
 func (*ResourceServiceProvisionRequest) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{36}
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *ResourceServiceProvisionRequest) GetIntegration() *Integration {
@@ -2754,7 +2599,7 @@ type ResourceServiceProvisionResponse struct {
 
 func (x *ResourceServiceProvisionResponse) Reset() {
 	*x = ResourceServiceProvisionResponse{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[37]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2766,7 +2611,7 @@ func (x *ResourceServiceProvisionResponse) String() string {
 func (*ResourceServiceProvisionResponse) ProtoMessage() {}
 
 func (x *ResourceServiceProvisionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[37]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2779,7 +2624,7 @@ func (x *ResourceServiceProvisionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResourceServiceProvisionResponse.ProtoReflect.Descriptor instead.
 func (*ResourceServiceProvisionResponse) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{37}
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *ResourceServiceProvisionResponse) GetOutputs() *structpb.Struct {
@@ -2800,7 +2645,7 @@ type ResourceServiceDeprovisionRequest struct {
 
 func (x *ResourceServiceDeprovisionRequest) Reset() {
 	*x = ResourceServiceDeprovisionRequest{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[38]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2812,7 +2657,7 @@ func (x *ResourceServiceDeprovisionRequest) String() string {
 func (*ResourceServiceDeprovisionRequest) ProtoMessage() {}
 
 func (x *ResourceServiceDeprovisionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[38]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2825,7 +2670,7 @@ func (x *ResourceServiceDeprovisionRequest) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use ResourceServiceDeprovisionRequest.ProtoReflect.Descriptor instead.
 func (*ResourceServiceDeprovisionRequest) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{38}
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *ResourceServiceDeprovisionRequest) GetIntegration() *Integration {
@@ -2850,7 +2695,7 @@ type ResourceServiceDeprovisionResponse struct {
 
 func (x *ResourceServiceDeprovisionResponse) Reset() {
 	*x = ResourceServiceDeprovisionResponse{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[39]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2862,7 +2707,7 @@ func (x *ResourceServiceDeprovisionResponse) String() string {
 func (*ResourceServiceDeprovisionResponse) ProtoMessage() {}
 
 func (x *ResourceServiceDeprovisionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[39]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2875,7 +2720,7 @@ func (x *ResourceServiceDeprovisionResponse) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use ResourceServiceDeprovisionResponse.ProtoReflect.Descriptor instead.
 func (*ResourceServiceDeprovisionResponse) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{39}
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{37}
 }
 
 type ResourceServiceListRequest struct {
@@ -2889,7 +2734,7 @@ type ResourceServiceListRequest struct {
 
 func (x *ResourceServiceListRequest) Reset() {
 	*x = ResourceServiceListRequest{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[40]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2901,7 +2746,7 @@ func (x *ResourceServiceListRequest) String() string {
 func (*ResourceServiceListRequest) ProtoMessage() {}
 
 func (x *ResourceServiceListRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[40]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2914,7 +2759,7 @@ func (x *ResourceServiceListRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResourceServiceListRequest.ProtoReflect.Descriptor instead.
 func (*ResourceServiceListRequest) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{40}
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *ResourceServiceListRequest) GetIntegration() *Integration {
@@ -2949,7 +2794,7 @@ type ResourceServiceListResponse struct {
 
 func (x *ResourceServiceListResponse) Reset() {
 	*x = ResourceServiceListResponse{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[41]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2961,7 +2806,7 @@ func (x *ResourceServiceListResponse) String() string {
 func (*ResourceServiceListResponse) ProtoMessage() {}
 
 func (x *ResourceServiceListResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[41]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2974,7 +2819,7 @@ func (x *ResourceServiceListResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResourceServiceListResponse.ProtoReflect.Descriptor instead.
 func (*ResourceServiceListResponse) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{41}
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *ResourceServiceListResponse) GetResources() []*Resource {
@@ -3008,7 +2853,7 @@ type ApplicationServiceCreateRequest struct {
 
 func (x *ApplicationServiceCreateRequest) Reset() {
 	*x = ApplicationServiceCreateRequest{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[42]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3020,7 +2865,7 @@ func (x *ApplicationServiceCreateRequest) String() string {
 func (*ApplicationServiceCreateRequest) ProtoMessage() {}
 
 func (x *ApplicationServiceCreateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[42]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3033,7 +2878,7 @@ func (x *ApplicationServiceCreateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplicationServiceCreateRequest.ProtoReflect.Descriptor instead.
 func (*ApplicationServiceCreateRequest) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{42}
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *ApplicationServiceCreateRequest) GetIntegration() *Integration {
@@ -3088,7 +2933,7 @@ type ApplicationServiceCreateResponse struct {
 
 func (x *ApplicationServiceCreateResponse) Reset() {
 	*x = ApplicationServiceCreateResponse{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[43]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3100,7 +2945,7 @@ func (x *ApplicationServiceCreateResponse) String() string {
 func (*ApplicationServiceCreateResponse) ProtoMessage() {}
 
 func (x *ApplicationServiceCreateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[43]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3113,7 +2958,7 @@ func (x *ApplicationServiceCreateResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplicationServiceCreateResponse.ProtoReflect.Descriptor instead.
 func (*ApplicationServiceCreateResponse) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{43}
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *ApplicationServiceCreateResponse) GetApplication() *Application {
@@ -3134,7 +2979,7 @@ type ApplicationServiceDestroyRequest struct {
 
 func (x *ApplicationServiceDestroyRequest) Reset() {
 	*x = ApplicationServiceDestroyRequest{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[44]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3146,7 +2991,7 @@ func (x *ApplicationServiceDestroyRequest) String() string {
 func (*ApplicationServiceDestroyRequest) ProtoMessage() {}
 
 func (x *ApplicationServiceDestroyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[44]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3159,7 +3004,7 @@ func (x *ApplicationServiceDestroyRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplicationServiceDestroyRequest.ProtoReflect.Descriptor instead.
 func (*ApplicationServiceDestroyRequest) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{44}
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *ApplicationServiceDestroyRequest) GetIntegration() *Integration {
@@ -3184,7 +3029,7 @@ type ApplicationServiceDestroyResponse struct {
 
 func (x *ApplicationServiceDestroyResponse) Reset() {
 	*x = ApplicationServiceDestroyResponse{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[45]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3196,7 +3041,7 @@ func (x *ApplicationServiceDestroyResponse) String() string {
 func (*ApplicationServiceDestroyResponse) ProtoMessage() {}
 
 func (x *ApplicationServiceDestroyResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[45]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3209,7 +3054,7 @@ func (x *ApplicationServiceDestroyResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use ApplicationServiceDestroyResponse.ProtoReflect.Descriptor instead.
 func (*ApplicationServiceDestroyResponse) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{45}
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{43}
 }
 
 // Deploys the application from a source, replacing what is running. `application.variables` is the
@@ -3228,7 +3073,7 @@ type ApplicationServiceDeployRequest struct {
 
 func (x *ApplicationServiceDeployRequest) Reset() {
 	*x = ApplicationServiceDeployRequest{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[46]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3240,7 +3085,7 @@ func (x *ApplicationServiceDeployRequest) String() string {
 func (*ApplicationServiceDeployRequest) ProtoMessage() {}
 
 func (x *ApplicationServiceDeployRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[46]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3253,7 +3098,7 @@ func (x *ApplicationServiceDeployRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplicationServiceDeployRequest.ProtoReflect.Descriptor instead.
 func (*ApplicationServiceDeployRequest) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{46}
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *ApplicationServiceDeployRequest) GetIntegration() *Integration {
@@ -3287,7 +3132,7 @@ type ApplicationServiceDeployResponse struct {
 
 func (x *ApplicationServiceDeployResponse) Reset() {
 	*x = ApplicationServiceDeployResponse{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[47]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3299,7 +3144,7 @@ func (x *ApplicationServiceDeployResponse) String() string {
 func (*ApplicationServiceDeployResponse) ProtoMessage() {}
 
 func (x *ApplicationServiceDeployResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[47]
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3312,7 +3157,7 @@ func (x *ApplicationServiceDeployResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplicationServiceDeployResponse.ProtoReflect.Descriptor instead.
 func (*ApplicationServiceDeployResponse) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{47}
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *ApplicationServiceDeployResponse) GetApplication() *Application {
@@ -3322,38 +3167,194 @@ func (x *ApplicationServiceDeployResponse) GetApplication() *Application {
 	return nil
 }
 
-// Writes a secret, creating it or replacing it. Idempotent. The value is a secret of the call: the
+// Turns an integration of a credential into what a tool reads: environment variables and files. The runner calls it before a task
+// invokes any plugin, once for each integration shared with the task, and merges the results. A value is a secret of the call: the
 // plugin must not persist it or write it to a log.
-type SecretEngineServicePutRequest struct {
-	state       protoimpl.MessageState `protogen:"open.v1"`
-	Integration *Integration           `protobuf:"bytes,1,opt,name=integration,proto3" json:"integration,omitempty"`
-	// A name declared in PluginDefinition.secret_engines.
-	Engine string `protobuf:"bytes,2,opt,name=engine,proto3" json:"engine,omitempty"`
-	// The settings of the store, keyed by the inputs the engine declared.
-	Settings *structpb.Struct `protobuf:"bytes,3,opt,name=settings,proto3" json:"settings,omitempty"`
-	// The name of the secret, which can hold slashes.
-	Name  string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
-	Value string `protobuf:"bytes,5,opt,name=value,proto3" json:"value,omitempty"`
-	// Where the secret is placed, such as the region of an AWS secret, and its tags.
-	Metadata      *structpb.Struct `protobuf:"bytes,6,opt,name=metadata,proto3" json:"metadata,omitempty"`
+type CredentialServiceResolveRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// A name declared in PluginDefinition.credentials.
+	Credential string `protobuf:"bytes,1,opt,name=credential,proto3" json:"credential,omitempty"`
+	// The settings of the integration, keyed by the inputs the credential declared.
+	Inputs *structpb.Struct `protobuf:"bytes,2,opt,name=inputs,proto3" json:"inputs,omitempty"`
+	// The secrets of the integration, keyed by the secrets the credential declared. Resolved by the runner for this call only.
+	Secrets map[string]string `protobuf:"bytes,3,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// A token that proves who the integration is, for the audience the credential declared. Valid for minutes, and never persisted.
+	IdentityToken string `protobuf:"bytes,4,opt,name=identity_token,json=identityToken,proto3" json:"identity_token,omitempty"`
+	// Who the integration is, and the organization it belongs to, so that a plugin can name what it makes after them.
+	IntegrationUlid string        `protobuf:"bytes,5,opt,name=integration_ulid,json=integrationUlid,proto3" json:"integration_ulid,omitempty"`
+	IntegrationName string        `protobuf:"bytes,6,opt,name=integration_name,json=integrationName,proto3" json:"integration_name,omitempty"`
+	Organization    *Organization `protobuf:"bytes,7,opt,name=organization,proto3" json:"organization,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *CredentialServiceResolveRequest) Reset() {
+	*x = CredentialServiceResolveRequest{}
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[46]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CredentialServiceResolveRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CredentialServiceResolveRequest) ProtoMessage() {}
+
+func (x *CredentialServiceResolveRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[46]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CredentialServiceResolveRequest.ProtoReflect.Descriptor instead.
+func (*CredentialServiceResolveRequest) Descriptor() ([]byte, []int) {
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{46}
+}
+
+func (x *CredentialServiceResolveRequest) GetCredential() string {
+	if x != nil {
+		return x.Credential
+	}
+	return ""
+}
+
+func (x *CredentialServiceResolveRequest) GetInputs() *structpb.Struct {
+	if x != nil {
+		return x.Inputs
+	}
+	return nil
+}
+
+func (x *CredentialServiceResolveRequest) GetSecrets() map[string]string {
+	if x != nil {
+		return x.Secrets
+	}
+	return nil
+}
+
+func (x *CredentialServiceResolveRequest) GetIdentityToken() string {
+	if x != nil {
+		return x.IdentityToken
+	}
+	return ""
+}
+
+func (x *CredentialServiceResolveRequest) GetIntegrationUlid() string {
+	if x != nil {
+		return x.IntegrationUlid
+	}
+	return ""
+}
+
+func (x *CredentialServiceResolveRequest) GetIntegrationName() string {
+	if x != nil {
+		return x.IntegrationName
+	}
+	return ""
+}
+
+func (x *CredentialServiceResolveRequest) GetOrganization() *Organization {
+	if x != nil {
+		return x.Organization
+	}
+	return nil
+}
+
+type CredentialServiceResolveResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Environment variables for the process of the task, such as AWS_ACCESS_KEY_ID.
+	Env map[string]string `protobuf:"bytes,1,rep,name=env,proto3" json:"env,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// Files for the process of the task, which the runner writes into a directory of the task and removes after it. The path of each
+	// file is given to the process in the variable named by its env_name.
+	Files []*CredentialFile `protobuf:"bytes,2,rep,name=files,proto3" json:"files,omitempty"`
+	// When the credentials stop working, as seconds since the epoch. 0 when they do not expire. The runner calls Resolve again before
+	// then when a task is still running.
+	ExpiresAt     int64 `protobuf:"varint,3,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *SecretEngineServicePutRequest) Reset() {
-	*x = SecretEngineServicePutRequest{}
+func (x *CredentialServiceResolveResponse) Reset() {
+	*x = CredentialServiceResolveResponse{}
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[47]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CredentialServiceResolveResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CredentialServiceResolveResponse) ProtoMessage() {}
+
+func (x *CredentialServiceResolveResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[47]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CredentialServiceResolveResponse.ProtoReflect.Descriptor instead.
+func (*CredentialServiceResolveResponse) Descriptor() ([]byte, []int) {
+	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{47}
+}
+
+func (x *CredentialServiceResolveResponse) GetEnv() map[string]string {
+	if x != nil {
+		return x.Env
+	}
+	return nil
+}
+
+func (x *CredentialServiceResolveResponse) GetFiles() []*CredentialFile {
+	if x != nil {
+		return x.Files
+	}
+	return nil
+}
+
+func (x *CredentialServiceResolveResponse) GetExpiresAt() int64 {
+	if x != nil {
+		return x.ExpiresAt
+	}
+	return 0
+}
+
+type CredentialFile struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The name of the environment variable that holds the path of the file, such as AWS_WEB_IDENTITY_TOKEN_FILE.
+	EnvName       string `protobuf:"bytes,1,opt,name=env_name,json=envName,proto3" json:"env_name,omitempty"`
+	Content       []byte `protobuf:"bytes,2,opt,name=content,proto3" json:"content,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CredentialFile) Reset() {
+	*x = CredentialFile{}
 	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *SecretEngineServicePutRequest) String() string {
+func (x *CredentialFile) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SecretEngineServicePutRequest) ProtoMessage() {}
+func (*CredentialFile) ProtoMessage() {}
 
-func (x *SecretEngineServicePutRequest) ProtoReflect() protoreflect.Message {
+func (x *CredentialFile) ProtoReflect() protoreflect.Message {
 	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3365,343 +3366,35 @@ func (x *SecretEngineServicePutRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SecretEngineServicePutRequest.ProtoReflect.Descriptor instead.
-func (*SecretEngineServicePutRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use CredentialFile.ProtoReflect.Descriptor instead.
+func (*CredentialFile) Descriptor() ([]byte, []int) {
 	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{48}
 }
 
-func (x *SecretEngineServicePutRequest) GetIntegration() *Integration {
+func (x *CredentialFile) GetEnvName() string {
 	if x != nil {
-		return x.Integration
-	}
-	return nil
-}
-
-func (x *SecretEngineServicePutRequest) GetEngine() string {
-	if x != nil {
-		return x.Engine
+		return x.EnvName
 	}
 	return ""
 }
 
-func (x *SecretEngineServicePutRequest) GetSettings() *structpb.Struct {
+func (x *CredentialFile) GetContent() []byte {
 	if x != nil {
-		return x.Settings
+		return x.Content
 	}
 	return nil
-}
-
-func (x *SecretEngineServicePutRequest) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *SecretEngineServicePutRequest) GetValue() string {
-	if x != nil {
-		return x.Value
-	}
-	return ""
-}
-
-func (x *SecretEngineServicePutRequest) GetMetadata() *structpb.Struct {
-	if x != nil {
-		return x.Metadata
-	}
-	return nil
-}
-
-type SecretEngineServicePutResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SecretEngineServicePutResponse) Reset() {
-	*x = SecretEngineServicePutResponse{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[49]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SecretEngineServicePutResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SecretEngineServicePutResponse) ProtoMessage() {}
-
-func (x *SecretEngineServicePutResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[49]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SecretEngineServicePutResponse.ProtoReflect.Descriptor instead.
-func (*SecretEngineServicePutResponse) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{49}
-}
-
-// Removes a secret. Idempotent: succeeds if it is already gone.
-type SecretEngineServiceDeleteRequest struct {
-	state       protoimpl.MessageState `protogen:"open.v1"`
-	Integration *Integration           `protobuf:"bytes,1,opt,name=integration,proto3" json:"integration,omitempty"`
-	Engine      string                 `protobuf:"bytes,2,opt,name=engine,proto3" json:"engine,omitempty"`
-	Settings    *structpb.Struct       `protobuf:"bytes,3,opt,name=settings,proto3" json:"settings,omitempty"`
-	Name        string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
-	// The metadata the secret was placed with.
-	Metadata      *structpb.Struct `protobuf:"bytes,5,opt,name=metadata,proto3" json:"metadata,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SecretEngineServiceDeleteRequest) Reset() {
-	*x = SecretEngineServiceDeleteRequest{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[50]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SecretEngineServiceDeleteRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SecretEngineServiceDeleteRequest) ProtoMessage() {}
-
-func (x *SecretEngineServiceDeleteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[50]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SecretEngineServiceDeleteRequest.ProtoReflect.Descriptor instead.
-func (*SecretEngineServiceDeleteRequest) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{50}
-}
-
-func (x *SecretEngineServiceDeleteRequest) GetIntegration() *Integration {
-	if x != nil {
-		return x.Integration
-	}
-	return nil
-}
-
-func (x *SecretEngineServiceDeleteRequest) GetEngine() string {
-	if x != nil {
-		return x.Engine
-	}
-	return ""
-}
-
-func (x *SecretEngineServiceDeleteRequest) GetSettings() *structpb.Struct {
-	if x != nil {
-		return x.Settings
-	}
-	return nil
-}
-
-func (x *SecretEngineServiceDeleteRequest) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *SecretEngineServiceDeleteRequest) GetMetadata() *structpb.Struct {
-	if x != nil {
-		return x.Metadata
-	}
-	return nil
-}
-
-type SecretEngineServiceDeleteResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SecretEngineServiceDeleteResponse) Reset() {
-	*x = SecretEngineServiceDeleteResponse{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[51]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SecretEngineServiceDeleteResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SecretEngineServiceDeleteResponse) ProtoMessage() {}
-
-func (x *SecretEngineServiceDeleteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[51]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SecretEngineServiceDeleteResponse.ProtoReflect.Descriptor instead.
-func (*SecretEngineServiceDeleteResponse) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{51}
-}
-
-// Reads a secret, for the runner to hand to another plugin as a secret of its call. It is how a
-// secret is resolved, and nothing shows the value to a person. The plugin must not persist the
-// value or write it to a log. Fails with NOT_FOUND if there is no such secret.
-type SecretEngineServiceGetRequest struct {
-	state       protoimpl.MessageState `protogen:"open.v1"`
-	Integration *Integration           `protobuf:"bytes,1,opt,name=integration,proto3" json:"integration,omitempty"`
-	Engine      string                 `protobuf:"bytes,2,opt,name=engine,proto3" json:"engine,omitempty"`
-	Settings    *structpb.Struct       `protobuf:"bytes,3,opt,name=settings,proto3" json:"settings,omitempty"`
-	Name        string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
-	// The metadata the secret was placed with.
-	Metadata      *structpb.Struct `protobuf:"bytes,5,opt,name=metadata,proto3" json:"metadata,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SecretEngineServiceGetRequest) Reset() {
-	*x = SecretEngineServiceGetRequest{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[52]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SecretEngineServiceGetRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SecretEngineServiceGetRequest) ProtoMessage() {}
-
-func (x *SecretEngineServiceGetRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[52]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SecretEngineServiceGetRequest.ProtoReflect.Descriptor instead.
-func (*SecretEngineServiceGetRequest) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{52}
-}
-
-func (x *SecretEngineServiceGetRequest) GetIntegration() *Integration {
-	if x != nil {
-		return x.Integration
-	}
-	return nil
-}
-
-func (x *SecretEngineServiceGetRequest) GetEngine() string {
-	if x != nil {
-		return x.Engine
-	}
-	return ""
-}
-
-func (x *SecretEngineServiceGetRequest) GetSettings() *structpb.Struct {
-	if x != nil {
-		return x.Settings
-	}
-	return nil
-}
-
-func (x *SecretEngineServiceGetRequest) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *SecretEngineServiceGetRequest) GetMetadata() *structpb.Struct {
-	if x != nil {
-		return x.Metadata
-	}
-	return nil
-}
-
-type SecretEngineServiceGetResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Value         string                 `protobuf:"bytes,1,opt,name=value,proto3" json:"value,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SecretEngineServiceGetResponse) Reset() {
-	*x = SecretEngineServiceGetResponse{}
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[53]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SecretEngineServiceGetResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SecretEngineServiceGetResponse) ProtoMessage() {}
-
-func (x *SecretEngineServiceGetResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_plugin_v1_plugin_proto_msgTypes[53]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SecretEngineServiceGetResponse.ProtoReflect.Descriptor instead.
-func (*SecretEngineServiceGetResponse) Descriptor() ([]byte, []int) {
-	return file_steward_plugin_v1_plugin_proto_rawDescGZIP(), []int{53}
-}
-
-func (x *SecretEngineServiceGetResponse) GetValue() string {
-	if x != nil {
-		return x.Value
-	}
-	return ""
 }
 
 var File_steward_plugin_v1_plugin_proto protoreflect.FileDescriptor
 
 const file_steward_plugin_v1_plugin_proto_rawDesc = "" +
 	"\n" +
-	"\x1esteward/plugin/v1/plugin.proto\x12\x11steward.plugin.v1\x1a\x1cgoogle/protobuf/struct.proto\"\xfe\x02\n" +
-	"\vIntegration\x12/\n" +
-	"\x06inputs\x18\x01 \x01(\v2\x17.google.protobuf.StructR\x06inputs\x12E\n" +
-	"\asecrets\x18\x02 \x03(\v2+.steward.plugin.v1.Integration.SecretsEntryR\asecrets\x12\x12\n" +
+	"\x1esteward/plugin/v1/plugin.proto\x12\x11steward.plugin.v1\x1a\x1cgoogle/protobuf/struct.proto\"\xd6\x01\n" +
+	"\vIntegration\x12\x12\n" +
 	"\x04ulid\x18\x03 \x01(\tR\x04ulid\x12\x12\n" +
 	"\x04name\x18\x04 \x01(\tR\x04name\x12C\n" +
-	"\forganization\x18\x05 \x01(\v2\x1f.steward.plugin.v1.OrganizationR\forganization\x12%\n" +
-	"\x0eidentity_token\x18\x06 \x01(\tR\ridentityToken\x12'\n" +
-	"\x0fidentity_issuer\x18\a \x01(\tR\x0eidentityIssuer\x1a:\n" +
-	"\fSecretsEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"6\n" +
+	"\forganization\x18\x05 \x01(\v2\x1f.steward.plugin.v1.OrganizationR\forganization\x12'\n" +
+	"\x0fidentity_issuer\x18\a \x01(\tR\x0eidentityIssuerJ\x04\b\x01\x10\x02J\x04\b\x02\x10\x03J\x04\b\x06\x10\aR\x06inputsR\asecretsR\x0eidentity_token\"6\n" +
 	"\fOrganization\x12\x12\n" +
 	"\x04ulid\x18\x01 \x01(\tR\x04ulid\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\"\x96\x02\n" +
@@ -3766,19 +3459,16 @@ const file_steward_plugin_v1_plugin_proto_rawDesc = "" +
 	"\tSetupLink\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x10\n" +
-	"\x03url\x18\x03 \x01(\tR\x03url\"\xdb\x04\n" +
+	"\x03url\x18\x03 \x01(\tR\x03url\"\xe4\x03\n" +
 	"\x10PluginDefinition\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\x12:\n" +
-	"\x06inputs\x18\x03 \x03(\v2\".steward.plugin.v1.InputDefinitionR\x06inputs\x12=\n" +
-	"\asecrets\x18\b \x03(\v2#.steward.plugin.v1.SecretDefinitionR\asecrets\x12C\n" +
-	"\tresources\x18\x04 \x03(\v2%.steward.plugin.v1.ResourceDefinitionR\tresources\x12I\n" +
-	"\vpermissions\x18\x05 \x03(\v2'.steward.plugin.v1.PermissionDefinitionR\vpermissions\x127\n" +
-	"\x05roles\x18\x06 \x03(\v2!.steward.plugin.v1.RoleDefinitionR\x05roles\x12L\n" +
-	"\fapplications\x18\a \x03(\v2(.steward.plugin.v1.ApplicationDefinitionR\fapplications\x12P\n" +
-	"\x0esecret_engines\x18\t \x03(\v2).steward.plugin.v1.SecretEngineDefinitionR\rsecretEngines\x12+\n" +
-	"\x11identity_audience\x18\n" +
-	" \x01(\tR\x10identityAudience\"\xd9\x01\n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12C\n" +
+	"\tresources\x18\x04 \x03(\v2%.steward.plugin.v1.ResourceDefinitionR\tresources\x12L\n" +
+	"\fapplications\x18\a \x03(\v2(.steward.plugin.v1.ApplicationDefinitionR\fapplications\x12I\n" +
+	"\vcredentials\x18\v \x03(\v2'.steward.plugin.v1.CredentialDefinitionR\vcredentials\x12:\n" +
+	"\x06grants\x18\r \x03(\v2\".steward.plugin.v1.GrantDefinitionR\x06grantsJ\x04\b\x03\x10\x04J\x04\b\b\x10\tJ\x04\b\x05\x10\x06J\x04\b\x06\x10\aJ\x04\b\f\x10\rJ\x04\b\t\x10\n" +
+	"J\x04\b\n" +
+	"\x10\vR\x06inputsR\asecretsR\vpermissionsR\x05rolesR\fgrant_inputsR\x0esecret_enginesR\x11identity_audience\"\x97\x02\n" +
 	"\x0fInputDefinition\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05label\x18\x02 \x01(\tR\x05label\x12 \n" +
@@ -3786,7 +3476,11 @@ const file_steward_plugin_v1_plugin_proto_rawDesc = "" +
 	"\x04type\x18\x04 \x01(\tR\x04type\x12\x1a\n" +
 	"\brequired\x18\x05 \x01(\bR\brequired\x120\n" +
 	"\adefault\x18\x06 \x01(\v2\x16.google.protobuf.ValueR\adefault\x12\x18\n" +
-	"\aoptions\x18\a \x03(\tR\aoptions\"d\n" +
+	"\aoptions\x18\a \x03(\tR\aoptions\x12\x15\n" +
+	"\x03min\x18\b \x01(\x01H\x00R\x03min\x88\x01\x01\x12\x15\n" +
+	"\x03max\x18\t \x01(\x01H\x01R\x03max\x88\x01\x01B\x06\n" +
+	"\x04_minB\x06\n" +
+	"\x04_max\"d\n" +
 	"\x10SecretDefinition\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x1a\n" +
@@ -3813,14 +3507,19 @@ const file_steward_plugin_v1_plugin_proto_rawDesc = "" +
 	"\x06inputs\x18\x04 \x03(\v2\".steward.plugin.v1.InputDefinitionR\x06inputs\x12=\n" +
 	"\asecrets\x18\a \x03(\v2#.steward.plugin.v1.SecretDefinitionR\asecrets\x12\x18\n" +
 	"\asources\x18\x05 \x03(\tR\asources\x12=\n" +
-	"\aoutputs\x18\x06 \x03(\v2#.steward.plugin.v1.OutputDefinitionR\aoutputs\"\xf6\x01\n" +
-	"\x16SecretEngineDefinition\x12\x12\n" +
+	"\aoutputs\x18\x06 \x03(\v2#.steward.plugin.v1.OutputDefinitionR\aoutputs\"\x8a\x02\n" +
+	"\x14CredentialDefinition\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x12\n" +
-	"\x04icon\x18\x04 \x01(\tR\x04icon\x12:\n" +
-	"\x06inputs\x18\x05 \x03(\v2\".steward.plugin.v1.InputDefinitionR\x06inputs\x12@\n" +
-	"\tplacement\x18\x06 \x03(\v2\".steward.plugin.v1.InputDefinitionR\tplacement\"z\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12:\n" +
+	"\x06inputs\x18\x04 \x03(\v2\".steward.plugin.v1.InputDefinitionR\x06inputs\x12=\n" +
+	"\asecrets\x18\x05 \x03(\v2#.steward.plugin.v1.SecretDefinitionR\asecrets\x12+\n" +
+	"\x11identity_audience\x18\x06 \x01(\tR\x10identityAudience\"\x99\x01\n" +
+	"\x0fGrantDefinition\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12:\n" +
+	"\x06inputs\x18\x04 \x03(\v2\".steward.plugin.v1.InputDefinitionR\x06inputs\"z\n" +
 	"\x14PermissionDefinition\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
@@ -3829,41 +3528,34 @@ const file_steward_plugin_v1_plugin_proto_rawDesc = "" +
 	"\x0eRoleDefinition\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\"S\n" +
-	"\x0fValidateRequest\x12@\n" +
-	"\vintegration\x18\x01 \x01(\v2\x1e.steward.plugin.v1.IntegrationR\vintegration\"\xde\x01\n" +
-	"\x10ValidateResponse\x12:\n" +
-	"\x06errors\x18\x01 \x03(\v2\".steward.plugin.v1.ValidationErrorR\x06errors\x12E\n" +
-	"\finput_errors\x18\x02 \x03(\v2\".steward.plugin.v1.ValidationErrorR\vinputErrors\x12G\n" +
-	"\rsecret_errors\x18\x03 \x03(\v2\".steward.plugin.v1.ValidationErrorR\fsecretErrors\"A\n" +
-	"\x0fValidationError\x12\x14\n" +
-	"\x05field\x18\x01 \x01(\tR\x05field\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"\x8a\x02\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\"\x96\x02\n" +
 	"\x1fPluginServiceGrantAccessRequest\x12@\n" +
 	"\vintegration\x18\x01 \x01(\v2\x1e.steward.plugin.v1.IntegrationR\vintegration\x127\n" +
-	"\bidentity\x18\x02 \x01(\v2\x1b.steward.plugin.v1.IdentityR\bidentity\x12+\n" +
-	"\x04role\x18\x03 \x01(\v2\x17.steward.plugin.v1.RoleR\x04role\x12?\n" +
-	"\vpermissions\x18\x04 \x03(\v2\x1d.steward.plugin.v1.PermissionR\vpermissions\"\xba\x01\n" +
+	"\bidentity\x18\x02 \x01(\v2\x1b.steward.plugin.v1.IdentityR\bidentity\x12\x14\n" +
+	"\x05grant\x18\x05 \x01(\tR\x05grant\x12/\n" +
+	"\x06inputs\x18\x06 \x01(\v2\x17.google.protobuf.StructR\x06inputsJ\x04\b\x03\x10\x04J\x04\b\x04\x10\x05J\x04\b\n" +
+	"\x10\vR\x04roleR\vpermissionsR\fgrant_inputs\"k\n" +
 	" PluginServiceGrantAccessResponse\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12+\n" +
-	"\x04role\x18\x02 \x01(\v2\x17.steward.plugin.v1.RoleR\x04role\x12?\n" +
-	"\vpermissions\x18\x04 \x03(\v2\x1d.steward.plugin.v1.PermissionR\vpermissions\x12\x18\n" +
-	"\apending\x18\x03 \x01(\bR\apending\"\x9b\x02\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
+	"\apending\x18\x03 \x01(\bR\apendingJ\x04\b\x02\x10\x03J\x04\b\x04\x10\x05R\x04roleR\vpermissions\"\xa7\x02\n" +
 	" PluginServiceRevokeAccessRequest\x12@\n" +
 	"\vintegration\x18\x01 \x01(\v2\x1e.steward.plugin.v1.IntegrationR\vintegration\x127\n" +
-	"\bidentity\x18\x02 \x01(\v2\x1b.steward.plugin.v1.IdentityR\bidentity\x12+\n" +
-	"\x04role\x18\x03 \x01(\v2\x17.steward.plugin.v1.RoleR\x04role\x12?\n" +
-	"\vpermissions\x18\x05 \x03(\v2\x1d.steward.plugin.v1.PermissionR\vpermissions\x12\x0e\n" +
-	"\x02id\x18\x04 \x01(\tR\x02id\"#\n" +
-	"!PluginServiceRevokeAccessResponse\"\x9a\x01\n" +
+	"\bidentity\x18\x02 \x01(\v2\x1b.steward.plugin.v1.IdentityR\bidentity\x12\x0e\n" +
+	"\x02id\x18\x04 \x01(\tR\x02id\x12\x14\n" +
+	"\x05grant\x18\x06 \x01(\tR\x05grant\x12/\n" +
+	"\x06inputs\x18\a \x01(\v2\x17.google.protobuf.StructR\x06inputsJ\x04\b\x03\x10\x04J\x04\b\x05\x10\x06J\x04\b\n" +
+	"\x10\vR\x04roleR\vpermissionsR\fgrant_inputs\"#\n" +
+	"!PluginServiceRevokeAccessResponse\"\xf5\x01\n" +
 	"\x1dPluginServiceGetAccessRequest\x12@\n" +
 	"\vintegration\x18\x01 \x01(\v2\x1e.steward.plugin.v1.IntegrationR\vintegration\x127\n" +
-	"\bidentity\x18\x02 \x01(\v2\x1b.steward.plugin.v1.IdentityR\bidentity\"\xe3\x01\n" +
-	"\x1ePluginServiceGetAccessResponse\x12-\n" +
-	"\x05roles\x18\x01 \x03(\v2\x17.steward.plugin.v1.RoleR\x05roles\x12?\n" +
-	"\vpermissions\x18\x04 \x03(\v2\x1d.steward.plugin.v1.PermissionR\vpermissions\x12\x18\n" +
+	"\bidentity\x18\x02 \x01(\v2\x1b.steward.plugin.v1.IdentityR\bidentity\x12\x14\n" +
+	"\x05grant\x18\x03 \x01(\tR\x05grant\x12/\n" +
+	"\x06inputs\x18\x04 \x01(\v2\x17.google.protobuf.StructR\x06inputsJ\x04\b\n" +
+	"\x10\vR\fgrant_inputs\"\xad\x01\n" +
+	"\x1ePluginServiceGetAccessResponse\x12\x18\n" +
+	"\agranted\x18\x05 \x01(\bR\agranted\x12\x18\n" +
 	"\apending\x18\x02 \x01(\bR\apending\x127\n" +
-	"\bidentity\x18\x03 \x01(\v2\x1b.steward.plugin.v1.IdentityR\bidentity\"\xc5\x02\n" +
+	"\bidentity\x18\x03 \x01(\v2\x1b.steward.plugin.v1.IdentityR\bidentityJ\x04\b\x01\x10\x02J\x04\b\x04\x10\x05R\x05rolesR\vpermissions\"\xc5\x02\n" +
 	"!ResourceServiceGrantAccessRequest\x12@\n" +
 	"\vintegration\x18\x01 \x01(\v2\x1e.steward.plugin.v1.IntegrationR\vintegration\x127\n" +
 	"\bresource\x18\x02 \x01(\v2\x1b.steward.plugin.v1.ResourceR\bresource\x127\n" +
@@ -3935,33 +3627,33 @@ const file_steward_plugin_v1_plugin_proto_rawDesc = "" +
 	"\vapplication\x18\x02 \x01(\v2\x1e.steward.plugin.v1.ApplicationR\vapplication\x12<\n" +
 	"\x06source\x18\x03 \x01(\v2$.steward.plugin.v1.ApplicationSourceR\x06source\"d\n" +
 	" ApplicationServiceDeployResponse\x12@\n" +
-	"\vapplication\x18\x01 \x01(\v2\x1e.steward.plugin.v1.ApplicationR\vapplication\"\x8d\x02\n" +
-	"\x1dSecretEngineServicePutRequest\x12@\n" +
-	"\vintegration\x18\x01 \x01(\v2\x1e.steward.plugin.v1.IntegrationR\vintegration\x12\x16\n" +
-	"\x06engine\x18\x02 \x01(\tR\x06engine\x123\n" +
-	"\bsettings\x18\x03 \x01(\v2\x17.google.protobuf.StructR\bsettings\x12\x12\n" +
-	"\x04name\x18\x04 \x01(\tR\x04name\x12\x14\n" +
-	"\x05value\x18\x05 \x01(\tR\x05value\x123\n" +
-	"\bmetadata\x18\x06 \x01(\v2\x17.google.protobuf.StructR\bmetadata\" \n" +
-	"\x1eSecretEngineServicePutResponse\"\xfa\x01\n" +
-	" SecretEngineServiceDeleteRequest\x12@\n" +
-	"\vintegration\x18\x01 \x01(\v2\x1e.steward.plugin.v1.IntegrationR\vintegration\x12\x16\n" +
-	"\x06engine\x18\x02 \x01(\tR\x06engine\x123\n" +
-	"\bsettings\x18\x03 \x01(\v2\x17.google.protobuf.StructR\bsettings\x12\x12\n" +
-	"\x04name\x18\x04 \x01(\tR\x04name\x123\n" +
-	"\bmetadata\x18\x05 \x01(\v2\x17.google.protobuf.StructR\bmetadata\"#\n" +
-	"!SecretEngineServiceDeleteResponse\"\xf7\x01\n" +
-	"\x1dSecretEngineServiceGetRequest\x12@\n" +
-	"\vintegration\x18\x01 \x01(\v2\x1e.steward.plugin.v1.IntegrationR\vintegration\x12\x16\n" +
-	"\x06engine\x18\x02 \x01(\tR\x06engine\x123\n" +
-	"\bsettings\x18\x03 \x01(\v2\x17.google.protobuf.StructR\bsettings\x12\x12\n" +
-	"\x04name\x18\x04 \x01(\tR\x04name\x123\n" +
-	"\bmetadata\x18\x05 \x01(\v2\x17.google.protobuf.StructR\bmetadata\"6\n" +
-	"\x1eSecretEngineServiceGetResponse\x12\x14\n" +
-	"\x05value\x18\x01 \x01(\tR\x05value2\x9e\x04\n" +
+	"\vapplication\x18\x01 \x01(\v2\x1e.steward.plugin.v1.ApplicationR\vapplication\"\xcb\x03\n" +
+	"\x1fCredentialServiceResolveRequest\x12\x1e\n" +
+	"\n" +
+	"credential\x18\x01 \x01(\tR\n" +
+	"credential\x12/\n" +
+	"\x06inputs\x18\x02 \x01(\v2\x17.google.protobuf.StructR\x06inputs\x12Y\n" +
+	"\asecrets\x18\x03 \x03(\v2?.steward.plugin.v1.CredentialServiceResolveRequest.SecretsEntryR\asecrets\x12%\n" +
+	"\x0eidentity_token\x18\x04 \x01(\tR\ridentityToken\x12)\n" +
+	"\x10integration_ulid\x18\x05 \x01(\tR\x0fintegrationUlid\x12)\n" +
+	"\x10integration_name\x18\x06 \x01(\tR\x0fintegrationName\x12C\n" +
+	"\forganization\x18\a \x01(\v2\x1f.steward.plugin.v1.OrganizationR\forganization\x1a:\n" +
+	"\fSecretsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x82\x02\n" +
+	" CredentialServiceResolveResponse\x12N\n" +
+	"\x03env\x18\x01 \x03(\v2<.steward.plugin.v1.CredentialServiceResolveResponse.EnvEntryR\x03env\x127\n" +
+	"\x05files\x18\x02 \x03(\v2!.steward.plugin.v1.CredentialFileR\x05files\x12\x1d\n" +
+	"\n" +
+	"expires_at\x18\x03 \x01(\x03R\texpiresAt\x1a6\n" +
+	"\bEnvEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"E\n" +
+	"\x0eCredentialFile\x12\x19\n" +
+	"\benv_name\x18\x01 \x01(\tR\aenvName\x12\x18\n" +
+	"\acontent\x18\x02 \x01(\fR\acontent2\xc9\x03\n" +
 	"\rPluginService\x12S\n" +
-	"\bDescribe\x12\".steward.plugin.v1.DescribeRequest\x1a#.steward.plugin.v1.DescribeResponse\x12S\n" +
-	"\bValidate\x12\".steward.plugin.v1.ValidateRequest\x1a#.steward.plugin.v1.ValidateResponse\x12v\n" +
+	"\bDescribe\x12\".steward.plugin.v1.DescribeRequest\x1a#.steward.plugin.v1.DescribeResponse\x12v\n" +
 	"\vGrantAccess\x122.steward.plugin.v1.PluginServiceGrantAccessRequest\x1a3.steward.plugin.v1.PluginServiceGrantAccessResponse\x12y\n" +
 	"\fRevokeAccess\x123.steward.plugin.v1.PluginServiceRevokeAccessRequest\x1a4.steward.plugin.v1.PluginServiceRevokeAccessResponse\x12p\n" +
 	"\tGetAccess\x120.steward.plugin.v1.PluginServiceGetAccessRequest\x1a1.steward.plugin.v1.PluginServiceGetAccessResponse2\xdb\x05\n" +
@@ -3975,11 +3667,9 @@ const file_steward_plugin_v1_plugin_proto_rawDesc = "" +
 	"\x12ApplicationService\x12q\n" +
 	"\x06Create\x122.steward.plugin.v1.ApplicationServiceCreateRequest\x1a3.steward.plugin.v1.ApplicationServiceCreateResponse\x12t\n" +
 	"\aDestroy\x123.steward.plugin.v1.ApplicationServiceDestroyRequest\x1a4.steward.plugin.v1.ApplicationServiceDestroyResponse\x12q\n" +
-	"\x06Deploy\x122.steward.plugin.v1.ApplicationServiceDeployRequest\x1a3.steward.plugin.v1.ApplicationServiceDeployResponse2\xe2\x02\n" +
-	"\x13SecretEngineService\x12j\n" +
-	"\x03Put\x120.steward.plugin.v1.SecretEngineServicePutRequest\x1a1.steward.plugin.v1.SecretEngineServicePutResponse\x12s\n" +
-	"\x06Delete\x123.steward.plugin.v1.SecretEngineServiceDeleteRequest\x1a4.steward.plugin.v1.SecretEngineServiceDeleteResponse\x12j\n" +
-	"\x03Get\x120.steward.plugin.v1.SecretEngineServiceGetRequest\x1a1.steward.plugin.v1.SecretEngineServiceGetResponseB\xce\x01\n" +
+	"\x06Deploy\x122.steward.plugin.v1.ApplicationServiceDeployRequest\x1a3.steward.plugin.v1.ApplicationServiceDeployResponse2\x87\x01\n" +
+	"\x11CredentialService\x12r\n" +
+	"\aResolve\x122.steward.plugin.v1.CredentialServiceResolveRequest\x1a3.steward.plugin.v1.CredentialServiceResolveResponseB\xce\x01\n" +
 	"\x15com.steward.plugin.v1B\vPluginProtoP\x01ZBgithub.com/treno-dev/steward-sdk/go/gen/steward/plugin/v1;pluginv1\xa2\x02\x03SPX\xaa\x02\x11Steward.Plugin.V1\xca\x02\x11Steward\\Plugin\\V1\xe2\x02\x1dSteward\\Plugin\\V1\\GPBMetadata\xea\x02\x13Steward::Plugin::V1b\x06proto3"
 
 var (
@@ -3994,7 +3684,7 @@ func file_steward_plugin_v1_plugin_proto_rawDescGZIP() []byte {
 	return file_steward_plugin_v1_plugin_proto_rawDescData
 }
 
-var file_steward_plugin_v1_plugin_proto_msgTypes = make([]protoimpl.MessageInfo, 59)
+var file_steward_plugin_v1_plugin_proto_msgTypes = make([]protoimpl.MessageInfo, 55)
 var file_steward_plugin_v1_plugin_proto_goTypes = []any{
 	(*Integration)(nil),                         // 0: steward.plugin.v1.Integration
 	(*Organization)(nil),                        // 1: steward.plugin.v1.Organization
@@ -4014,189 +3704,162 @@ var file_steward_plugin_v1_plugin_proto_goTypes = []any{
 	(*OutputDefinition)(nil),                    // 15: steward.plugin.v1.OutputDefinition
 	(*ResourceDefinition)(nil),                  // 16: steward.plugin.v1.ResourceDefinition
 	(*ApplicationDefinition)(nil),               // 17: steward.plugin.v1.ApplicationDefinition
-	(*SecretEngineDefinition)(nil),              // 18: steward.plugin.v1.SecretEngineDefinition
-	(*PermissionDefinition)(nil),                // 19: steward.plugin.v1.PermissionDefinition
-	(*RoleDefinition)(nil),                      // 20: steward.plugin.v1.RoleDefinition
-	(*ValidateRequest)(nil),                     // 21: steward.plugin.v1.ValidateRequest
-	(*ValidateResponse)(nil),                    // 22: steward.plugin.v1.ValidateResponse
-	(*ValidationError)(nil),                     // 23: steward.plugin.v1.ValidationError
-	(*PluginServiceGrantAccessRequest)(nil),     // 24: steward.plugin.v1.PluginServiceGrantAccessRequest
-	(*PluginServiceGrantAccessResponse)(nil),    // 25: steward.plugin.v1.PluginServiceGrantAccessResponse
-	(*PluginServiceRevokeAccessRequest)(nil),    // 26: steward.plugin.v1.PluginServiceRevokeAccessRequest
-	(*PluginServiceRevokeAccessResponse)(nil),   // 27: steward.plugin.v1.PluginServiceRevokeAccessResponse
-	(*PluginServiceGetAccessRequest)(nil),       // 28: steward.plugin.v1.PluginServiceGetAccessRequest
-	(*PluginServiceGetAccessResponse)(nil),      // 29: steward.plugin.v1.PluginServiceGetAccessResponse
-	(*ResourceServiceGrantAccessRequest)(nil),   // 30: steward.plugin.v1.ResourceServiceGrantAccessRequest
-	(*ResourceServiceGrantAccessResponse)(nil),  // 31: steward.plugin.v1.ResourceServiceGrantAccessResponse
-	(*ResourceServiceRevokeAccessRequest)(nil),  // 32: steward.plugin.v1.ResourceServiceRevokeAccessRequest
-	(*ResourceServiceRevokeAccessResponse)(nil), // 33: steward.plugin.v1.ResourceServiceRevokeAccessResponse
-	(*ResourceServiceGetAccessRequest)(nil),     // 34: steward.plugin.v1.ResourceServiceGetAccessRequest
-	(*ResourceServiceGetAccessResponse)(nil),    // 35: steward.plugin.v1.ResourceServiceGetAccessResponse
-	(*ResourceServiceProvisionRequest)(nil),     // 36: steward.plugin.v1.ResourceServiceProvisionRequest
-	(*ResourceServiceProvisionResponse)(nil),    // 37: steward.plugin.v1.ResourceServiceProvisionResponse
-	(*ResourceServiceDeprovisionRequest)(nil),   // 38: steward.plugin.v1.ResourceServiceDeprovisionRequest
-	(*ResourceServiceDeprovisionResponse)(nil),  // 39: steward.plugin.v1.ResourceServiceDeprovisionResponse
-	(*ResourceServiceListRequest)(nil),          // 40: steward.plugin.v1.ResourceServiceListRequest
-	(*ResourceServiceListResponse)(nil),         // 41: steward.plugin.v1.ResourceServiceListResponse
-	(*ApplicationServiceCreateRequest)(nil),     // 42: steward.plugin.v1.ApplicationServiceCreateRequest
-	(*ApplicationServiceCreateResponse)(nil),    // 43: steward.plugin.v1.ApplicationServiceCreateResponse
-	(*ApplicationServiceDestroyRequest)(nil),    // 44: steward.plugin.v1.ApplicationServiceDestroyRequest
-	(*ApplicationServiceDestroyResponse)(nil),   // 45: steward.plugin.v1.ApplicationServiceDestroyResponse
-	(*ApplicationServiceDeployRequest)(nil),     // 46: steward.plugin.v1.ApplicationServiceDeployRequest
-	(*ApplicationServiceDeployResponse)(nil),    // 47: steward.plugin.v1.ApplicationServiceDeployResponse
-	(*SecretEngineServicePutRequest)(nil),       // 48: steward.plugin.v1.SecretEngineServicePutRequest
-	(*SecretEngineServicePutResponse)(nil),      // 49: steward.plugin.v1.SecretEngineServicePutResponse
-	(*SecretEngineServiceDeleteRequest)(nil),    // 50: steward.plugin.v1.SecretEngineServiceDeleteRequest
-	(*SecretEngineServiceDeleteResponse)(nil),   // 51: steward.plugin.v1.SecretEngineServiceDeleteResponse
-	(*SecretEngineServiceGetRequest)(nil),       // 52: steward.plugin.v1.SecretEngineServiceGetRequest
-	(*SecretEngineServiceGetResponse)(nil),      // 53: steward.plugin.v1.SecretEngineServiceGetResponse
-	nil,                                         // 54: steward.plugin.v1.Integration.SecretsEntry
-	nil,                                         // 55: steward.plugin.v1.Resource.SecretsEntry
-	nil,                                         // 56: steward.plugin.v1.Application.SecretsEntry
-	nil,                                         // 57: steward.plugin.v1.ResourceServiceProvisionRequest.SecretsEntry
-	nil,                                         // 58: steward.plugin.v1.ApplicationServiceCreateRequest.SecretsEntry
-	(*structpb.Struct)(nil),                     // 59: google.protobuf.Struct
-	(*structpb.Value)(nil),                      // 60: google.protobuf.Value
+	(*CredentialDefinition)(nil),                // 18: steward.plugin.v1.CredentialDefinition
+	(*GrantDefinition)(nil),                     // 19: steward.plugin.v1.GrantDefinition
+	(*PermissionDefinition)(nil),                // 20: steward.plugin.v1.PermissionDefinition
+	(*RoleDefinition)(nil),                      // 21: steward.plugin.v1.RoleDefinition
+	(*PluginServiceGrantAccessRequest)(nil),     // 22: steward.plugin.v1.PluginServiceGrantAccessRequest
+	(*PluginServiceGrantAccessResponse)(nil),    // 23: steward.plugin.v1.PluginServiceGrantAccessResponse
+	(*PluginServiceRevokeAccessRequest)(nil),    // 24: steward.plugin.v1.PluginServiceRevokeAccessRequest
+	(*PluginServiceRevokeAccessResponse)(nil),   // 25: steward.plugin.v1.PluginServiceRevokeAccessResponse
+	(*PluginServiceGetAccessRequest)(nil),       // 26: steward.plugin.v1.PluginServiceGetAccessRequest
+	(*PluginServiceGetAccessResponse)(nil),      // 27: steward.plugin.v1.PluginServiceGetAccessResponse
+	(*ResourceServiceGrantAccessRequest)(nil),   // 28: steward.plugin.v1.ResourceServiceGrantAccessRequest
+	(*ResourceServiceGrantAccessResponse)(nil),  // 29: steward.plugin.v1.ResourceServiceGrantAccessResponse
+	(*ResourceServiceRevokeAccessRequest)(nil),  // 30: steward.plugin.v1.ResourceServiceRevokeAccessRequest
+	(*ResourceServiceRevokeAccessResponse)(nil), // 31: steward.plugin.v1.ResourceServiceRevokeAccessResponse
+	(*ResourceServiceGetAccessRequest)(nil),     // 32: steward.plugin.v1.ResourceServiceGetAccessRequest
+	(*ResourceServiceGetAccessResponse)(nil),    // 33: steward.plugin.v1.ResourceServiceGetAccessResponse
+	(*ResourceServiceProvisionRequest)(nil),     // 34: steward.plugin.v1.ResourceServiceProvisionRequest
+	(*ResourceServiceProvisionResponse)(nil),    // 35: steward.plugin.v1.ResourceServiceProvisionResponse
+	(*ResourceServiceDeprovisionRequest)(nil),   // 36: steward.plugin.v1.ResourceServiceDeprovisionRequest
+	(*ResourceServiceDeprovisionResponse)(nil),  // 37: steward.plugin.v1.ResourceServiceDeprovisionResponse
+	(*ResourceServiceListRequest)(nil),          // 38: steward.plugin.v1.ResourceServiceListRequest
+	(*ResourceServiceListResponse)(nil),         // 39: steward.plugin.v1.ResourceServiceListResponse
+	(*ApplicationServiceCreateRequest)(nil),     // 40: steward.plugin.v1.ApplicationServiceCreateRequest
+	(*ApplicationServiceCreateResponse)(nil),    // 41: steward.plugin.v1.ApplicationServiceCreateResponse
+	(*ApplicationServiceDestroyRequest)(nil),    // 42: steward.plugin.v1.ApplicationServiceDestroyRequest
+	(*ApplicationServiceDestroyResponse)(nil),   // 43: steward.plugin.v1.ApplicationServiceDestroyResponse
+	(*ApplicationServiceDeployRequest)(nil),     // 44: steward.plugin.v1.ApplicationServiceDeployRequest
+	(*ApplicationServiceDeployResponse)(nil),    // 45: steward.plugin.v1.ApplicationServiceDeployResponse
+	(*CredentialServiceResolveRequest)(nil),     // 46: steward.plugin.v1.CredentialServiceResolveRequest
+	(*CredentialServiceResolveResponse)(nil),    // 47: steward.plugin.v1.CredentialServiceResolveResponse
+	(*CredentialFile)(nil),                      // 48: steward.plugin.v1.CredentialFile
+	nil,                                         // 49: steward.plugin.v1.Resource.SecretsEntry
+	nil,                                         // 50: steward.plugin.v1.Application.SecretsEntry
+	nil,                                         // 51: steward.plugin.v1.ResourceServiceProvisionRequest.SecretsEntry
+	nil,                                         // 52: steward.plugin.v1.ApplicationServiceCreateRequest.SecretsEntry
+	nil,                                         // 53: steward.plugin.v1.CredentialServiceResolveRequest.SecretsEntry
+	nil,                                         // 54: steward.plugin.v1.CredentialServiceResolveResponse.EnvEntry
+	(*structpb.Struct)(nil),                     // 55: google.protobuf.Struct
+	(*structpb.Value)(nil),                      // 56: google.protobuf.Value
 }
 var file_steward_plugin_v1_plugin_proto_depIdxs = []int32{
-	59,  // 0: steward.plugin.v1.Integration.inputs:type_name -> google.protobuf.Struct
-	54,  // 1: steward.plugin.v1.Integration.secrets:type_name -> steward.plugin.v1.Integration.SecretsEntry
-	1,   // 2: steward.plugin.v1.Integration.organization:type_name -> steward.plugin.v1.Organization
-	59,  // 3: steward.plugin.v1.Resource.inputs:type_name -> google.protobuf.Struct
-	55,  // 4: steward.plugin.v1.Resource.secrets:type_name -> steward.plugin.v1.Resource.SecretsEntry
-	59,  // 5: steward.plugin.v1.Resource.outputs:type_name -> google.protobuf.Struct
-	59,  // 6: steward.plugin.v1.Application.inputs:type_name -> google.protobuf.Struct
-	56,  // 7: steward.plugin.v1.Application.secrets:type_name -> steward.plugin.v1.Application.SecretsEntry
-	59,  // 8: steward.plugin.v1.Application.outputs:type_name -> google.protobuf.Struct
-	4,   // 9: steward.plugin.v1.Application.source:type_name -> steward.plugin.v1.ApplicationSource
-	5,   // 10: steward.plugin.v1.Application.variables:type_name -> steward.plugin.v1.Variable
-	59,  // 11: steward.plugin.v1.ApplicationSource.config:type_name -> google.protobuf.Struct
-	59,  // 12: steward.plugin.v1.Identity.attrs:type_name -> google.protobuf.Struct
-	0,   // 13: steward.plugin.v1.DescribeRequest.integration:type_name -> steward.plugin.v1.Integration
-	12,  // 14: steward.plugin.v1.DescribeResponse.definition:type_name -> steward.plugin.v1.PluginDefinition
-	11,  // 15: steward.plugin.v1.DescribeResponse.setup_links:type_name -> steward.plugin.v1.SetupLink
-	13,  // 16: steward.plugin.v1.PluginDefinition.inputs:type_name -> steward.plugin.v1.InputDefinition
-	14,  // 17: steward.plugin.v1.PluginDefinition.secrets:type_name -> steward.plugin.v1.SecretDefinition
-	16,  // 18: steward.plugin.v1.PluginDefinition.resources:type_name -> steward.plugin.v1.ResourceDefinition
-	19,  // 19: steward.plugin.v1.PluginDefinition.permissions:type_name -> steward.plugin.v1.PermissionDefinition
-	20,  // 20: steward.plugin.v1.PluginDefinition.roles:type_name -> steward.plugin.v1.RoleDefinition
-	17,  // 21: steward.plugin.v1.PluginDefinition.applications:type_name -> steward.plugin.v1.ApplicationDefinition
-	18,  // 22: steward.plugin.v1.PluginDefinition.secret_engines:type_name -> steward.plugin.v1.SecretEngineDefinition
-	60,  // 23: steward.plugin.v1.InputDefinition.default:type_name -> google.protobuf.Value
-	13,  // 24: steward.plugin.v1.ResourceDefinition.inputs:type_name -> steward.plugin.v1.InputDefinition
-	14,  // 25: steward.plugin.v1.ResourceDefinition.secrets:type_name -> steward.plugin.v1.SecretDefinition
-	19,  // 26: steward.plugin.v1.ResourceDefinition.permissions:type_name -> steward.plugin.v1.PermissionDefinition
-	20,  // 27: steward.plugin.v1.ResourceDefinition.roles:type_name -> steward.plugin.v1.RoleDefinition
-	15,  // 28: steward.plugin.v1.ResourceDefinition.outputs:type_name -> steward.plugin.v1.OutputDefinition
-	13,  // 29: steward.plugin.v1.ApplicationDefinition.inputs:type_name -> steward.plugin.v1.InputDefinition
-	14,  // 30: steward.plugin.v1.ApplicationDefinition.secrets:type_name -> steward.plugin.v1.SecretDefinition
-	15,  // 31: steward.plugin.v1.ApplicationDefinition.outputs:type_name -> steward.plugin.v1.OutputDefinition
-	13,  // 32: steward.plugin.v1.SecretEngineDefinition.inputs:type_name -> steward.plugin.v1.InputDefinition
-	13,  // 33: steward.plugin.v1.SecretEngineDefinition.placement:type_name -> steward.plugin.v1.InputDefinition
-	0,   // 34: steward.plugin.v1.ValidateRequest.integration:type_name -> steward.plugin.v1.Integration
-	23,  // 35: steward.plugin.v1.ValidateResponse.errors:type_name -> steward.plugin.v1.ValidationError
-	23,  // 36: steward.plugin.v1.ValidateResponse.input_errors:type_name -> steward.plugin.v1.ValidationError
-	23,  // 37: steward.plugin.v1.ValidateResponse.secret_errors:type_name -> steward.plugin.v1.ValidationError
-	0,   // 38: steward.plugin.v1.PluginServiceGrantAccessRequest.integration:type_name -> steward.plugin.v1.Integration
-	6,   // 39: steward.plugin.v1.PluginServiceGrantAccessRequest.identity:type_name -> steward.plugin.v1.Identity
-	7,   // 40: steward.plugin.v1.PluginServiceGrantAccessRequest.role:type_name -> steward.plugin.v1.Role
-	8,   // 41: steward.plugin.v1.PluginServiceGrantAccessRequest.permissions:type_name -> steward.plugin.v1.Permission
-	7,   // 42: steward.plugin.v1.PluginServiceGrantAccessResponse.role:type_name -> steward.plugin.v1.Role
-	8,   // 43: steward.plugin.v1.PluginServiceGrantAccessResponse.permissions:type_name -> steward.plugin.v1.Permission
-	0,   // 44: steward.plugin.v1.PluginServiceRevokeAccessRequest.integration:type_name -> steward.plugin.v1.Integration
-	6,   // 45: steward.plugin.v1.PluginServiceRevokeAccessRequest.identity:type_name -> steward.plugin.v1.Identity
-	7,   // 46: steward.plugin.v1.PluginServiceRevokeAccessRequest.role:type_name -> steward.plugin.v1.Role
-	8,   // 47: steward.plugin.v1.PluginServiceRevokeAccessRequest.permissions:type_name -> steward.plugin.v1.Permission
-	0,   // 48: steward.plugin.v1.PluginServiceGetAccessRequest.integration:type_name -> steward.plugin.v1.Integration
-	6,   // 49: steward.plugin.v1.PluginServiceGetAccessRequest.identity:type_name -> steward.plugin.v1.Identity
-	7,   // 50: steward.plugin.v1.PluginServiceGetAccessResponse.roles:type_name -> steward.plugin.v1.Role
-	8,   // 51: steward.plugin.v1.PluginServiceGetAccessResponse.permissions:type_name -> steward.plugin.v1.Permission
-	6,   // 52: steward.plugin.v1.PluginServiceGetAccessResponse.identity:type_name -> steward.plugin.v1.Identity
-	0,   // 53: steward.plugin.v1.ResourceServiceGrantAccessRequest.integration:type_name -> steward.plugin.v1.Integration
-	2,   // 54: steward.plugin.v1.ResourceServiceGrantAccessRequest.resource:type_name -> steward.plugin.v1.Resource
-	6,   // 55: steward.plugin.v1.ResourceServiceGrantAccessRequest.identity:type_name -> steward.plugin.v1.Identity
-	7,   // 56: steward.plugin.v1.ResourceServiceGrantAccessRequest.role:type_name -> steward.plugin.v1.Role
-	8,   // 57: steward.plugin.v1.ResourceServiceGrantAccessRequest.permissions:type_name -> steward.plugin.v1.Permission
-	7,   // 58: steward.plugin.v1.ResourceServiceGrantAccessResponse.role:type_name -> steward.plugin.v1.Role
-	8,   // 59: steward.plugin.v1.ResourceServiceGrantAccessResponse.permissions:type_name -> steward.plugin.v1.Permission
-	0,   // 60: steward.plugin.v1.ResourceServiceRevokeAccessRequest.integration:type_name -> steward.plugin.v1.Integration
-	2,   // 61: steward.plugin.v1.ResourceServiceRevokeAccessRequest.resource:type_name -> steward.plugin.v1.Resource
-	6,   // 62: steward.plugin.v1.ResourceServiceRevokeAccessRequest.identity:type_name -> steward.plugin.v1.Identity
-	7,   // 63: steward.plugin.v1.ResourceServiceRevokeAccessRequest.role:type_name -> steward.plugin.v1.Role
-	8,   // 64: steward.plugin.v1.ResourceServiceRevokeAccessRequest.permissions:type_name -> steward.plugin.v1.Permission
-	0,   // 65: steward.plugin.v1.ResourceServiceGetAccessRequest.integration:type_name -> steward.plugin.v1.Integration
-	2,   // 66: steward.plugin.v1.ResourceServiceGetAccessRequest.resource:type_name -> steward.plugin.v1.Resource
-	6,   // 67: steward.plugin.v1.ResourceServiceGetAccessRequest.identity:type_name -> steward.plugin.v1.Identity
-	7,   // 68: steward.plugin.v1.ResourceServiceGetAccessResponse.roles:type_name -> steward.plugin.v1.Role
-	8,   // 69: steward.plugin.v1.ResourceServiceGetAccessResponse.permissions:type_name -> steward.plugin.v1.Permission
-	0,   // 70: steward.plugin.v1.ResourceServiceProvisionRequest.integration:type_name -> steward.plugin.v1.Integration
-	59,  // 71: steward.plugin.v1.ResourceServiceProvisionRequest.inputs:type_name -> google.protobuf.Struct
-	57,  // 72: steward.plugin.v1.ResourceServiceProvisionRequest.secrets:type_name -> steward.plugin.v1.ResourceServiceProvisionRequest.SecretsEntry
-	59,  // 73: steward.plugin.v1.ResourceServiceProvisionResponse.outputs:type_name -> google.protobuf.Struct
-	0,   // 74: steward.plugin.v1.ResourceServiceDeprovisionRequest.integration:type_name -> steward.plugin.v1.Integration
-	2,   // 75: steward.plugin.v1.ResourceServiceDeprovisionRequest.resource:type_name -> steward.plugin.v1.Resource
-	0,   // 76: steward.plugin.v1.ResourceServiceListRequest.integration:type_name -> steward.plugin.v1.Integration
-	2,   // 77: steward.plugin.v1.ResourceServiceListResponse.resources:type_name -> steward.plugin.v1.Resource
-	0,   // 78: steward.plugin.v1.ApplicationServiceCreateRequest.integration:type_name -> steward.plugin.v1.Integration
-	59,  // 79: steward.plugin.v1.ApplicationServiceCreateRequest.inputs:type_name -> google.protobuf.Struct
-	58,  // 80: steward.plugin.v1.ApplicationServiceCreateRequest.secrets:type_name -> steward.plugin.v1.ApplicationServiceCreateRequest.SecretsEntry
-	4,   // 81: steward.plugin.v1.ApplicationServiceCreateRequest.source:type_name -> steward.plugin.v1.ApplicationSource
-	5,   // 82: steward.plugin.v1.ApplicationServiceCreateRequest.variables:type_name -> steward.plugin.v1.Variable
-	3,   // 83: steward.plugin.v1.ApplicationServiceCreateResponse.application:type_name -> steward.plugin.v1.Application
-	0,   // 84: steward.plugin.v1.ApplicationServiceDestroyRequest.integration:type_name -> steward.plugin.v1.Integration
-	3,   // 85: steward.plugin.v1.ApplicationServiceDestroyRequest.application:type_name -> steward.plugin.v1.Application
-	0,   // 86: steward.plugin.v1.ApplicationServiceDeployRequest.integration:type_name -> steward.plugin.v1.Integration
-	3,   // 87: steward.plugin.v1.ApplicationServiceDeployRequest.application:type_name -> steward.plugin.v1.Application
-	4,   // 88: steward.plugin.v1.ApplicationServiceDeployRequest.source:type_name -> steward.plugin.v1.ApplicationSource
-	3,   // 89: steward.plugin.v1.ApplicationServiceDeployResponse.application:type_name -> steward.plugin.v1.Application
-	0,   // 90: steward.plugin.v1.SecretEngineServicePutRequest.integration:type_name -> steward.plugin.v1.Integration
-	59,  // 91: steward.plugin.v1.SecretEngineServicePutRequest.settings:type_name -> google.protobuf.Struct
-	59,  // 92: steward.plugin.v1.SecretEngineServicePutRequest.metadata:type_name -> google.protobuf.Struct
-	0,   // 93: steward.plugin.v1.SecretEngineServiceDeleteRequest.integration:type_name -> steward.plugin.v1.Integration
-	59,  // 94: steward.plugin.v1.SecretEngineServiceDeleteRequest.settings:type_name -> google.protobuf.Struct
-	59,  // 95: steward.plugin.v1.SecretEngineServiceDeleteRequest.metadata:type_name -> google.protobuf.Struct
-	0,   // 96: steward.plugin.v1.SecretEngineServiceGetRequest.integration:type_name -> steward.plugin.v1.Integration
-	59,  // 97: steward.plugin.v1.SecretEngineServiceGetRequest.settings:type_name -> google.protobuf.Struct
-	59,  // 98: steward.plugin.v1.SecretEngineServiceGetRequest.metadata:type_name -> google.protobuf.Struct
-	9,   // 99: steward.plugin.v1.PluginService.Describe:input_type -> steward.plugin.v1.DescribeRequest
-	21,  // 100: steward.plugin.v1.PluginService.Validate:input_type -> steward.plugin.v1.ValidateRequest
-	24,  // 101: steward.plugin.v1.PluginService.GrantAccess:input_type -> steward.plugin.v1.PluginServiceGrantAccessRequest
-	26,  // 102: steward.plugin.v1.PluginService.RevokeAccess:input_type -> steward.plugin.v1.PluginServiceRevokeAccessRequest
-	28,  // 103: steward.plugin.v1.PluginService.GetAccess:input_type -> steward.plugin.v1.PluginServiceGetAccessRequest
-	30,  // 104: steward.plugin.v1.ResourceService.GrantAccess:input_type -> steward.plugin.v1.ResourceServiceGrantAccessRequest
-	32,  // 105: steward.plugin.v1.ResourceService.RevokeAccess:input_type -> steward.plugin.v1.ResourceServiceRevokeAccessRequest
-	34,  // 106: steward.plugin.v1.ResourceService.GetAccess:input_type -> steward.plugin.v1.ResourceServiceGetAccessRequest
-	36,  // 107: steward.plugin.v1.ResourceService.Provision:input_type -> steward.plugin.v1.ResourceServiceProvisionRequest
-	38,  // 108: steward.plugin.v1.ResourceService.Deprovision:input_type -> steward.plugin.v1.ResourceServiceDeprovisionRequest
-	40,  // 109: steward.plugin.v1.ResourceService.List:input_type -> steward.plugin.v1.ResourceServiceListRequest
-	42,  // 110: steward.plugin.v1.ApplicationService.Create:input_type -> steward.plugin.v1.ApplicationServiceCreateRequest
-	44,  // 111: steward.plugin.v1.ApplicationService.Destroy:input_type -> steward.plugin.v1.ApplicationServiceDestroyRequest
-	46,  // 112: steward.plugin.v1.ApplicationService.Deploy:input_type -> steward.plugin.v1.ApplicationServiceDeployRequest
-	48,  // 113: steward.plugin.v1.SecretEngineService.Put:input_type -> steward.plugin.v1.SecretEngineServicePutRequest
-	50,  // 114: steward.plugin.v1.SecretEngineService.Delete:input_type -> steward.plugin.v1.SecretEngineServiceDeleteRequest
-	52,  // 115: steward.plugin.v1.SecretEngineService.Get:input_type -> steward.plugin.v1.SecretEngineServiceGetRequest
-	10,  // 116: steward.plugin.v1.PluginService.Describe:output_type -> steward.plugin.v1.DescribeResponse
-	22,  // 117: steward.plugin.v1.PluginService.Validate:output_type -> steward.plugin.v1.ValidateResponse
-	25,  // 118: steward.plugin.v1.PluginService.GrantAccess:output_type -> steward.plugin.v1.PluginServiceGrantAccessResponse
-	27,  // 119: steward.plugin.v1.PluginService.RevokeAccess:output_type -> steward.plugin.v1.PluginServiceRevokeAccessResponse
-	29,  // 120: steward.plugin.v1.PluginService.GetAccess:output_type -> steward.plugin.v1.PluginServiceGetAccessResponse
-	31,  // 121: steward.plugin.v1.ResourceService.GrantAccess:output_type -> steward.plugin.v1.ResourceServiceGrantAccessResponse
-	33,  // 122: steward.plugin.v1.ResourceService.RevokeAccess:output_type -> steward.plugin.v1.ResourceServiceRevokeAccessResponse
-	35,  // 123: steward.plugin.v1.ResourceService.GetAccess:output_type -> steward.plugin.v1.ResourceServiceGetAccessResponse
-	37,  // 124: steward.plugin.v1.ResourceService.Provision:output_type -> steward.plugin.v1.ResourceServiceProvisionResponse
-	39,  // 125: steward.plugin.v1.ResourceService.Deprovision:output_type -> steward.plugin.v1.ResourceServiceDeprovisionResponse
-	41,  // 126: steward.plugin.v1.ResourceService.List:output_type -> steward.plugin.v1.ResourceServiceListResponse
-	43,  // 127: steward.plugin.v1.ApplicationService.Create:output_type -> steward.plugin.v1.ApplicationServiceCreateResponse
-	45,  // 128: steward.plugin.v1.ApplicationService.Destroy:output_type -> steward.plugin.v1.ApplicationServiceDestroyResponse
-	47,  // 129: steward.plugin.v1.ApplicationService.Deploy:output_type -> steward.plugin.v1.ApplicationServiceDeployResponse
-	49,  // 130: steward.plugin.v1.SecretEngineService.Put:output_type -> steward.plugin.v1.SecretEngineServicePutResponse
-	51,  // 131: steward.plugin.v1.SecretEngineService.Delete:output_type -> steward.plugin.v1.SecretEngineServiceDeleteResponse
-	53,  // 132: steward.plugin.v1.SecretEngineService.Get:output_type -> steward.plugin.v1.SecretEngineServiceGetResponse
-	116, // [116:133] is the sub-list for method output_type
-	99,  // [99:116] is the sub-list for method input_type
-	99,  // [99:99] is the sub-list for extension type_name
-	99,  // [99:99] is the sub-list for extension extendee
-	0,   // [0:99] is the sub-list for field type_name
+	1,  // 0: steward.plugin.v1.Integration.organization:type_name -> steward.plugin.v1.Organization
+	55, // 1: steward.plugin.v1.Resource.inputs:type_name -> google.protobuf.Struct
+	49, // 2: steward.plugin.v1.Resource.secrets:type_name -> steward.plugin.v1.Resource.SecretsEntry
+	55, // 3: steward.plugin.v1.Resource.outputs:type_name -> google.protobuf.Struct
+	55, // 4: steward.plugin.v1.Application.inputs:type_name -> google.protobuf.Struct
+	50, // 5: steward.plugin.v1.Application.secrets:type_name -> steward.plugin.v1.Application.SecretsEntry
+	55, // 6: steward.plugin.v1.Application.outputs:type_name -> google.protobuf.Struct
+	4,  // 7: steward.plugin.v1.Application.source:type_name -> steward.plugin.v1.ApplicationSource
+	5,  // 8: steward.plugin.v1.Application.variables:type_name -> steward.plugin.v1.Variable
+	55, // 9: steward.plugin.v1.ApplicationSource.config:type_name -> google.protobuf.Struct
+	55, // 10: steward.plugin.v1.Identity.attrs:type_name -> google.protobuf.Struct
+	0,  // 11: steward.plugin.v1.DescribeRequest.integration:type_name -> steward.plugin.v1.Integration
+	12, // 12: steward.plugin.v1.DescribeResponse.definition:type_name -> steward.plugin.v1.PluginDefinition
+	11, // 13: steward.plugin.v1.DescribeResponse.setup_links:type_name -> steward.plugin.v1.SetupLink
+	16, // 14: steward.plugin.v1.PluginDefinition.resources:type_name -> steward.plugin.v1.ResourceDefinition
+	17, // 15: steward.plugin.v1.PluginDefinition.applications:type_name -> steward.plugin.v1.ApplicationDefinition
+	18, // 16: steward.plugin.v1.PluginDefinition.credentials:type_name -> steward.plugin.v1.CredentialDefinition
+	19, // 17: steward.plugin.v1.PluginDefinition.grants:type_name -> steward.plugin.v1.GrantDefinition
+	56, // 18: steward.plugin.v1.InputDefinition.default:type_name -> google.protobuf.Value
+	13, // 19: steward.plugin.v1.ResourceDefinition.inputs:type_name -> steward.plugin.v1.InputDefinition
+	14, // 20: steward.plugin.v1.ResourceDefinition.secrets:type_name -> steward.plugin.v1.SecretDefinition
+	20, // 21: steward.plugin.v1.ResourceDefinition.permissions:type_name -> steward.plugin.v1.PermissionDefinition
+	21, // 22: steward.plugin.v1.ResourceDefinition.roles:type_name -> steward.plugin.v1.RoleDefinition
+	15, // 23: steward.plugin.v1.ResourceDefinition.outputs:type_name -> steward.plugin.v1.OutputDefinition
+	13, // 24: steward.plugin.v1.ApplicationDefinition.inputs:type_name -> steward.plugin.v1.InputDefinition
+	14, // 25: steward.plugin.v1.ApplicationDefinition.secrets:type_name -> steward.plugin.v1.SecretDefinition
+	15, // 26: steward.plugin.v1.ApplicationDefinition.outputs:type_name -> steward.plugin.v1.OutputDefinition
+	13, // 27: steward.plugin.v1.CredentialDefinition.inputs:type_name -> steward.plugin.v1.InputDefinition
+	14, // 28: steward.plugin.v1.CredentialDefinition.secrets:type_name -> steward.plugin.v1.SecretDefinition
+	13, // 29: steward.plugin.v1.GrantDefinition.inputs:type_name -> steward.plugin.v1.InputDefinition
+	0,  // 30: steward.plugin.v1.PluginServiceGrantAccessRequest.integration:type_name -> steward.plugin.v1.Integration
+	6,  // 31: steward.plugin.v1.PluginServiceGrantAccessRequest.identity:type_name -> steward.plugin.v1.Identity
+	55, // 32: steward.plugin.v1.PluginServiceGrantAccessRequest.inputs:type_name -> google.protobuf.Struct
+	0,  // 33: steward.plugin.v1.PluginServiceRevokeAccessRequest.integration:type_name -> steward.plugin.v1.Integration
+	6,  // 34: steward.plugin.v1.PluginServiceRevokeAccessRequest.identity:type_name -> steward.plugin.v1.Identity
+	55, // 35: steward.plugin.v1.PluginServiceRevokeAccessRequest.inputs:type_name -> google.protobuf.Struct
+	0,  // 36: steward.plugin.v1.PluginServiceGetAccessRequest.integration:type_name -> steward.plugin.v1.Integration
+	6,  // 37: steward.plugin.v1.PluginServiceGetAccessRequest.identity:type_name -> steward.plugin.v1.Identity
+	55, // 38: steward.plugin.v1.PluginServiceGetAccessRequest.inputs:type_name -> google.protobuf.Struct
+	6,  // 39: steward.plugin.v1.PluginServiceGetAccessResponse.identity:type_name -> steward.plugin.v1.Identity
+	0,  // 40: steward.plugin.v1.ResourceServiceGrantAccessRequest.integration:type_name -> steward.plugin.v1.Integration
+	2,  // 41: steward.plugin.v1.ResourceServiceGrantAccessRequest.resource:type_name -> steward.plugin.v1.Resource
+	6,  // 42: steward.plugin.v1.ResourceServiceGrantAccessRequest.identity:type_name -> steward.plugin.v1.Identity
+	7,  // 43: steward.plugin.v1.ResourceServiceGrantAccessRequest.role:type_name -> steward.plugin.v1.Role
+	8,  // 44: steward.plugin.v1.ResourceServiceGrantAccessRequest.permissions:type_name -> steward.plugin.v1.Permission
+	7,  // 45: steward.plugin.v1.ResourceServiceGrantAccessResponse.role:type_name -> steward.plugin.v1.Role
+	8,  // 46: steward.plugin.v1.ResourceServiceGrantAccessResponse.permissions:type_name -> steward.plugin.v1.Permission
+	0,  // 47: steward.plugin.v1.ResourceServiceRevokeAccessRequest.integration:type_name -> steward.plugin.v1.Integration
+	2,  // 48: steward.plugin.v1.ResourceServiceRevokeAccessRequest.resource:type_name -> steward.plugin.v1.Resource
+	6,  // 49: steward.plugin.v1.ResourceServiceRevokeAccessRequest.identity:type_name -> steward.plugin.v1.Identity
+	7,  // 50: steward.plugin.v1.ResourceServiceRevokeAccessRequest.role:type_name -> steward.plugin.v1.Role
+	8,  // 51: steward.plugin.v1.ResourceServiceRevokeAccessRequest.permissions:type_name -> steward.plugin.v1.Permission
+	0,  // 52: steward.plugin.v1.ResourceServiceGetAccessRequest.integration:type_name -> steward.plugin.v1.Integration
+	2,  // 53: steward.plugin.v1.ResourceServiceGetAccessRequest.resource:type_name -> steward.plugin.v1.Resource
+	6,  // 54: steward.plugin.v1.ResourceServiceGetAccessRequest.identity:type_name -> steward.plugin.v1.Identity
+	7,  // 55: steward.plugin.v1.ResourceServiceGetAccessResponse.roles:type_name -> steward.plugin.v1.Role
+	8,  // 56: steward.plugin.v1.ResourceServiceGetAccessResponse.permissions:type_name -> steward.plugin.v1.Permission
+	0,  // 57: steward.plugin.v1.ResourceServiceProvisionRequest.integration:type_name -> steward.plugin.v1.Integration
+	55, // 58: steward.plugin.v1.ResourceServiceProvisionRequest.inputs:type_name -> google.protobuf.Struct
+	51, // 59: steward.plugin.v1.ResourceServiceProvisionRequest.secrets:type_name -> steward.plugin.v1.ResourceServiceProvisionRequest.SecretsEntry
+	55, // 60: steward.plugin.v1.ResourceServiceProvisionResponse.outputs:type_name -> google.protobuf.Struct
+	0,  // 61: steward.plugin.v1.ResourceServiceDeprovisionRequest.integration:type_name -> steward.plugin.v1.Integration
+	2,  // 62: steward.plugin.v1.ResourceServiceDeprovisionRequest.resource:type_name -> steward.plugin.v1.Resource
+	0,  // 63: steward.plugin.v1.ResourceServiceListRequest.integration:type_name -> steward.plugin.v1.Integration
+	2,  // 64: steward.plugin.v1.ResourceServiceListResponse.resources:type_name -> steward.plugin.v1.Resource
+	0,  // 65: steward.plugin.v1.ApplicationServiceCreateRequest.integration:type_name -> steward.plugin.v1.Integration
+	55, // 66: steward.plugin.v1.ApplicationServiceCreateRequest.inputs:type_name -> google.protobuf.Struct
+	52, // 67: steward.plugin.v1.ApplicationServiceCreateRequest.secrets:type_name -> steward.plugin.v1.ApplicationServiceCreateRequest.SecretsEntry
+	4,  // 68: steward.plugin.v1.ApplicationServiceCreateRequest.source:type_name -> steward.plugin.v1.ApplicationSource
+	5,  // 69: steward.plugin.v1.ApplicationServiceCreateRequest.variables:type_name -> steward.plugin.v1.Variable
+	3,  // 70: steward.plugin.v1.ApplicationServiceCreateResponse.application:type_name -> steward.plugin.v1.Application
+	0,  // 71: steward.plugin.v1.ApplicationServiceDestroyRequest.integration:type_name -> steward.plugin.v1.Integration
+	3,  // 72: steward.plugin.v1.ApplicationServiceDestroyRequest.application:type_name -> steward.plugin.v1.Application
+	0,  // 73: steward.plugin.v1.ApplicationServiceDeployRequest.integration:type_name -> steward.plugin.v1.Integration
+	3,  // 74: steward.plugin.v1.ApplicationServiceDeployRequest.application:type_name -> steward.plugin.v1.Application
+	4,  // 75: steward.plugin.v1.ApplicationServiceDeployRequest.source:type_name -> steward.plugin.v1.ApplicationSource
+	3,  // 76: steward.plugin.v1.ApplicationServiceDeployResponse.application:type_name -> steward.plugin.v1.Application
+	55, // 77: steward.plugin.v1.CredentialServiceResolveRequest.inputs:type_name -> google.protobuf.Struct
+	53, // 78: steward.plugin.v1.CredentialServiceResolveRequest.secrets:type_name -> steward.plugin.v1.CredentialServiceResolveRequest.SecretsEntry
+	1,  // 79: steward.plugin.v1.CredentialServiceResolveRequest.organization:type_name -> steward.plugin.v1.Organization
+	54, // 80: steward.plugin.v1.CredentialServiceResolveResponse.env:type_name -> steward.plugin.v1.CredentialServiceResolveResponse.EnvEntry
+	48, // 81: steward.plugin.v1.CredentialServiceResolveResponse.files:type_name -> steward.plugin.v1.CredentialFile
+	9,  // 82: steward.plugin.v1.PluginService.Describe:input_type -> steward.plugin.v1.DescribeRequest
+	22, // 83: steward.plugin.v1.PluginService.GrantAccess:input_type -> steward.plugin.v1.PluginServiceGrantAccessRequest
+	24, // 84: steward.plugin.v1.PluginService.RevokeAccess:input_type -> steward.plugin.v1.PluginServiceRevokeAccessRequest
+	26, // 85: steward.plugin.v1.PluginService.GetAccess:input_type -> steward.plugin.v1.PluginServiceGetAccessRequest
+	28, // 86: steward.plugin.v1.ResourceService.GrantAccess:input_type -> steward.plugin.v1.ResourceServiceGrantAccessRequest
+	30, // 87: steward.plugin.v1.ResourceService.RevokeAccess:input_type -> steward.plugin.v1.ResourceServiceRevokeAccessRequest
+	32, // 88: steward.plugin.v1.ResourceService.GetAccess:input_type -> steward.plugin.v1.ResourceServiceGetAccessRequest
+	34, // 89: steward.plugin.v1.ResourceService.Provision:input_type -> steward.plugin.v1.ResourceServiceProvisionRequest
+	36, // 90: steward.plugin.v1.ResourceService.Deprovision:input_type -> steward.plugin.v1.ResourceServiceDeprovisionRequest
+	38, // 91: steward.plugin.v1.ResourceService.List:input_type -> steward.plugin.v1.ResourceServiceListRequest
+	40, // 92: steward.plugin.v1.ApplicationService.Create:input_type -> steward.plugin.v1.ApplicationServiceCreateRequest
+	42, // 93: steward.plugin.v1.ApplicationService.Destroy:input_type -> steward.plugin.v1.ApplicationServiceDestroyRequest
+	44, // 94: steward.plugin.v1.ApplicationService.Deploy:input_type -> steward.plugin.v1.ApplicationServiceDeployRequest
+	46, // 95: steward.plugin.v1.CredentialService.Resolve:input_type -> steward.plugin.v1.CredentialServiceResolveRequest
+	10, // 96: steward.plugin.v1.PluginService.Describe:output_type -> steward.plugin.v1.DescribeResponse
+	23, // 97: steward.plugin.v1.PluginService.GrantAccess:output_type -> steward.plugin.v1.PluginServiceGrantAccessResponse
+	25, // 98: steward.plugin.v1.PluginService.RevokeAccess:output_type -> steward.plugin.v1.PluginServiceRevokeAccessResponse
+	27, // 99: steward.plugin.v1.PluginService.GetAccess:output_type -> steward.plugin.v1.PluginServiceGetAccessResponse
+	29, // 100: steward.plugin.v1.ResourceService.GrantAccess:output_type -> steward.plugin.v1.ResourceServiceGrantAccessResponse
+	31, // 101: steward.plugin.v1.ResourceService.RevokeAccess:output_type -> steward.plugin.v1.ResourceServiceRevokeAccessResponse
+	33, // 102: steward.plugin.v1.ResourceService.GetAccess:output_type -> steward.plugin.v1.ResourceServiceGetAccessResponse
+	35, // 103: steward.plugin.v1.ResourceService.Provision:output_type -> steward.plugin.v1.ResourceServiceProvisionResponse
+	37, // 104: steward.plugin.v1.ResourceService.Deprovision:output_type -> steward.plugin.v1.ResourceServiceDeprovisionResponse
+	39, // 105: steward.plugin.v1.ResourceService.List:output_type -> steward.plugin.v1.ResourceServiceListResponse
+	41, // 106: steward.plugin.v1.ApplicationService.Create:output_type -> steward.plugin.v1.ApplicationServiceCreateResponse
+	43, // 107: steward.plugin.v1.ApplicationService.Destroy:output_type -> steward.plugin.v1.ApplicationServiceDestroyResponse
+	45, // 108: steward.plugin.v1.ApplicationService.Deploy:output_type -> steward.plugin.v1.ApplicationServiceDeployResponse
+	47, // 109: steward.plugin.v1.CredentialService.Resolve:output_type -> steward.plugin.v1.CredentialServiceResolveResponse
+	96, // [96:110] is the sub-list for method output_type
+	82, // [82:96] is the sub-list for method input_type
+	82, // [82:82] is the sub-list for extension type_name
+	82, // [82:82] is the sub-list for extension extendee
+	0,  // [0:82] is the sub-list for field type_name
 }
 
 func init() { file_steward_plugin_v1_plugin_proto_init() }
@@ -4206,13 +3869,14 @@ func file_steward_plugin_v1_plugin_proto_init() {
 	}
 	file_steward_plugin_v1_plugin_proto_msgTypes[6].OneofWrappers = []any{}
 	file_steward_plugin_v1_plugin_proto_msgTypes[8].OneofWrappers = []any{}
+	file_steward_plugin_v1_plugin_proto_msgTypes[13].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_steward_plugin_v1_plugin_proto_rawDesc), len(file_steward_plugin_v1_plugin_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   59,
+			NumMessages:   55,
 			NumExtensions: 0,
 			NumServices:   4,
 		},

@@ -1,7 +1,8 @@
 // Package plugin is the plugin part of the Steward SDK for Go: the plumbing between the plugin
 // contract (gRPC, see ../../proto) and the functions a plugin writes.
 //
-//	p := plugin.New(plugin.Options{Name: "github", Version: "0.1.0", Inputs: inputs, Validate: validate})
+//	p := plugin.New(plugin.Options{Name: "github", Version: "0.1.0"})
+//	p.Credential("app", plugin.CredentialOptions{Inputs: inputs, Resolve: resolve})
 //	p.Resource("repository", plugin.ResourceOptions{Provision: provision, Deprovision: deprovision})
 //	p.Serve()
 //
@@ -26,25 +27,13 @@ import (
 	pluginv1 "github.com/treno-dev/steward-sdk/go/gen/steward/plugin/v1"
 )
 
-// Options declare the plugin: what is needed to configure it and, when it supports access as a
-// whole, the handlers for that.
+// Options declare the plugin and, when it supports access as a whole, the handlers for that. A plugin has no settings or secrets of
+// its own: the credentials, resources and applications it offers declare theirs.
 type Options struct {
 	Name        string
 	Version     string
 	Title       string
 	Description string
-
-	// IdentityAudience is the audience of the token that proves who an integration is, such as
-	// "sts.amazonaws.com". A plugin that declares it is sent the token, signed by Steward, in the
-	// identity token of the integration of each call.
-	IdentityAudience string
-
-	// Inputs are the settings the plugin is configured with; Secrets are its credentials.
-	Inputs  []*InputDefinition
-	Secrets []*SecretDefinition
-
-	// Validate checks the inputs and credentials.
-	Validate func(context.Context, *PluginValidateRequest) (*PluginValidateResponse, error)
 
 	// SetupLinks says what the person does in another tool before the settings of an integration,
 	// such as a page that creates a role, as links with the address already filled in. It is given
@@ -52,9 +41,8 @@ type Options struct {
 	// docs, so it has to answer for an integration that is nil.
 	SetupLinks func(context.Context, *Integration) []*SetupLink
 
-	// What can be granted on the plugin as a whole, and the handlers that grant it.
-	Permissions []*PermissionDefinition
-	Roles       []*RoleDefinition
+	// What can be given on the plugin as a whole, and the handlers that give it. A grant declares the inputs it wants.
+	Grants []*GrantDefinition
 
 	GrantAccess  func(context.Context, *PluginGrantAccessRequest) (*PluginGrantAccessResponse, error)
 	RevokeAccess func(context.Context, *PluginRevokeAccessRequest) (*PluginRevokeAccessResponse, error)
@@ -103,61 +91,56 @@ type ApplicationOptions struct {
 	Deploy  func(context.Context, *ApplicationDeployRequest) (*ApplicationDeployResponse, error)
 }
 
-// SecretEngineOptions describe a place the plugin can keep secrets, with its handlers. A call for
-// something without a handler fails with UNIMPLEMENTED. A value is never shown to a person: Get is
-// how the runner resolves a secret for a call.
-type SecretEngineOptions struct {
+// CredentialOptions describe a way of reaching the tool, such as a role that is assumed with the identity token of Steward. An
+// integration is an instance of a credential. The runner calls Resolve before a task invokes any plugin, and hands what it returns
+// to the plugin as environment variables and files. A value is a secret of the call: do not persist it or log it.
+type CredentialOptions struct {
 	Title       string
 	Description string
 
-	// Icon is the name of an icon for the engine, such as "database" or "vault".
-	Icon string
+	// Inputs are the settings of an integration of this credential, and Secrets its secrets, which are references to a vault that the
+	// runner resolves for the call.
+	Inputs  []*InputDefinition
+	Secrets []*SecretDefinition
 
-	// Inputs are the settings of a store made with this engine, such as a prefix. The credentials
-	// are the integration's.
-	Inputs []*InputDefinition
+	// IdentityAudience is the audience of the token that proves who the integration is, such as "sts.amazonaws.com". A credential
+	// that declares it is sent the token in the request.
+	IdentityAudience string
 
-	// Placement is where each secret is placed in the backend, such as the region of an AWS secret.
-	// It is chosen when the secret is made, and sent in the metadata of every call about the secret.
-	Placement []*InputDefinition
-
-	Put    func(context.Context, *SecretEnginePutRequest) (*SecretEnginePutResponse, error)
-	Delete func(context.Context, *SecretEngineDeleteRequest) (*SecretEngineDeleteResponse, error)
-	Get    func(context.Context, *SecretEngineGetRequest) (*SecretEngineGetResponse, error)
+	Resolve func(context.Context, *CredentialResolveRequest) (*CredentialResolveResponse, error)
 }
 
-// Plugin is what a plugin author builds. Declare its resources, applications and secret engines,
+// Plugin is what a plugin author builds. Declare its resources, applications and credentials,
 // then call Serve.
 type Plugin struct {
-	options       Options
-	resources     map[string]ResourceOptions
-	applications  map[string]ApplicationOptions
-	secretEngines map[string]SecretEngineOptions
+	options      Options
+	resources    map[string]ResourceOptions
+	applications map[string]ApplicationOptions
+	credentials  map[string]CredentialOptions
 
 	// Declaration order, so the description lists kinds the way the plugin declared them.
-	resourceOrder     []string
-	applicationOrder  []string
-	secretEngineOrder []string
+	resourceOrder    []string
+	applicationOrder []string
+	credentialOrder  []string
 }
 
 // New creates a plugin.
 func New(options Options) *Plugin {
 	return &Plugin{
-		options:       options,
-		resources:     map[string]ResourceOptions{},
-		applications:  map[string]ApplicationOptions{},
-		secretEngines: map[string]SecretEngineOptions{},
+		options:      options,
+		resources:    map[string]ResourceOptions{},
+		applications: map[string]ApplicationOptions{},
+		credentials:  map[string]CredentialOptions{},
 	}
 }
 
-// SecretEngine declares a place the plugin can keep secrets. The name is unique within the plugin,
-// such as "parameter-store".
-func (p *Plugin) SecretEngine(name string, options SecretEngineOptions) *Plugin {
-	if _, declared := p.secretEngines[name]; !declared {
-		p.secretEngineOrder = append(p.secretEngineOrder, name)
+// Credential declares a way of reaching the tool. The name is unique within the plugin, such as "oidc-role".
+func (p *Plugin) Credential(name string, options CredentialOptions) *Plugin {
+	if _, declared := p.credentials[name]; !declared {
+		p.credentialOrder = append(p.credentialOrder, name)
 	}
 
-	p.secretEngines[name] = options
+	p.credentials[name] = options
 
 	return p
 }
@@ -191,12 +174,7 @@ func (p *Plugin) describe(ctx context.Context, integration *Integration) *plugin
 	definition := &pluginv1.PluginDefinition{
 		Title:       o.Title,
 		Description: o.Description,
-		Inputs:      o.Inputs,
-		Secrets:     o.Secrets,
-		Permissions: o.Permissions,
-		Roles:       o.Roles,
-
-		IdentityAudience: o.IdentityAudience,
+		Grants:      o.Grants,
 	}
 
 	for _, name := range p.resourceOrder {
@@ -216,15 +194,15 @@ func (p *Plugin) describe(ctx context.Context, integration *Integration) *plugin
 		})
 	}
 
-	for _, name := range p.secretEngineOrder {
-		options := p.secretEngines[name]
-		definition.SecretEngines = append(definition.SecretEngines, &pluginv1.SecretEngineDefinition{
-			Name:        name,
-			Title:       options.Title,
-			Description: options.Description,
-			Icon:        options.Icon,
-			Inputs:      options.Inputs,
-			Placement:   options.Placement,
+	for _, name := range p.credentialOrder {
+		options := p.credentials[name]
+		definition.Credentials = append(definition.Credentials, &pluginv1.CredentialDefinition{
+			Name:             name,
+			Title:            options.Title,
+			Description:      options.Description,
+			Inputs:           options.Inputs,
+			Secrets:          options.Secrets,
+			IdentityAudience: options.IdentityAudience,
 		})
 	}
 
@@ -269,10 +247,10 @@ func (p *Plugin) application(kind string) (ApplicationOptions, error) {
 	return found, nil
 }
 
-func (p *Plugin) secretEngine(name string) (SecretEngineOptions, error) {
-	found, ok := p.secretEngines[name]
+func (p *Plugin) credential(name string) (CredentialOptions, error) {
+	found, ok := p.credentials[name]
 	if !ok {
-		return found, status.Error(codes.NotFound, fmt.Sprintf("this plugin has no secret engine %q", name))
+		return found, status.Error(codes.NotFound, fmt.Sprintf("this plugin has no credential %q", name))
 	}
 
 	return found, nil

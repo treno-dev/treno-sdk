@@ -20,7 +20,6 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	PluginService_Describe_FullMethodName     = "/steward.plugin.v1.PluginService/Describe"
-	PluginService_Validate_FullMethodName     = "/steward.plugin.v1.PluginService/Validate"
 	PluginService_GrantAccess_FullMethodName  = "/steward.plugin.v1.PluginService/GrantAccess"
 	PluginService_RevokeAccess_FullMethodName = "/steward.plugin.v1.PluginService/RevokeAccess"
 	PluginService_GetAccess_FullMethodName    = "/steward.plugin.v1.PluginService/GetAccess"
@@ -30,15 +29,12 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// Mandatory for every plugin. Describe and Validate are always served. GrantAccess, RevokeAccess and
-// GetAccess apply only to a plugin that declares roles or permissions, and answer UNIMPLEMENTED
-// otherwise.
+// Mandatory for every plugin. Describe is always served. GrantAccess, RevokeAccess and
+// GetAccess apply only to a plugin that declares grants, and answer UNIMPLEMENTED otherwise.
 type PluginServiceClient interface {
-	// Describes the plugin: what it needs (its inputs) and the resources it manages.
+	// Describes the plugin: the credentials it offers, the resources and applications it manages, and the grants it gives.
 	Describe(ctx context.Context, in *DescribeRequest, opts ...grpc.CallOption) (*DescribeResponse, error)
-	// Checks an integration, for example that the inputs are valid and the credentials work.
-	Validate(ctx context.Context, in *ValidateRequest, opts ...grpc.CallOption) (*ValidateResponse, error)
-	// Access to the plugin as a whole: giving identities roles on it, taking them away, and checking
+	// Access to the plugin as a whole: giving identities a grant, taking it away, and checking
 	// what they hold.
 	GrantAccess(ctx context.Context, in *PluginServiceGrantAccessRequest, opts ...grpc.CallOption) (*PluginServiceGrantAccessResponse, error)
 	RevokeAccess(ctx context.Context, in *PluginServiceRevokeAccessRequest, opts ...grpc.CallOption) (*PluginServiceRevokeAccessResponse, error)
@@ -57,16 +53,6 @@ func (c *pluginServiceClient) Describe(ctx context.Context, in *DescribeRequest,
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(DescribeResponse)
 	err := c.cc.Invoke(ctx, PluginService_Describe_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *pluginServiceClient) Validate(ctx context.Context, in *ValidateRequest, opts ...grpc.CallOption) (*ValidateResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ValidateResponse)
-	err := c.cc.Invoke(ctx, PluginService_Validate_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -107,15 +93,12 @@ func (c *pluginServiceClient) GetAccess(ctx context.Context, in *PluginServiceGe
 // All implementations must embed UnimplementedPluginServiceServer
 // for forward compatibility.
 //
-// Mandatory for every plugin. Describe and Validate are always served. GrantAccess, RevokeAccess and
-// GetAccess apply only to a plugin that declares roles or permissions, and answer UNIMPLEMENTED
-// otherwise.
+// Mandatory for every plugin. Describe is always served. GrantAccess, RevokeAccess and
+// GetAccess apply only to a plugin that declares grants, and answer UNIMPLEMENTED otherwise.
 type PluginServiceServer interface {
-	// Describes the plugin: what it needs (its inputs) and the resources it manages.
+	// Describes the plugin: the credentials it offers, the resources and applications it manages, and the grants it gives.
 	Describe(context.Context, *DescribeRequest) (*DescribeResponse, error)
-	// Checks an integration, for example that the inputs are valid and the credentials work.
-	Validate(context.Context, *ValidateRequest) (*ValidateResponse, error)
-	// Access to the plugin as a whole: giving identities roles on it, taking them away, and checking
+	// Access to the plugin as a whole: giving identities a grant, taking it away, and checking
 	// what they hold.
 	GrantAccess(context.Context, *PluginServiceGrantAccessRequest) (*PluginServiceGrantAccessResponse, error)
 	RevokeAccess(context.Context, *PluginServiceRevokeAccessRequest) (*PluginServiceRevokeAccessResponse, error)
@@ -132,9 +115,6 @@ type UnimplementedPluginServiceServer struct{}
 
 func (UnimplementedPluginServiceServer) Describe(context.Context, *DescribeRequest) (*DescribeResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Describe not implemented")
-}
-func (UnimplementedPluginServiceServer) Validate(context.Context, *ValidateRequest) (*ValidateResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method Validate not implemented")
 }
 func (UnimplementedPluginServiceServer) GrantAccess(context.Context, *PluginServiceGrantAccessRequest) (*PluginServiceGrantAccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GrantAccess not implemented")
@@ -180,24 +160,6 @@ func _PluginService_Describe_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PluginServiceServer).Describe(ctx, req.(*DescribeRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _PluginService_Validate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ValidateRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PluginServiceServer).Validate(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: PluginService_Validate_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PluginServiceServer).Validate(ctx, req.(*ValidateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -266,10 +228,6 @@ var PluginService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Describe",
 			Handler:    _PluginService_Describe_Handler,
-		},
-		{
-			MethodName: "Validate",
-			Handler:    _PluginService_Validate_Handler,
 		},
 		{
 			MethodName: "GrantAccess",
@@ -771,183 +729,105 @@ var ApplicationService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	SecretEngineService_Put_FullMethodName    = "/steward.plugin.v1.SecretEngineService/Put"
-	SecretEngineService_Delete_FullMethodName = "/steward.plugin.v1.SecretEngineService/Delete"
-	SecretEngineService_Get_FullMethodName    = "/steward.plugin.v1.SecretEngineService/Get"
+	CredentialService_Resolve_FullMethodName = "/steward.plugin.v1.CredentialService/Resolve"
 )
 
-// SecretEngineServiceClient is the client API for SecretEngineService service.
+// CredentialServiceClient is the client API for CredentialService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// For plugins that keep secrets (PluginDefinition.secret_engines). A call an engine does not offer
-// answers UNIMPLEMENTED.
-type SecretEngineServiceClient interface {
-	Put(ctx context.Context, in *SecretEngineServicePutRequest, opts ...grpc.CallOption) (*SecretEngineServicePutResponse, error)
-	Delete(ctx context.Context, in *SecretEngineServiceDeleteRequest, opts ...grpc.CallOption) (*SecretEngineServiceDeleteResponse, error)
-	Get(ctx context.Context, in *SecretEngineServiceGetRequest, opts ...grpc.CallOption) (*SecretEngineServiceGetResponse, error)
+// For plugins that offer ways to reach a tool (PluginDefinition.credentials).
+type CredentialServiceClient interface {
+	Resolve(ctx context.Context, in *CredentialServiceResolveRequest, opts ...grpc.CallOption) (*CredentialServiceResolveResponse, error)
 }
 
-type secretEngineServiceClient struct {
+type credentialServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewSecretEngineServiceClient(cc grpc.ClientConnInterface) SecretEngineServiceClient {
-	return &secretEngineServiceClient{cc}
+func NewCredentialServiceClient(cc grpc.ClientConnInterface) CredentialServiceClient {
+	return &credentialServiceClient{cc}
 }
 
-func (c *secretEngineServiceClient) Put(ctx context.Context, in *SecretEngineServicePutRequest, opts ...grpc.CallOption) (*SecretEngineServicePutResponse, error) {
+func (c *credentialServiceClient) Resolve(ctx context.Context, in *CredentialServiceResolveRequest, opts ...grpc.CallOption) (*CredentialServiceResolveResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SecretEngineServicePutResponse)
-	err := c.cc.Invoke(ctx, SecretEngineService_Put_FullMethodName, in, out, cOpts...)
+	out := new(CredentialServiceResolveResponse)
+	err := c.cc.Invoke(ctx, CredentialService_Resolve_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *secretEngineServiceClient) Delete(ctx context.Context, in *SecretEngineServiceDeleteRequest, opts ...grpc.CallOption) (*SecretEngineServiceDeleteResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SecretEngineServiceDeleteResponse)
-	err := c.cc.Invoke(ctx, SecretEngineService_Delete_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *secretEngineServiceClient) Get(ctx context.Context, in *SecretEngineServiceGetRequest, opts ...grpc.CallOption) (*SecretEngineServiceGetResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SecretEngineServiceGetResponse)
-	err := c.cc.Invoke(ctx, SecretEngineService_Get_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// SecretEngineServiceServer is the server API for SecretEngineService service.
-// All implementations must embed UnimplementedSecretEngineServiceServer
+// CredentialServiceServer is the server API for CredentialService service.
+// All implementations must embed UnimplementedCredentialServiceServer
 // for forward compatibility.
 //
-// For plugins that keep secrets (PluginDefinition.secret_engines). A call an engine does not offer
-// answers UNIMPLEMENTED.
-type SecretEngineServiceServer interface {
-	Put(context.Context, *SecretEngineServicePutRequest) (*SecretEngineServicePutResponse, error)
-	Delete(context.Context, *SecretEngineServiceDeleteRequest) (*SecretEngineServiceDeleteResponse, error)
-	Get(context.Context, *SecretEngineServiceGetRequest) (*SecretEngineServiceGetResponse, error)
-	mustEmbedUnimplementedSecretEngineServiceServer()
+// For plugins that offer ways to reach a tool (PluginDefinition.credentials).
+type CredentialServiceServer interface {
+	Resolve(context.Context, *CredentialServiceResolveRequest) (*CredentialServiceResolveResponse, error)
+	mustEmbedUnimplementedCredentialServiceServer()
 }
 
-// UnimplementedSecretEngineServiceServer must be embedded to have
+// UnimplementedCredentialServiceServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedSecretEngineServiceServer struct{}
+type UnimplementedCredentialServiceServer struct{}
 
-func (UnimplementedSecretEngineServiceServer) Put(context.Context, *SecretEngineServicePutRequest) (*SecretEngineServicePutResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method Put not implemented")
+func (UnimplementedCredentialServiceServer) Resolve(context.Context, *CredentialServiceResolveRequest) (*CredentialServiceResolveResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method Resolve not implemented")
 }
-func (UnimplementedSecretEngineServiceServer) Delete(context.Context, *SecretEngineServiceDeleteRequest) (*SecretEngineServiceDeleteResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method Delete not implemented")
-}
-func (UnimplementedSecretEngineServiceServer) Get(context.Context, *SecretEngineServiceGetRequest) (*SecretEngineServiceGetResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method Get not implemented")
-}
-func (UnimplementedSecretEngineServiceServer) mustEmbedUnimplementedSecretEngineServiceServer() {}
-func (UnimplementedSecretEngineServiceServer) testEmbeddedByValue()                             {}
+func (UnimplementedCredentialServiceServer) mustEmbedUnimplementedCredentialServiceServer() {}
+func (UnimplementedCredentialServiceServer) testEmbeddedByValue()                           {}
 
-// UnsafeSecretEngineServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to SecretEngineServiceServer will
+// UnsafeCredentialServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to CredentialServiceServer will
 // result in compilation errors.
-type UnsafeSecretEngineServiceServer interface {
-	mustEmbedUnimplementedSecretEngineServiceServer()
+type UnsafeCredentialServiceServer interface {
+	mustEmbedUnimplementedCredentialServiceServer()
 }
 
-func RegisterSecretEngineServiceServer(s grpc.ServiceRegistrar, srv SecretEngineServiceServer) {
-	// If the following call panics, it indicates UnimplementedSecretEngineServiceServer was
+func RegisterCredentialServiceServer(s grpc.ServiceRegistrar, srv CredentialServiceServer) {
+	// If the following call panics, it indicates UnimplementedCredentialServiceServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&SecretEngineService_ServiceDesc, srv)
+	s.RegisterService(&CredentialService_ServiceDesc, srv)
 }
 
-func _SecretEngineService_Put_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SecretEngineServicePutRequest)
+func _CredentialService_Resolve_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CredentialServiceResolveRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SecretEngineServiceServer).Put(ctx, in)
+		return srv.(CredentialServiceServer).Resolve(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: SecretEngineService_Put_FullMethodName,
+		FullMethod: CredentialService_Resolve_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SecretEngineServiceServer).Put(ctx, req.(*SecretEngineServicePutRequest))
+		return srv.(CredentialServiceServer).Resolve(ctx, req.(*CredentialServiceResolveRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SecretEngineService_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SecretEngineServiceDeleteRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(SecretEngineServiceServer).Delete(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: SecretEngineService_Delete_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SecretEngineServiceServer).Delete(ctx, req.(*SecretEngineServiceDeleteRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _SecretEngineService_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SecretEngineServiceGetRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(SecretEngineServiceServer).Get(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: SecretEngineService_Get_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SecretEngineServiceServer).Get(ctx, req.(*SecretEngineServiceGetRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-// SecretEngineService_ServiceDesc is the grpc.ServiceDesc for SecretEngineService service.
+// CredentialService_ServiceDesc is the grpc.ServiceDesc for CredentialService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var SecretEngineService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "steward.plugin.v1.SecretEngineService",
-	HandlerType: (*SecretEngineServiceServer)(nil),
+var CredentialService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "steward.plugin.v1.CredentialService",
+	HandlerType: (*CredentialServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Put",
-			Handler:    _SecretEngineService_Put_Handler,
-		},
-		{
-			MethodName: "Delete",
-			Handler:    _SecretEngineService_Delete_Handler,
-		},
-		{
-			MethodName: "Get",
-			Handler:    _SecretEngineService_Get_Handler,
+			MethodName: "Resolve",
+			Handler:    _CredentialService_Resolve_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

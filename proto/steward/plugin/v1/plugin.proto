@@ -4,9 +4,9 @@ package steward.plugin.v1;
 
 import "google/protobuf/struct.proto";
 
-// The plugin contract. Every plugin serves PluginService: it describes itself, validates an integration
-// of itself and, when it declares roles or permissions, grants access as a whole. A plugin that has resources
-// also serves ResourceService, and one that runs applications serves ApplicationService. A plugin
+// The plugin contract. Every plugin serves PluginService: it describes itself and, when it declares grants,
+// gives access as a whole. A plugin that offers credentials serves CredentialService, one that
+// has resources also serves ResourceService, and one that runs applications serves ApplicationService. A plugin
 // offers a call by implementing it. A call it does not offer fails with UNIMPLEMENTED, and Steward
 // treats that as not offered. Within v1 the contract is additive only.
 //
@@ -20,16 +20,13 @@ import "google/protobuf/struct.proto";
 // Shared messages
 // ---------------------------------------------------------------------------------------------
 
-// An integration is an instance of a plugin: the plugin with the inputs and the secrets it was set up with, such as a
-// GitHub plugin for one organization. Every call carries the integration it is for. The inputs and the secrets are kept,
-// sent and logged separately, and a plugin must not persist the secrets.
+// An integration is a way of reaching a tool that was set up with a credential of a plugin, such as a role of one AWS account.
+// A call that is made on behalf of an integration says which. What the integration holds, its inputs and its secrets, is
+// handed to the plugin that declared the credential in CredentialService.Resolve, and a task reads the result as its environment.
 message Integration {
-  // Values for the inputs declared in PluginDefinition.inputs, keyed by input name.
-  google.protobuf.Struct inputs = 1;
-
-  // Values for the secrets declared in PluginDefinition.secrets, keyed by secret name. Resolved by
-  // the runner for this call only.
-  map<string, string> secrets = 2;
+  // Inputs and secrets belong to a credential, and the identity token to its Resolve.
+  reserved 1, 2, 6;
+  reserved "inputs", "secrets", "identity_token";
 
   // Who the integration is. A plugin can name what it makes in a tool after it, such as a role.
   string ulid = 3;
@@ -37,12 +34,6 @@ message Integration {
 
   // The organization the integration belongs to.
   Organization organization = 5;
-
-  // A token that proves who the integration is, signed by Steward, for the cloud named by
-  // PluginDefinition.identity_audience. The plugin exchanges it for credentials of the cloud. It is
-  // set only when the plugin declares an audience, it is valid for minutes, and a plugin must not
-  // persist it.
-  string identity_token = 6;
 
   // The address of Steward as an issuer of identity tokens: the `iss` of the token, which a cloud is
   // told to trust. A plugin that sets up trust in it, such as with a link to a guide, uses this
@@ -223,21 +214,17 @@ message PluginDefinition {
   string title = 1;
   string description = 2;
 
-  // The settings this plugin is configured with, such as a base URL or an organization name.
-  repeated InputDefinition inputs = 3;
-
-  // The credentials this plugin is configured with, such as an API token or a private key.
-  repeated SecretDefinition secrets = 8;
+  // A plugin has no settings or secrets of its own. They belong to what it offers: each credential, resource and application
+  // declares its own inputs and secrets.
+  reserved 3, 8;
+  reserved "inputs", "secrets";
 
   // The resource kinds this plugin manages. Kinds are unique within the plugin.
   repeated ResourceDefinition resources = 4;
 
-  // What can be granted on the plugin as a whole, such as membership of a GitHub organization, a
-  // user in a Jira site or an IAM user in an AWS account. Declaring permissions or roles is what
-  // says the plugin supports access. They are separate lists: the permissions are the pieces
-  // Steward composes its own roles from, and the roles are the ones the tool defines itself.
-  repeated PermissionDefinition permissions = 5;
-  repeated RoleDefinition roles = 6;
+  // What can be granted on the plugin as a whole is declared as grants. Roles and permissions are not part of the plugin.
+  reserved 5, 6, 12;
+  reserved "permissions", "roles", "grant_inputs";
 
   // The application kinds this plugin can run, such as a Laravel app on a host. Applications are a
   // second kind of thing next to resources: they are deployed from a source and have variables that
@@ -245,16 +232,21 @@ message PluginDefinition {
   // applications.
   repeated ApplicationDefinition applications = 7;
 
-  // The places this plugin can keep secrets for an organization, such as a parameter store or a
-  // secrets manager. Names are unique within the plugin. A store is made with an engine of an
-  // integration, and the plugin reaches the place with the credentials of that integration. Empty
-  // when the plugin keeps no secrets.
-  repeated SecretEngineDefinition secret_engines = 9;
+  // Plugins keep no secrets: they are in vaults, and an integration refers to them.
+  reserved 9;
+  reserved "secret_engines";
 
-  // The audience of the token that proves who an integration is, such as `sts.amazonaws.com`. A
-  // plugin that reaches its tool with a token of Steward declares it, and the runner sends the token
-  // in Integration.identity_token. Empty when the plugin takes no token.
-  string identity_audience = 10;
+  // The audience of an identity token is declared by the credential that takes one.
+  reserved 10;
+  reserved "identity_audience";
+
+  // The ways this plugin can reach its tool, which integrations are instances of. Empty when the plugin offers none, such as one that
+  // only reads the environment its tool reads.
+  repeated CredentialDefinition credentials = 11;
+
+  // What a person can be given in the tool as a whole, such as access to an AWS account through a role, or membership of a GitHub
+  // organization. Names are unique within the plugin. Declaring grants is what says the plugin supports access.
+  repeated GrantDefinition grants = 13;
 }
 
 // One setting a plugin, a resource or an application takes, declared the way a variable is: a name
@@ -276,6 +268,10 @@ message InputDefinition {
 
   // The choices for a "select".
   repeated string options = 7;
+
+  // For a "number": the least and the greatest value it can have. Left out, there is no limit on that side.
+  optional double min = 8;
+  optional double max = 9;
 }
 
 // One credential a plugin, a resource or an application takes, such as an API token or a private
@@ -347,25 +343,39 @@ message ApplicationDefinition {
   repeated OutputDefinition outputs = 6;
 }
 
-// A place a plugin can keep secrets, such as a parameter store. Values are write-only: there is no
-// call that reads one back for a person.
-message SecretEngineDefinition {
-  // Unique within the plugin, such as "parameter-store". A store keeps its settings under it.
+// A way of reaching the tool that a plugin offers, such as an AWS role assumed with the identity token of Steward, or a pair of access
+// keys. An integration is an instance of a credential. Before a task calls any plugin, the runner calls Resolve on the credentials
+// shared with the task and hands what they return to the plugin as its environment and files, so a plugin that only reads the
+// environment of its tool needs nothing from the credentials of another plugin.
+message CredentialDefinition {
+  // Unique within the plugin, such as "oidc-role".
   string name = 1;
   string title = 2;
   string description = 3;
 
-  // The name of an icon for the engine, such as "database" or "vault".
-  string icon = 4;
+  // The settings of an integration of this credential, such as the ARN of a role. Not secrets.
+  repeated InputDefinition inputs = 4;
 
-  // The settings of a store made with this engine, such as a prefix. Not the credentials, which are
-  // the integration's.
-  repeated InputDefinition inputs = 5;
+  // The secrets of an integration of this credential, such as an access key. A value is a reference to a vault that the runner
+  // resolves for the call; it is never kept in the integration.
+  repeated SecretDefinition secrets = 5;
 
-  // Where each secret is placed in the backend, such as the region of an AWS secret, which differs
-  // from one secret to the next and is chosen when the secret is made. The values are sent in the
-  // metadata of every call about the secret.
-  repeated InputDefinition placement = 6;
+  // The audience of the identity token of Steward that the runner sends in CredentialServiceResolveRequest.identity_token, such as
+  // `sts.amazonaws.com`. Empty when the credential takes no token.
+  string identity_audience = 6;
+}
+
+// Something a person can be given in the tool, such as access to an account or a seat. A grant is not always a role: it is whatever
+// the plugin can give and take away, and it declares the inputs it wants. An input can be free, such as the ARN of a role, or fixed,
+// such as a "select" of the roles an organization has.
+message GrantDefinition {
+  // Unique within the plugin, such as "access" or "member".
+  string name = 1;
+  string title = 2;
+  string description = 3;
+
+  // What a grant of this kind asks to know about. The values are sent in the `inputs` of every access call.
+  repeated InputDefinition inputs = 4;
 }
 
 message PermissionDefinition {
@@ -385,82 +395,73 @@ message RoleDefinition {
   string description = 3;
 }
 
-message ValidateRequest {
-  Integration integration = 1;
-}
-
-message ValidateResponse {
-  // Problems with the integration as a whole, which the user can fix but which are not about one input or secret. Empty when
-  // the integration is good. Failures of the call itself are returned as gRPC errors instead.
-  repeated ValidationError errors = 1;
-  // Problems with one input, each naming the input in `field`. Inputs and secrets are separate lists, so which list an error is in
-  // says which of them it is about.
-  repeated ValidationError input_errors = 2;
-  // Problems with one secret, each naming the secret in `field`, such as a token that the tool does not accept.
-  repeated ValidationError secret_errors = 3;
-}
-
-message ValidationError {
-  // The name of the input or the secret the error is about, as the list it is in says. Empty in `errors`, which is about the
-  // integration as a whole.
-  string field = 1;
-  string message = 2;
-}
-
-// Access to the plugin as a whole, such as membership of a GitHub organization. Steward grants it
-// before it grants access to the plugin's resources, and decides when to remove it.
+// Access to the plugin as a whole, such as a role in an AWS account or membership of a GitHub organization. Steward grants it before
+// it grants access to the plugin's resources, and decides when to remove it.
 //
 // Idempotent: granting what is already granted succeeds.
 message PluginServiceGrantAccessRequest {
+  reserved 3, 4, 10;
+  reserved "role", "permissions", "grant_inputs";
+
   Integration integration = 1;
   Identity identity = 2;
 
-  // Always set. For a role Steward composed, `permissions` are its pieces, which the plugin
-  // applies as far as the tool allows. Empty for a role the tool defines.
-  Role role = 3;
-  repeated Permission permissions = 4;
+  // A name declared in PluginDefinition.grants.
+  string grant = 5;
+
+  // The values of the inputs that grant declared, keyed by input name.
+  google.protobuf.Struct inputs = 6;
 }
 
 message PluginServiceGrantAccessResponse {
+  reserved 2, 4;
+  reserved "role", "permissions";
+
   // The grant's own identity in the tool, such as a membership or invitation id. Empty when the
   // tool has none. Steward records it and sends it back on revoke.
   string id = 1;
-
-  // What the tool actually applied. It can differ from what was requested: a composed role may land
-  // as a native role, or as only the permissions the tool supports.
-  Role role = 2;
-  repeated Permission permissions = 4;
 
   // True when the grant needs the identity to act before it takes effect, such as accepting an
   // invitation. The access is not in effect yet.
   bool pending = 3;
 }
 
-// Idempotent: revoking what is already absent succeeds. Steward works out overlap between roles
-// before it sends a revoke, so the role here is safe to remove in full.
+// Idempotent: revoking what is already absent succeeds.
 message PluginServiceRevokeAccessRequest {
+  reserved 3, 5, 10;
+  reserved "role", "permissions", "grant_inputs";
+
   Integration integration = 1;
   Identity identity = 2;
-  Role role = 3;
-  repeated Permission permissions = 5;
 
   // The id GrantAccess returned for this grant, when it returned one.
   string id = 4;
+
+  string grant = 6;
+  google.protobuf.Struct inputs = 7;
 }
 
 message PluginServiceRevokeAccessResponse {}
 
-// Asks what an identity holds on the plugin now, for example to skip an invitation to someone who
+// Asks whether an identity holds a grant now, for example to skip an invitation to someone who
 // is already a member, or to find drift.
 message PluginServiceGetAccessRequest {
+  reserved 10;
+  reserved "grant_inputs";
+
   Integration integration = 1;
   Identity identity = 2;
+
+  string grant = 3;
+  google.protobuf.Struct inputs = 4;
 }
 
 message PluginServiceGetAccessResponse {
-  // The roles and permissions the identity holds. Empty when it has none.
-  repeated Role roles = 1;
-  repeated Permission permissions = 4;
+  reserved 1, 4;
+  reserved "roles", "permissions";
+
+  // True when the identity holds the grant.
+  bool granted = 5;
 
   // True when an invitation or similar is outstanding and the access is not yet in effect.
   bool pending = 2;
@@ -625,73 +626,58 @@ message ApplicationServiceDeployResponse {
   Application application = 1;
 }
 
-// Writes a secret, creating it or replacing it. Idempotent. The value is a secret of the call: the
+// Turns an integration of a credential into what a tool reads: environment variables and files. The runner calls it before a task
+// invokes any plugin, once for each integration shared with the task, and merges the results. A value is a secret of the call: the
 // plugin must not persist it or write it to a log.
-message SecretEngineServicePutRequest {
-  Integration integration = 1;
+message CredentialServiceResolveRequest {
+  // A name declared in PluginDefinition.credentials.
+  string credential = 1;
 
-  // A name declared in PluginDefinition.secret_engines.
-  string engine = 2;
+  // The settings of the integration, keyed by the inputs the credential declared.
+  google.protobuf.Struct inputs = 2;
 
-  // The settings of the store, keyed by the inputs the engine declared.
-  google.protobuf.Struct settings = 3;
+  // The secrets of the integration, keyed by the secrets the credential declared. Resolved by the runner for this call only.
+  map<string, string> secrets = 3;
 
-  // The name of the secret, which can hold slashes.
-  string name = 4;
+  // A token that proves who the integration is, for the audience the credential declared. Valid for minutes, and never persisted.
+  string identity_token = 4;
 
-  string value = 5;
-
-  // Where the secret is placed, such as the region of an AWS secret, and its tags.
-  google.protobuf.Struct metadata = 6;
+  // Who the integration is, and the organization it belongs to, so that a plugin can name what it makes after them.
+  string integration_ulid = 5;
+  string integration_name = 6;
+  Organization organization = 7;
 }
 
-message SecretEngineServicePutResponse {}
+message CredentialServiceResolveResponse {
+  // Environment variables for the process of the task, such as AWS_ACCESS_KEY_ID.
+  map<string, string> env = 1;
 
-// Removes a secret. Idempotent: succeeds if it is already gone.
-message SecretEngineServiceDeleteRequest {
-  Integration integration = 1;
-  string engine = 2;
-  google.protobuf.Struct settings = 3;
-  string name = 4;
+  // Files for the process of the task, which the runner writes into a directory of the task and removes after it. The path of each
+  // file is given to the process in the variable named by its env_name.
+  repeated CredentialFile files = 2;
 
-  // The metadata the secret was placed with.
-  google.protobuf.Struct metadata = 5;
+  // When the credentials stop working, as seconds since the epoch. 0 when they do not expire. The runner calls Resolve again before
+  // then when a task is still running.
+  int64 expires_at = 3;
 }
 
-message SecretEngineServiceDeleteResponse {}
-
-// Reads a secret, for the runner to hand to another plugin as a secret of its call. It is how a
-// secret is resolved, and nothing shows the value to a person. The plugin must not persist the
-// value or write it to a log. Fails with NOT_FOUND if there is no such secret.
-message SecretEngineServiceGetRequest {
-  Integration integration = 1;
-  string engine = 2;
-  google.protobuf.Struct settings = 3;
-  string name = 4;
-
-  // The metadata the secret was placed with.
-  google.protobuf.Struct metadata = 5;
-}
-
-message SecretEngineServiceGetResponse {
-  string value = 1;
+message CredentialFile {
+  // The name of the environment variable that holds the path of the file, such as AWS_WEB_IDENTITY_TOKEN_FILE.
+  string env_name = 1;
+  bytes content = 2;
 }
 
 // ---------------------------------------------------------------------------------------------
 // Services
 // ---------------------------------------------------------------------------------------------
 
-// Mandatory for every plugin. Describe and Validate are always served. GrantAccess, RevokeAccess and
-// GetAccess apply only to a plugin that declares roles or permissions, and answer UNIMPLEMENTED
-// otherwise.
+// Mandatory for every plugin. Describe is always served. GrantAccess, RevokeAccess and
+// GetAccess apply only to a plugin that declares grants, and answer UNIMPLEMENTED otherwise.
 service PluginService {
-  // Describes the plugin: what it needs (its inputs) and the resources it manages.
+  // Describes the plugin: the credentials it offers, the resources and applications it manages, and the grants it gives.
   rpc Describe(DescribeRequest) returns (DescribeResponse);
 
-  // Checks an integration, for example that the inputs are valid and the credentials work.
-  rpc Validate(ValidateRequest) returns (ValidateResponse);
-
-  // Access to the plugin as a whole: giving identities roles on it, taking them away, and checking
+  // Access to the plugin as a whole: giving identities a grant, taking it away, and checking
   // what they hold.
   rpc GrantAccess(PluginServiceGrantAccessRequest) returns (PluginServiceGrantAccessResponse);
   rpc RevokeAccess(PluginServiceRevokeAccessRequest) returns (PluginServiceRevokeAccessResponse);
@@ -717,10 +703,7 @@ service ApplicationService {
   rpc Deploy(ApplicationServiceDeployRequest) returns (ApplicationServiceDeployResponse);
 }
 
-// For plugins that keep secrets (PluginDefinition.secret_engines). A call an engine does not offer
-// answers UNIMPLEMENTED.
-service SecretEngineService {
-  rpc Put(SecretEngineServicePutRequest) returns (SecretEngineServicePutResponse);
-  rpc Delete(SecretEngineServiceDeleteRequest) returns (SecretEngineServiceDeleteResponse);
-  rpc Get(SecretEngineServiceGetRequest) returns (SecretEngineServiceGetResponse);
+// For plugins that offer ways to reach a tool (PluginDefinition.credentials).
+service CredentialService {
+  rpc Resolve(CredentialServiceResolveRequest) returns (CredentialServiceResolveResponse);
 }

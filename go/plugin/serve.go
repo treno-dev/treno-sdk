@@ -49,8 +49,8 @@ func (g *grpcPlugin) GRPCServer(_ *goplugin.GRPCBroker, server *grpc.Server) err
 		pluginv1.RegisterApplicationServiceServer(server, applicationService{plugin: p})
 	}
 
-	if len(p.secretEngines) > 0 {
-		pluginv1.RegisterSecretEngineServiceServer(server, secretEngineService{plugin: p})
+	if len(p.credentials) > 0 {
+		pluginv1.RegisterCredentialServiceServer(server, credentialService{plugin: p})
 	}
 
 	return nil
@@ -91,15 +91,6 @@ type pluginService struct {
 
 func (s pluginService) Describe(ctx context.Context, request *pluginv1.DescribeRequest) (*pluginv1.DescribeResponse, error) {
 	return s.plugin.describe(ctx, request.GetIntegration()), nil
-}
-
-func (s pluginService) Validate(ctx context.Context, request *PluginValidateRequest) (*PluginValidateResponse, error) {
-	// Every plugin must answer Validate; without a handler of its own, every integration is accepted.
-	if s.plugin.options.Validate == nil {
-		return &PluginValidateResponse{}, nil
-	}
-
-	return s.plugin.options.Validate(ctx, request)
 }
 
 func (s pluginService) GrantAccess(ctx context.Context, request *PluginGrantAccessRequest) (*PluginGrantAccessResponse, error) {
@@ -253,46 +244,20 @@ func (s applicationService) Deploy(ctx context.Context, request *ApplicationDepl
 	return kind.Deploy(ctx, request)
 }
 
-type secretEngineService struct {
-	pluginv1.UnimplementedSecretEngineServiceServer
+type credentialService struct {
+	pluginv1.UnimplementedCredentialServiceServer
 	plugin *Plugin
 }
 
-func (s secretEngineService) Put(ctx context.Context, request *SecretEnginePutRequest) (*SecretEnginePutResponse, error) {
-	engine, err := s.plugin.secretEngine(request.GetEngine())
+func (s credentialService) Resolve(ctx context.Context, request *CredentialResolveRequest) (*CredentialResolveResponse, error) {
+	credential, err := s.plugin.credential(request.GetCredential())
 	if err != nil {
 		return nil, err
 	}
 
-	if engine.Put == nil {
-		return nil, unimplemented("put", "secret engine")
+	if credential.Resolve == nil {
+		return nil, unimplemented("resolve", "credential")
 	}
 
-	return engine.Put(ctx, request)
-}
-
-func (s secretEngineService) Delete(ctx context.Context, request *SecretEngineDeleteRequest) (*SecretEngineDeleteResponse, error) {
-	engine, err := s.plugin.secretEngine(request.GetEngine())
-	if err != nil {
-		return nil, err
-	}
-
-	if engine.Delete == nil {
-		return nil, unimplemented("delete", "secret engine")
-	}
-
-	return engine.Delete(ctx, request)
-}
-
-func (s secretEngineService) Get(ctx context.Context, request *SecretEngineGetRequest) (*SecretEngineGetResponse, error) {
-	engine, err := s.plugin.secretEngine(request.GetEngine())
-	if err != nil {
-		return nil, err
-	}
-
-	if engine.Get == nil {
-		return nil, unimplemented("get", "secret engine")
-	}
-
-	return engine.Get(ctx, request)
+	return credential.Resolve(ctx, request)
 }
