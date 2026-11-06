@@ -2,7 +2,7 @@
 // contract (gRPC, see ../../proto) and the functions a provider writes.
 //
 //	p := provider.New(provider.Options{Name: "github", Version: "0.1.0"})
-//	p.Connector("app", provider.ConnectorOptions{Inputs: inputs, Resolve: resolve})
+//	p.Credential("app", provider.CredentialOptions{Inputs: inputs, Resolve: resolve})
 //	p.Resource("repository", provider.ResourceOptions{Provision: provision, Deprovision: deprovision})
 //	p.Serve()
 //
@@ -28,18 +28,18 @@ import (
 )
 
 // Options declare the provider and, when it supports access as a whole, the handlers for that. A provider has no settings or secrets of
-// its own: the connectors, resources and applications it offers declare theirs.
+// its own: the credentials, resources and applications it offers declare theirs.
 type Options struct {
 	Name        string
 	Version     string
 	Title       string
 	Description string
 
-	// SetupLinks says what the person does in another tool before the settings of a connector,
+	// SetupLinks says what the person does in another tool before the settings of a credential,
 	// such as a page that creates a role, as links with the address already filled in. It is given
-	// the connector when a runner installs it, and nothing when the description is read for the
-	// docs, so it has to answer for a connector that is nil.
-	SetupLinks func(context.Context, *Connector) []*SetupLink
+	// the credential when a runner installs it, and nothing when the description is read for the
+	// docs, so it has to answer for a credential that is nil.
+	SetupLinks func(context.Context, *Credential) []*SetupLink
 
 	// What can be given on the provider as a whole, and the handlers that give it. A grant declares the inputs it wants.
 	Grants []*GrantDefinition
@@ -55,7 +55,7 @@ type ResourceOptions struct {
 	Title       string
 	Description string
 
-	// Inputs is what a resource of this kind takes besides its name, Secrets its credentials, and
+	// Inputs is what a resource of this kind takes besides its name, Secrets the secrets it takes, and
 	// Outputs what it produces.
 	Inputs  []*InputDefinition
 	Secrets []*SecretDefinition
@@ -91,37 +91,37 @@ type ApplicationOptions struct {
 	Deploy  func(context.Context, *ApplicationDeployRequest) (*ApplicationDeployResponse, error)
 }
 
-// ConnectorOptions describe a kind of connector, a way of reaching the tool such as a role that is assumed with the identity token of
-// Steward. A connector is an instance of a kind. The runner calls Resolve before a task invokes any provider, and hands what it returns
+// CredentialOptions describe a kind of credential, a way of reaching the tool such as a role that is assumed with the identity token of
+// Steward. A credential is an instance of a kind. The runner calls Resolve before a task invokes any provider, and hands what it returns
 // to the provider as environment variables and files. A value is a secret of the call: do not persist it or log it.
-type ConnectorOptions struct {
+type CredentialOptions struct {
 	Title       string
 	Description string
 
-	// Inputs are the settings of a connector of this kind, and Secrets its secrets, which are references to a vault that the
+	// Inputs are the settings of a credential of this kind, and Secrets its secrets, which are references to a vault that the
 	// runner resolves for the call.
 	Inputs  []*InputDefinition
 	Secrets []*SecretDefinition
 
-	// IdentityAudience is the audience of the token that proves who the connector is, such as "sts.amazonaws.com". A kind
+	// IdentityAudience is the audience of the token that proves who the credential is, such as "sts.amazonaws.com". A kind
 	// that declares it is sent the token in the request.
 	IdentityAudience string
 
-	Resolve func(context.Context, *ConnectorResolveRequest) (*ConnectorResolveResponse, error)
+	Resolve func(context.Context, *CredentialResolveRequest) (*CredentialResolveResponse, error)
 }
 
-// Provider is what a provider author builds. Declare its resources, applications and connectors,
+// Provider is what a provider author builds. Declare its resources, applications and credentials,
 // then call Serve.
 type Provider struct {
 	options      Options
 	resources    map[string]ResourceOptions
 	applications map[string]ApplicationOptions
-	connectors   map[string]ConnectorOptions
+	credentials  map[string]CredentialOptions
 
 	// Declaration order, so the description lists kinds the way the provider declared them.
 	resourceOrder    []string
 	applicationOrder []string
-	connectorOrder   []string
+	credentialOrder  []string
 }
 
 // New creates a provider.
@@ -130,17 +130,17 @@ func New(options Options) *Provider {
 		options:      options,
 		resources:    map[string]ResourceOptions{},
 		applications: map[string]ApplicationOptions{},
-		connectors:   map[string]ConnectorOptions{},
+		credentials:  map[string]CredentialOptions{},
 	}
 }
 
-// Connector declares a kind of connector, a way of reaching the tool. The name is unique within the provider, such as "oidc-role".
-func (p *Provider) Connector(name string, options ConnectorOptions) *Provider {
-	if _, declared := p.connectors[name]; !declared {
-		p.connectorOrder = append(p.connectorOrder, name)
+// Credential declares a kind of credential, a way of reaching the tool. The name is unique within the provider, such as "oidc-role".
+func (p *Provider) Credential(name string, options CredentialOptions) *Provider {
+	if _, declared := p.credentials[name]; !declared {
+		p.credentialOrder = append(p.credentialOrder, name)
 	}
 
-	p.connectors[name] = options
+	p.credentials[name] = options
 
 	return p
 }
@@ -169,7 +169,7 @@ func (p *Provider) Application(kind string, options ApplicationOptions) *Provide
 	return p
 }
 
-func (p *Provider) describe(ctx context.Context, connector *Connector) *providerv1.DescribeResponse {
+func (p *Provider) describe(ctx context.Context, credential *Credential) *providerv1.DescribeResponse {
 	o := p.options
 	definition := &providerv1.ProviderDefinition{
 		Title:       o.Title,
@@ -194,9 +194,9 @@ func (p *Provider) describe(ctx context.Context, connector *Connector) *provider
 		})
 	}
 
-	for _, name := range p.connectorOrder {
-		options := p.connectors[name]
-		definition.Connectors = append(definition.Connectors, &providerv1.ConnectorDefinition{
+	for _, name := range p.credentialOrder {
+		options := p.credentials[name]
+		definition.Credentials = append(definition.Credentials, &providerv1.CredentialDefinition{
 			Name:             name,
 			Title:            options.Title,
 			Description:      options.Description,
@@ -208,9 +208,9 @@ func (p *Provider) describe(ctx context.Context, connector *Connector) *provider
 
 	response := &providerv1.DescribeResponse{Name: o.Name, Version: o.Version, Definition: definition}
 
-	// The links are for a connector, so a description that was asked for without one has none.
-	if connector != nil && o.SetupLinks != nil {
-		response.SetupLinks = o.SetupLinks(ctx, connector)
+	// The links are for a credential, so a description that was asked for without one has none.
+	if credential != nil && o.SetupLinks != nil {
+		response.SetupLinks = o.SetupLinks(ctx, credential)
 	}
 
 	return response
@@ -247,10 +247,10 @@ func (p *Provider) application(kind string) (ApplicationOptions, error) {
 	return found, nil
 }
 
-func (p *Provider) connector(name string) (ConnectorOptions, error) {
-	found, ok := p.connectors[name]
+func (p *Provider) credential(name string) (CredentialOptions, error) {
+	found, ok := p.credentials[name]
 	if !ok {
-		return found, status.Error(codes.NotFound, fmt.Sprintf("this provider has no connector %q", name))
+		return found, status.Error(codes.NotFound, fmt.Sprintf("this provider has no credential %q", name))
 	}
 
 	return found, nil

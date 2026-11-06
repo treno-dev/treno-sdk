@@ -51,8 +51,8 @@ provider.resource({
   kind: 'item',
   outputs: [{ name: 'url', label: 'URL', type: 'string' }],
 
-  async provision({ connector, name }) {
-    return { outputs: { url: `${connector.inputs.base_url}/items/${name}` } };
+  async provision({ credential, name }) {
+    return { outputs: { url: `${credential.inputs.base_url}/items/${name}` } };
   },
 
   async deprovision({ resource }) {
@@ -65,7 +65,7 @@ provider.serve();
 
 A provider needs one `createProvider(...)`, any number of `provider.resource(...)` and
 `provider.application(...)` declarations, and a final `provider.serve()`. If it needs more than one tool,
-for example both Cloudflare and AWS, take the credentials for each as secrets.
+for example both Cloudflare and AWS, take a secret for each tool.
 
 ## What you declare
 
@@ -76,8 +76,8 @@ for example both Cloudflare and AWS, take the credentials for each as secrets.
 | `name`, `version` | Required. |
 | `title`, `description` | Shown in Steward. |
 | `inputs` | The settings the provider is configured with. |
-| `secrets` | The credentials it is configured with, such as an API token. |
-| `validate` | Optional. Checks the credentials, which Steward cannot. Returns `{ errors, inputErrors, secretErrors }`, each a list of `{ field, message }`: `inputErrors` and `secretErrors` name an input or a secret, and `errors` is about the connector as a whole. Without it, every connector is accepted. |
+| `secrets` | The secrets it is configured with, such as an API token. |
+| `validate` | Optional. Checks the secrets, which Steward cannot. Returns `{ errors, inputErrors, secretErrors }`, each a list of `{ field, message }`: `inputErrors` and `secretErrors` name an input or a secret, and `errors` is about the credential as a whole. Without it, every credential is accepted. |
 | `roles`, `permissions`, `grantAccess`, `revokeAccess`, `getAccess` | Access to the provider as a whole, such as membership of an organization. |
 
 **A resource**, with `provider.resource({ kind, ... })`, and **an application**, with
@@ -97,7 +97,7 @@ type: `github` `{ owner, name, branch? }`, `registry` `{ image, tag? }`, `s3` `{
 `type` is one of `string`, `number`, `boolean`, `select`, `list` (of strings) or `map`. Mark an output
 `sensitive: true` when it is a secret, such as a generated password, and it stays with the runner.
 
-**Secrets** are credentials, and are kept, sent and shown apart from inputs. Each has a `name`, used
+**Secrets** are kept, sent and shown apart from inputs. Each has a `name`, used
 as it is, a `description` and whether it is `required`. Its value is never shown back once set.
 
 ```js
@@ -124,18 +124,18 @@ const provider = createProvider({
 
   roles: [{ name: 'member', title: 'Member' }, { name: 'owner', title: 'Owner' }],
 
-  grantAccess: async ({ connector, identity, role }) => {
-    const invitation = await invite(connector, identity.externalId || identity.attrs.email, role.name);
+  grantAccess: async ({ credential, identity, role }) => {
+    const invitation = await invite(credential, identity.externalId || identity.attrs.email, role.name);
 
     return { id: invitation.id, role, pending: true }; // an invitation is not access until accepted
   },
-  revokeAccess: async ({ connector, identity }) => {
-    await removeFromOrganization(connector, identity.externalId);
+  revokeAccess: async ({ credential, identity }) => {
+    await removeFromOrganization(credential, identity.externalId);
 
     return {};
   },
-  getAccess: async ({ connector, identity }) => {
-    const membership = await findMembership(connector, identity);
+  getAccess: async ({ credential, identity }) => {
+    const membership = await findMembership(credential, identity);
 
     return { roles: membership ? [{ name: membership.role }] : [], pending: Boolean(membership?.pending) };
   },
@@ -154,18 +154,18 @@ provider.resource({
   permissions: [{ name: 'pull' }, { name: 'push' }],
   roles: [{ name: 'viewer', title: 'Viewer' }, { name: 'editor', title: 'Editor' }],
 
-  grantAccess: async ({ connector, resource, identity, role, permissions }) => {
-    await addCollaborator(connector, resource.name, identity.externalId, role.name);
+  grantAccess: async ({ credential, resource, identity, role, permissions }) => {
+    await addCollaborator(credential, resource.name, identity.externalId, role.name);
 
     return { role, permissions };
   },
-  revokeAccess: async ({ connector, resource, identity }) => {
-    await removeCollaborator(connector, resource.name, identity.externalId);
+  revokeAccess: async ({ credential, resource, identity }) => {
+    await removeCollaborator(credential, resource.name, identity.externalId);
 
     return {};
   },
-  getAccess: async ({ connector, resource, identity }) => {
-    const collaborator = await findCollaborator(connector, resource.name, identity);
+  getAccess: async ({ credential, resource, identity }) => {
+    const collaborator = await findCollaborator(credential, resource.name, identity);
 
     return { roles: collaborator ? [{ name: collaborator.role }] : [] };
   },
@@ -213,8 +213,8 @@ A handler receives the request as a plain object and returns the response as one
 any field it has nothing to say about. Field names are camelCase. In TypeScript, requests and
 responses are typed from the contract.
 
-- **Inputs and secrets.** `connector.inputs` and `inputs` hold the values of the inputs, keyed by input
-  name. The values of secrets arrive apart from them, keyed by secret name, in `connector.secrets` (and a
+- **Inputs and secrets.** `credential.inputs` and `inputs` hold the values of the inputs, keyed by input
+  name. The values of secrets arrive apart from them, keyed by secret name, in `credential.secrets` (and a
   resource's or application's `secrets`). Never store them. The SDK always provides these objects,
   empty if nothing was set.
 - **Idempotent, and no report of changes.** Make calls that change something idempotent: creating

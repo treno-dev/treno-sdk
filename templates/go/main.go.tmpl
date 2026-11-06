@@ -3,7 +3,7 @@
 //
 // Declare the provider and each kind of resource once, with its handlers attached: Steward's forms
 // follow from what you write here, and every call is routed to the right handler by kind. If your
-// provider needs more than one tool, take the credentials for each as inputs.
+// provider needs more than one tool, take the secrets for each as inputs.
 //
 // Handlers take the request and return the response, both typed from the contract and named for the
 // entity and the call (ResourceProvisionRequest, ResourceProvisionResponse). Request getters are safe
@@ -18,13 +18,13 @@ import (
 	"github.com/treno-dev/steward-sdk/go/provider"
 )
 
-// Check that the inputs and credentials work. Return an error for each input or secret the user can fix.
+// Check that the inputs and secrets work. Return an error for each input or secret the user can fix.
 func validate(ctx context.Context, request *provider.ProviderValidateRequest) (*provider.ProviderValidateResponse, error) {
 	response := &provider.ProviderValidateResponse{}
 
 	// An error goes in the list of what it is about: InputErrors for an input, SecretErrors for a secret, and Errors for what is
-	// about the connector as a whole. Steward marks the field that the list says, and does not guess it from a name.
-	if request.GetConnector().GetSecrets()["API_TOKEN"] == "" {
+	// about the credential as a whole. Steward marks the field that the list says, and does not guess it from a name.
+	if request.GetCredential().GetSecrets()["API_TOKEN"] == "" {
 		response.SecretErrors = append(response.SecretErrors, &provider.ValidationError{
 			Field:   "API_TOKEN",
 			Message: "An API token is required.",
@@ -35,16 +35,16 @@ func validate(ctx context.Context, request *provider.ProviderValidateRequest) (*
 }
 
 // Create a resource called request.Name. Idempotent: if it already exists, succeed anyway. Return
-// what it produced, as declared in Outputs. The request also has the Connector and the Inputs.
+// what it produced, as declared in Outputs. The request also has the Credential and the Inputs.
 func provision(ctx context.Context, request *provider.ResourceProvisionRequest) (*provider.ResourceProvisionResponse, error) {
-	baseURL := request.GetConnector().GetInputs().AsMap()["base_url"]
+	baseURL := request.GetCredential().GetInputs().AsMap()["base_url"]
 
 	return &provider.ResourceProvisionResponse{
 		Outputs: provider.Struct(map[string]any{"url": fmt.Sprintf("%v/items/%s", baseURL, request.GetName())}),
 	}, nil
 }
 
-// Remove a resource. Idempotent: succeed if it is already gone. The request has the Connector and the
+// Remove a resource. Idempotent: succeed if it is already gone. The request has the Credential and the
 // Resource (Kind, Name).
 func deprovision(ctx context.Context, request *provider.ResourceDeprovisionRequest) (*provider.ResourceDeprovisionResponse, error) {
 	return &provider.ResourceDeprovisionResponse{}, nil
@@ -53,7 +53,7 @@ func deprovision(ctx context.Context, request *provider.ResourceDeprovisionReque
 // Give an identity a role on the resource. Idempotent. The Role is always set. For a role Steward
 // composed, Permissions lists its pieces. Return what the tool applied, an Id for the grant if the
 // tool has one, and Pending if the person has to act first, such as accepting an invitation. The
-// request has the Connector, Resource, Identity (ExternalId, Name, Attrs), Role and Permissions.
+// request has the Credential, Resource, Identity (ExternalId, Name, Attrs), Role and Permissions.
 func grantAccess(ctx context.Context, request *provider.ResourceGrantAccessRequest) (*provider.ResourceGrantAccessResponse, error) {
 	return &provider.ResourceGrantAccessResponse{Role: request.GetRole(), Permissions: request.GetPermissions()}, nil
 }
@@ -71,8 +71,8 @@ func getAccess(ctx context.Context, request *provider.ResourceGetAccessRequest) 
 
 func main() {
 	// Steward builds the provider's form from Inputs and Secrets, so they are also the documentation
-	// people see. Settings arrive in request.Connector.Inputs, and credentials, kept and sent
-	// separately, in request.Connector.Secrets.
+	// people see. Settings arrive in request.Credential.Inputs, and secrets, kept and sent
+	// separately, in request.Credential.Secrets.
 	p := provider.New(provider.Options{
 		Name:        "[[.Name]]",
 		Version:     "0.1.0",
@@ -84,7 +84,7 @@ func main() {
 			{Name: "base_url", Label: "Base URL", Description: "The base URL of the API.", Type: provider.TypeString, Required: true},
 		},
 
-		// The credentials it is configured with.
+		// The secrets it is configured with.
 		Secrets: []*provider.SecretDefinition{
 			{Name: "API_TOKEN", Description: "The token to call the API with.", Required: true},
 		},

@@ -35,7 +35,7 @@ func Value(value any) *structpb.Value {
 // The messages a provider works with, from the generated contract, so a provider imports one package.
 // Requests and responses are named for what they handle (the entity, then the call).
 type (
-	Connector         = providerv1.Connector
+	Credential        = providerv1.Credential
 	Organization      = providerv1.Organization
 	SetupLink         = providerv1.SetupLink
 	Resource          = providerv1.Resource
@@ -52,9 +52,9 @@ type (
 	PermissionDefinition = providerv1.PermissionDefinition
 	RoleDefinition       = providerv1.RoleDefinition
 
-	ConnectorDefinition = providerv1.ConnectorDefinition
-	ConnectorFile       = providerv1.ConnectorFile
-	GrantDefinition     = providerv1.GrantDefinition
+	CredentialDefinition = providerv1.CredentialDefinition
+	CredentialFile       = providerv1.CredentialFile
+	GrantDefinition      = providerv1.GrantDefinition
 
 	ProviderGrantAccessRequest   = providerv1.ProviderServiceGrantAccessRequest
 	ProviderGrantAccessResponse  = providerv1.ProviderServiceGrantAccessResponse
@@ -83,8 +83,8 @@ type (
 	ApplicationDeployRequest   = providerv1.ApplicationServiceDeployRequest
 	ApplicationDeployResponse  = providerv1.ApplicationServiceDeployResponse
 
-	ConnectorResolveRequest  = providerv1.ConnectorServiceResolveRequest
-	ConnectorResolveResponse = providerv1.ConnectorServiceResolveResponse
+	CredentialResolveRequest  = providerv1.CredentialServiceResolveRequest
+	CredentialResolveResponse = providerv1.CredentialServiceResolveResponse
 )
 
 // The types an InputDefinition or OutputDefinition can have.

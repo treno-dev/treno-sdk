@@ -17,11 +17,11 @@ Run `npm run check` to type-check.
 
 ## Test
 
-Save this as `context.json`, the connector and resources to call the provider with:
+Save this as `context.json`, the credential and resources to call the provider with:
 
 ```json
 {
-  "connector": {
+  "credential": {
     "inputs": { "base_url": "https://example.test" },
     "secrets": { "API_TOKEN": "secret" }
   },
@@ -37,7 +37,7 @@ steward provider run --context context.json --call provision node src/provider.t
 ```
 
 The first creates each resource, grants and revokes the role, and removes it. It does this for real, in
-whatever your credentials reach, and asks before it starts (`--yes` skips the question). `--call` makes
+whatever your secrets reach, and asks before it starts (`--yes` skips the question). `--call` makes
 only the calls you name, once each and without cleaning up: `provision`, `grant-access`, `get-access`,
 `revoke-access` and `deprovision`. `steward provider validate` never changes anything.
 

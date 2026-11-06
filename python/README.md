@@ -42,7 +42,7 @@ from steward_sdk.provider import create_provider
 
 
 async def provision(request):
-    base_url = request.connector.inputs["base_url"]
+    base_url = request.credential.inputs["base_url"]
 
     return {"outputs": {"url": f"{base_url}/items/{request.name}"}}
 
@@ -70,7 +70,7 @@ provider.serve()
 
 A provider needs one `create_provider(...)`, any number of `provider.resource(...)` and
 `provider.application(...)` declarations, and a final `provider.serve()`. If it needs more than one tool,
-for example both Cloudflare and AWS, take the credentials for each as secrets.
+for example both Cloudflare and AWS, take a secret for each tool.
 
 ## What you declare
 
@@ -81,8 +81,8 @@ for example both Cloudflare and AWS, take the credentials for each as secrets.
 | `name`, `version`                                                     | Required.                                                                                                                                            |
 | `title`, `description`                                                | Shown in Steward.                                                                                                                                    |
 | `inputs`                                                              | The settings the provider is configured with.                                                                                                          |
-| `secrets`                                                             | The credentials it is configured with, such as an API token.                                                                                         |
-| `validate`                                                            | Optional. Checks the credentials, which Steward cannot. Returns `{"errors": [...], "input_errors": [...], "secret_errors": [...]}`, each a list of `{"field": ..., "message": ...}`: `input_errors` and `secret_errors` name an input or a secret, and `errors` is about the connector as a whole. Without it, every connector is accepted. |
+| `secrets`                                                             | The secrets it is configured with, such as an API token.                                                                                         |
+| `validate`                                                            | Optional. Checks the secrets, which Steward cannot. Returns `{"errors": [...], "input_errors": [...], "secret_errors": [...]}`, each a list of `{"field": ..., "message": ...}`: `input_errors` and `secret_errors` name an input or a secret, and `errors` is about the credential as a whole. Without it, every credential is accepted. |
 | `roles`, `permissions`, `grant_access`, `revoke_access`, `get_access` | Access to the provider as a whole, such as membership of an organization.                                                                              |
 
 **A resource**, with `provider.resource(kind=..., ...)`, and **an application**, with
@@ -102,7 +102,7 @@ of an application arrives as `type`, `config` and `ref`, where `config` holds th
 `type` is one of `string`, `number`, `boolean`, `select`, `list` (of strings) or `map`. Mark an output
 `"sensitive": True` when it is a secret, such as a generated password, and it stays with the runner.
 
-**Secrets** are credentials, and are kept, sent and shown apart from inputs. Each has a `name`, used as
+**Secrets** are kept, sent and shown apart from inputs. Each has a `name`, used as
 it is, a `description` and whether it is `required`. Its value is never shown back once set.
 
 ```python
@@ -125,7 +125,7 @@ For the provider it looks like this:
 async def grant_access(request: ProviderGrantAccessRequest) -> ProviderGrantAccessResponse:
     identity = request.identity
     email = identity.external_id or plain(identity.attrs)["email"]
-    invitation = await invite(request.connector, email, request.role.name)
+    invitation = await invite(request.credential, email, request.role.name)
 
     return {"id": invitation.id, "role": request.role, "pending": True}  # an invitation is not access until accepted
 
@@ -148,7 +148,7 @@ carry the `resource`:
 
 ```python
 async def grant_access(request: ResourceGrantAccessRequest) -> ResourceGrantAccessResponse:
-    await add_collaborator(request.connector, request.resource.name, request.identity.external_id, request.role.name)
+    await add_collaborator(request.credential, request.resource.name, request.identity.external_id, request.role.name)
 
     return {"role": plain(request.role), "permissions": [plain(item) for item in request.permissions]}
 
@@ -209,9 +209,9 @@ plain one runs in a thread, so blocking calls do not stall the provider).
 - **Responses** are a response message or a plain dict with the fields you have something to say
   about (snake_case or camelCase). Messages inside it, such as the `role` you were given, can be used
   as they are. Returning nothing is an empty response.
-- **Inputs and secrets.** `connector.inputs` and `inputs` hold the values of the inputs, keyed by input
+- **Inputs and secrets.** `credential.inputs` and `inputs` hold the values of the inputs, keyed by input
   name; numbers arrive as floats. The values of secrets arrive apart from them, keyed by secret name,
-  in `connector.secrets` (and a resource's or application's `secrets`), a plain `dict`-like of strings.
+  in `credential.secrets` (and a resource's or application's `secrets`), a plain `dict`-like of strings.
   Never store them.
 - **Idempotent, and no report of changes.** Make calls that change something idempotent: creating what
   exists, or removing what is gone, simply succeeds. Return the result of the change (the `outputs`,

@@ -41,7 +41,7 @@ Steward's questions and that system's API. The GitHub provider, for example:
 
 - **declares what it needs to connect:** the GitHub organization and an access token. Steward shows
   these as a form when someone adds the provider. A company can add the same provider several times, such
-  as for two GitHub organizations, each with its own settings and credentials.
+  as for two GitHub organizations, each with its own settings and secrets.
 - **declares what it manages:** kinds of **resources**, such as `repository`, each with the settings it
   takes to create one (visibility, description) and what it reports back once it exists (its URL).
 - **declares what can be granted:** the roles and permissions GitHub offers, such as `read`, `write`
@@ -89,9 +89,9 @@ the record of it, and works out what changed. The provider is told what to do, d
   changes on its own schedule. A small, stable contract lets anyone add one, whether that is us, the
   community, or a company writing a private provider for its own internal system, without any change to
   Steward.
-- **Steward does not run other people's code, and does not hold their credentials.** A provider runs in a
+- **Steward does not run other people's code, and does not hold their secrets.** A provider runs in a
   **runner**, a process the company operates in its own environment, next to the systems and secrets it
-  needs. Steward sends work to the runner; the runner starts the provider, passes it the credentials for
+  needs. Steward sends work to the runner; the runner starts the provider, passes it the secrets for
   that one call, and sends back the result.
 - **Every system looks the same to Steward.** Whatever the provider talks to, Steward asks the same
   questions and gets the same kinds of answers. That is what lets approvals, time-limited access,
@@ -146,8 +146,8 @@ road, and a provider in Rust, Java or anything else is the same contract without
 
 ### The pieces of a provider
 
-- **A connector**: an instance of the provider, with the inputs and secrets it is set up with. The provider declares its **inputs**, like variables with a name
-  and a type, and its **secrets**, the credentials it needs, with a name and a description. The runner
+- **A credential**: an instance of the provider, with the inputs and secrets it is set up with. The provider declares its **inputs**, like variables with a name
+  and a type, and its **secrets**, the keys and tokens it needs, with a name and a description. The runner
   passes secrets to each call separately from the inputs so the provider never has to store them.
 - **Resources**: the things the tool holds, each declared once under a **kind** (`"repository"`) with
   its own inputs and **outputs** (what comes back once it exists, such as a URL). A resource is
@@ -194,11 +194,11 @@ const provider = createProvider({
   ],
 
   // Return an error for each input or secret the user can fix, in the list of what it is about: `inputErrors`, `secretErrors`, or
-  // `errors` for what is about the connector as a whole.
-  async validate({ connector }) {
+  // `errors` for what is about the credential as a whole.
+  async validate({ credential }) {
     const secretErrors = [];
 
-    if (!connector.secrets.API_TOKEN) {
+    if (!credential.secrets.API_TOKEN) {
       secretErrors.push({ field: "API_TOKEN", message: "An API token is required." });
     }
 
@@ -208,15 +208,15 @@ const provider = createProvider({
   // Access to the tool as a whole, such as membership of an organization.
   roles: [{ name: "member", title: "Member" }],
 
-  async grantAccess({ connector, identity, role }) {
+  async grantAccess({ credential, identity, role }) {
     return { role };
   },
 
-  async revokeAccess({ connector, identity }) {
+  async revokeAccess({ credential, identity }) {
     return {};
   },
 
-  async getAccess({ connector, identity }) {
+  async getAccess({ credential, identity }) {
     return { roles: [] };
   },
 });
@@ -236,8 +236,8 @@ provider.resource({
   ],
 
   // Create the resource. Idempotent. Return what it produced.
-  async provision({ connector, name }) {
-    return { outputs: { url: `${connector.inputs.base_url}/items/${name}` } };
+  async provision({ credential, name }) {
+    return { outputs: { url: `${credential.inputs.base_url}/items/${name}` } };
   },
 
   async deprovision({ resource }) {
@@ -246,7 +246,7 @@ provider.resource({
 
   // Access to one resource: give an identity a role on it. The role is always set, and `permissions`
   // lists the pieces of a role Steward composed. Return what the tool applied.
-  async grantAccess({ connector, resource, identity, role, permissions }) {
+  async grantAccess({ credential, resource, identity, role, permissions }) {
     return { role, permissions };
   },
 
@@ -278,7 +278,7 @@ The other languages follow the same shape, in their own idiom:
 
 | Language               | Install                                      | Declare                                                 | A handler                                        |
 | ---------------------- | -------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------ |
-| JavaScript, TypeScript | `npm install @treno-dev/steward-sdk`         | `createProvider({...})`, `provider.resource({ kind, ... })` | `async provision({ connector, name }) { ... }`      |
+| JavaScript, TypeScript | `npm install @treno-dev/steward-sdk`         | `createProvider({...})`, `provider.resource({ kind, ... })` | `async provision({ credential, name }) { ... }`      |
 | Python                 | `pip install treno-dev-steward-sdk`          | `create_provider(...)`, `provider.resource(kind=..., ...)`  | `async def provision(request): ...`              |
 | Go                     | `go get github.com/treno-dev/steward-sdk/go` | `provider.New(...)`, `p.Resource("kind", ...)`            | `func(ctx, *Request) (*Response, error)`         |
 
@@ -356,7 +356,7 @@ steward provider validate go run .
 It only reads: it checks the handshake, the health service, what the provider describes about itself, that
 `Validate` answers, that the provider and each kind serve access exactly when they declare roles or
 permissions, and which kinds offer discovery. It never creates or changes anything, so it is safe to
-run against real credentials.
+run against real secrets.
 
 ### Run
 
@@ -364,7 +364,7 @@ run against real credentials.
 role on the provider, then for each resource in the context creates it, gives the identity a role on
 it and takes the role away, and removes it. It removes what it created even when a step fails.
 
-It does all of this for real, in whatever the provider's credentials reach, so point it at a test account.
+It does all of this for real, in whatever the provider's secrets reach, so point it at a test account.
 It lists what it is about to do and asks before it starts, unless you pass `--yes`, which a script or CI
 needs because there is nobody to ask.
 
@@ -394,7 +394,7 @@ printed as they come, so outputs marked sensitive show in your terminal as well.
 
 ```json
 {
-  "connector": {
+  "credential": {
     "inputs": { "base_url": "https://example.test" },
     "secrets": { "API_TOKEN": "..." }
   },
@@ -407,7 +407,7 @@ printed as they come, so outputs marked sensitive show in your terminal as well.
 }
 ```
 
-- **`connector`** holds the values the provider is invoked with, as Steward would supply them: its inputs and
+- **`credential`** holds the values the provider is invoked with, as Steward would supply them: its inputs and
   its secrets.
 - **`resources`** is a list of the requests that create resources. Each has a `kind` the provider declares, a
   `name`, and the `inputs` and `secrets` of that kind. They run in the order listed, and you can list
@@ -415,7 +415,7 @@ printed as they come, so outputs marked sensitive show in your terminal as well.
 - **`identity`** and **`role`** are who is given which role, on the provider and on each resource. The role
   is always named. Its `permissions` are only for a role Steward composed from the provider's permissions.
 
-`run` needs the file. `validate` can take it too, with `--context`, to give the provider the connector the read-only
+`run` needs the file. `validate` can take it too, with `--context`, to give the provider the credential the read-only
 calls are made with. Both commands exit with a failure when a check fails, so they can run in CI, and
 `--verbose` shows what the provider writes to standard error.
 

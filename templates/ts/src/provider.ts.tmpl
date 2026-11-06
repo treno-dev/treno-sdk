@@ -3,7 +3,7 @@
 //
 // Declare the provider and each kind of resource once, with its handlers attached: Steward's forms
 // follow from what you write here, and every call is routed to the right handler by kind. If your
-// provider needs more than one tool, take the credentials for each as inputs.
+// provider needs more than one tool, take the secrets for each as inputs.
 //
 // Each handler is annotated with the request and response types the SDK exports, named for the
 // entity and the call (ResourceProvisionRequest, ResourceProvisionResponse). Your editor completes
@@ -26,8 +26,8 @@ import {
 } from '@treno-dev/steward-sdk/provider';
 
 // Steward builds the provider's form from `inputs` and `secrets`, so they are also the documentation
-// people see. Settings arrive in `connector.inputs`, and credentials, kept and sent separately, in
-// `connector.secrets`.
+// people see. Settings arrive in `credential.inputs`, and secrets, kept and sent separately, in
+// `credential.secrets`.
 const provider = createProvider({
   name: '[[.Name]]',
   version: '0.1.0',
@@ -39,16 +39,16 @@ const provider = createProvider({
     { name: 'base_url', label: 'Base URL', description: 'The base URL of the API.', type: 'string', required: true },
   ],
 
-  // The credentials it is configured with.
+  // The secrets it is configured with.
   secrets: [{ name: 'API_TOKEN', description: 'The token to call the API with.', required: true }],
 
-  // Check that the inputs and credentials work. Return an error for each input or secret the user can fix, in the list of what it is
-  // about: `inputErrors`, `secretErrors`, or `errors` for what is about the connector as a whole.
+  // Check that the inputs and secrets work. Return an error for each input or secret the user can fix, in the list of what it is
+  // about: `inputErrors`, `secretErrors`, or `errors` for what is about the credential as a whole.
   async validate(request: ProviderValidateRequest): Promise<ProviderValidateResponse> {
-    const { connector } = request;
+    const { credential } = request;
     const secretErrors: { field: string; message: string }[] = [];
 
-    if (!connector.secrets.API_TOKEN) {
+    if (!credential.secrets.API_TOKEN) {
       secretErrors.push({ field: 'API_TOKEN', message: 'An API token is required.' });
     }
 
@@ -69,15 +69,15 @@ provider.resource({
   // Create a resource called `name`. Idempotent: if it already exists, succeed anyway. Return what
   // it produced, as declared in `outputs`.
   async provision(request: ResourceProvisionRequest): Promise<ResourceProvisionResponse> {
-    const { connector, name, inputs } = request;
-    const url = `${connector.inputs.base_url}/items/${name}`;
+    const { credential, name, inputs } = request;
+    const url = `${credential.inputs.base_url}/items/${name}`;
 
     return { outputs: { url } };
   },
 
   // Remove a resource. Idempotent: succeed if it is already gone.
   async deprovision(request: ResourceDeprovisionRequest): Promise<ResourceDeprovisionResponse> {
-    const { connector, resource } = request;
+    const { credential, resource } = request;
 
     return {};
   },
@@ -99,14 +99,14 @@ provider.resource({
   // the tool has one, and `pending: true` if the person has to act first, such as accepting an
   // invitation. `identity` has `externalId`, `name` and `attrs` (an email, say).
   async grantAccess(request: ResourceGrantAccessRequest): Promise<ResourceGrantAccessResponse> {
-    const { connector, resource, identity, role, permissions } = request;
+    const { credential, resource, identity, role, permissions } = request;
 
     return { role, permissions };
   },
 
   // Take a role away. Idempotent: succeed if the identity does not have it.
   async revokeAccess(request: ResourceRevokeAccessRequest): Promise<ResourceRevokeAccessResponse> {
-    const { connector, resource, identity, role, permissions } = request;
+    const { credential, resource, identity, role, permissions } = request;
 
     return {};
   },
@@ -114,7 +114,7 @@ provider.resource({
   // Report the roles and permissions the identity holds on the resource now, and whether a grant is
   // still pending.
   async getAccess(request: ResourceGetAccessRequest): Promise<ResourceGetAccessResponse> {
-    const { connector, resource, identity } = request;
+    const { credential, resource, identity } = request;
 
     return { roles: [], permissions: [], pending: false };
   },

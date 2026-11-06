@@ -3,7 +3,7 @@
 #
 # Declare the provider and each kind of resource once, with its handlers attached: Steward's forms
 # follow from what you write here, and every call is routed to the right handler by kind. If your
-# provider needs more than one tool, take the credentials for each as inputs.
+# provider needs more than one tool, take the secrets for each as inputs.
 #
 # Each handler is annotated with the request and response types the SDK exports, named for the
 # entity and the call (ResourceProvisionRequest, ResourceProvisionResponse). A request is the
@@ -28,25 +28,25 @@ from steward_sdk.provider import (
 )
 
 
-# Check that the inputs and credentials work. Return an error per input the user can fix.
+# Check that the inputs and secrets work. Return an error per input the user can fix.
 async def validate(request: ProviderValidateRequest) -> ProviderValidateResponse:
     errors = []
 
-    if not request.connector.secrets.get("API_TOKEN"):
+    if not request.credential.secrets.get("API_TOKEN"):
         errors.append({"field": "API_TOKEN", "message": "An API token is required."})
 
     return {"errors": errors}
 
 
 # Create a resource called `request.name`. Idempotent: if it already exists, succeed anyway. Return
-# what it produced, as declared in `outputs`. The request also has `connector` and `inputs`.
+# what it produced, as declared in `outputs`. The request also has `credential` and `inputs`.
 async def provision(request: ResourceProvisionRequest) -> ResourceProvisionResponse:
-    base_url = request.connector.inputs["base_url"]
+    base_url = request.credential.inputs["base_url"]
 
     return {"outputs": {"url": f"{base_url}/items/{request.name}"}}
 
 
-# Remove a resource. Idempotent: succeed if it is already gone. The request has `connector` and
+# Remove a resource. Idempotent: succeed if it is already gone. The request has `credential` and
 # `resource` (`kind`, `name`).
 async def deprovision(request: ResourceDeprovisionRequest) -> ResourceDeprovisionResponse:
     return {}
@@ -55,7 +55,7 @@ async def deprovision(request: ResourceDeprovisionRequest) -> ResourceDeprovisio
 # Give an identity a role on the resource. Idempotent. `role` is always set. For a role Steward
 # composed, `permissions` lists its pieces. Return what the tool applied, an `id` for the grant if
 # the tool has one, and `pending: True` if the person has to act first, such as accepting an
-# invitation. The request has `connector`, `resource`, `identity` (`external_id`, `name`, `attrs`),
+# invitation. The request has `credential`, `resource`, `identity` (`external_id`, `name`, `attrs`),
 # `role` and `permissions`.
 async def grant_access(request: ResourceGrantAccessRequest) -> ResourceGrantAccessResponse:
     return {"role": plain(request.role), "permissions": [plain(item) for item in request.permissions]}
@@ -73,8 +73,8 @@ async def get_access(request: ResourceGetAccessRequest) -> ResourceGetAccessResp
 
 
 # Steward builds the provider's form from `inputs` and `secrets`, so they are also the documentation
-# people see. Settings arrive in `request.connector.inputs`, and credentials, kept and sent separately,
-# in `request.connector.secrets`.
+# people see. Settings arrive in `request.credential.inputs`, and secrets, kept and sent separately,
+# in `request.credential.secrets`.
 provider = create_provider(
     name="[[.Name]]",
     version="0.1.0",
@@ -84,7 +84,7 @@ provider = create_provider(
     inputs=[
         {"name": "base_url", "label": "Base URL", "description": "The base URL of the API.", "type": "string", "required": True},
     ],
-    # The credentials it is configured with.
+    # The secrets it is configured with.
     secrets=[{"name": "API_TOKEN", "description": "The token to call the API with.", "required": True}],
     validate=validate,
 )

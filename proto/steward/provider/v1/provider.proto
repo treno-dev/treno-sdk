@@ -5,7 +5,7 @@ package steward.provider.v1;
 import "google/protobuf/struct.proto";
 
 // The provider contract. Every provider serves ProviderService: it describes itself and, when it declares grants,
-// gives access as a whole. A provider that offers connectors serves ConnectorService, one that
+// gives access as a whole. A provider that offers credentials serves CredentialService, one that
 // has resources also serves ResourceService, and one that runs applications serves ApplicationService. A provider
 // offers a call by implementing it. A call it does not offer fails with UNIMPLEMENTED, and Steward
 // treats that as not offered. Within v1 the contract is additive only.
@@ -20,24 +20,24 @@ import "google/protobuf/struct.proto";
 // Shared messages
 // ---------------------------------------------------------------------------------------------
 
-// A connector is a way of reaching a tool that an organization set up from a kind of connector that a provider offers, such as a role of
-// one AWS account. A call that is made on behalf of a connector says which. What the connector holds, its inputs and its secrets, is
-// handed to the provider that declared its kind in ConnectorService.Resolve, and a task reads the result as its environment.
-message Connector {
-  // Inputs and secrets belong to a connector kind, and the identity token to its Resolve.
+// A credential is a way of reaching a tool that an organization set up from a kind of credential that a provider offers, such as a role of
+// one AWS account. A call that is made on behalf of a credential says which. What the credential holds, its inputs and its secrets, is
+// handed to the provider that declared its kind in CredentialService.Resolve, and a task reads the result as its environment.
+message Credential {
+  // Inputs and secrets belong to a credential kind, and the identity token to its Resolve.
   reserved 1, 2, 6;
   reserved "inputs", "secrets", "identity_token";
 
-  // Who the connector is. A provider can name what it makes in a tool after it, such as a role.
+  // Who the credential is. A provider can name what it makes in a tool after it, such as a role.
   string ulid = 3;
   string name = 4;
 
-  // The organization the connector belongs to.
+  // The organization the credential belongs to.
   Organization organization = 5;
 
   // The address of Steward as an issuer of identity tokens: the `iss` of the token, which a cloud is
   // told to trust. A provider that sets up trust in it, such as with a link to a guide, uses this
-  // address. It is set in Describe, for the connector the provider is described for.
+  // address. It is set in Describe, for the credential the provider is described for.
   string identity_issuer = 7;
 }
 
@@ -60,7 +60,7 @@ message Resource {
   google.protobuf.Struct inputs = 3;
 
   // Values for the secrets declared in ResourceDefinition.secrets, keyed by secret name. Resolved
-  // by the runner for this call only, like Connector.secrets.
+  // by the runner for this call only, like Credential.secrets.
   map<string, string> secrets = 4;
 
   // Values the resource produced, as declared in ResourceDefinition.outputs, keyed by output name.
@@ -180,24 +180,23 @@ message Permission {
 // ---------------------------------------------------------------------------------------------
 
 message DescribeRequest {
-  // The connector the provider is being added for, when there is one. Steward sets it when a runner
-  // installs a connector, so that the provider can say what the person does in the tool before the
+  // The credential the provider is being added for, when there is one. Steward sets it when a runner
+  // installs a credential, so that the provider can say what the person does in the tool before the
   // settings. Tools that only read the description, such as the generator of docs, leave it empty.
-  Connector connector = 1;
+  Credential credential = 1;
 }
 
 message DescribeResponse {
   string name = 1;
   string version = 2;
 
-  // What the provider offers. A provider that needs several tools takes the credentials for each as
-  // secrets.
+  // What the provider offers. A provider that needs several tools takes a secret for each tool.
   ProviderDefinition definition = 3;
 
-  // Steps the person takes in another tool before the settings of this connector, such as a page
-  // that creates a stack. They are for the connector of the request and are kept with it: the
-  // definition is the same for every connector of a version of the provider, and these are not.
-  // Empty when the request has no connector.
+  // Steps the person takes in another tool before the settings of this credential, such as a page
+  // that creates a stack. They are for the credential of the request and are kept with it: the
+  // definition is the same for every credential of a version of the provider, and these are not.
+  // Empty when the request has no credential.
   repeated SetupLink setup_links = 4;
 }
 
@@ -214,7 +213,7 @@ message ProviderDefinition {
   string title = 1;
   string description = 2;
 
-  // A provider has no settings or secrets of its own. They belong to what it offers: each connector, resource and application
+  // A provider has no settings or secrets of its own. They belong to what it offers: each credential, resource and application
   // declares its own inputs and secrets.
   reserved 3, 8;
   reserved "inputs", "secrets";
@@ -232,17 +231,17 @@ message ProviderDefinition {
   // applications.
   repeated ApplicationDefinition applications = 7;
 
-  // Providers keep no secrets: they are in vaults, and a connector refers to them.
+  // Providers keep no secrets: they are in vaults, and a credential refers to them.
   reserved 9;
   reserved "secret_engines";
 
-  // The audience of an identity token is declared by the connector kind that takes one.
+  // The audience of an identity token is declared by the credential kind that takes one.
   reserved 10;
   reserved "identity_audience";
 
-  // The kinds of connector this provider offers, which are the ways it can reach its tool. Empty when the provider offers none, such as one that
+  // The kinds of credential this provider offers, which are the ways it can reach its tool. Empty when the provider offers none, such as one that
   // only reads the environment its tool reads.
-  repeated ConnectorDefinition connectors = 11;
+  repeated CredentialDefinition credentials = 11;
 
   // What a person can be given in the tool as a whole, such as access to an AWS account through a role, or membership of a GitHub
   // organization. Names are unique within the provider. Declaring grants is what says the provider supports access.
@@ -250,7 +249,7 @@ message ProviderDefinition {
 }
 
 // One setting a provider, a resource or an application takes, declared the way a variable is: a name
-// and a type, with the value passed separately, keyed by `name`, in Connector.inputs,
+// and a type, with the value passed separately, keyed by `name`, in Credential.inputs,
 // Resource.inputs or Application.inputs.
 message InputDefinition {
   string name = 1;
@@ -274,7 +273,7 @@ message InputDefinition {
   optional double max = 9;
 }
 
-// One credential a provider, a resource or an application takes, such as an API token or a private
+// One secret a provider, a resource or an application takes, such as an API token or a private
 // key. Secrets are separate from inputs: they are stored, sent and shown differently. The value is
 // passed in the `secrets` map, keyed by `name`, for one call only, and is never shown back once set.
 message SecretDefinition {
@@ -305,7 +304,7 @@ message ResourceDefinition {
   // What is required to create a resource of this kind. Provision takes values for these.
   repeated InputDefinition inputs = 4;
 
-  // The credentials a resource of this kind takes, separate from its inputs.
+  // The secrets a resource of this kind takes, separate from its inputs.
   repeated SecretDefinition secrets = 8;
 
   // What can be granted on this type. Declaring permissions or roles is what says the type supports
@@ -332,7 +331,7 @@ message ApplicationDefinition {
   // Fixed settings of the application itself, such as a runtime or a region. Not its variables.
   repeated InputDefinition inputs = 4;
 
-  // The credentials the application takes, separate from its inputs.
+  // The secrets the application takes, separate from its inputs.
   repeated SecretDefinition secrets = 7;
 
   // The source types it can be deployed from, by name: "github", "registry", "s3" or "raw", as
@@ -343,24 +342,24 @@ message ApplicationDefinition {
   repeated OutputDefinition outputs = 6;
 }
 
-// A kind of connector that a provider offers: a way of reaching the tool, such as an AWS role assumed with the identity token of Steward, or
-// a pair of access keys. A connector is an instance of a kind. Before a task calls any provider, the runner calls Resolve on the connectors
+// A kind of credential that a provider offers: a way of reaching the tool, such as an AWS role assumed with the identity token of Steward, or
+// a pair of access keys. A credential is an instance of a kind. Before a task calls any provider, the runner calls Resolve on the credentials
 // shared with the task and hands what they return to the provider as its environment and files, so a provider that only reads the
-// environment of its tool needs nothing from the connectors of another provider.
-message ConnectorDefinition {
+// environment of its tool needs nothing from the credentials of another provider.
+message CredentialDefinition {
   // Unique within the provider, such as "oidc-role".
   string name = 1;
   string title = 2;
   string description = 3;
 
-  // The settings of a connector of this kind, such as the ARN of a role. Not secrets.
+  // The settings of a credential of this kind, such as the ARN of a role. Not secrets.
   repeated InputDefinition inputs = 4;
 
-  // The secrets of a connector of this kind, such as an access key. A value is a reference to a vault that the runner
-  // resolves for the call; it is never kept in the connector.
+  // The secrets of a credential of this kind, such as an access key. A value is a reference to a vault that the runner
+  // resolves for the call; it is never kept in the credential.
   repeated SecretDefinition secrets = 5;
 
-  // The audience of the identity token of Steward that the runner sends in ConnectorServiceResolveRequest.identity_token, such as
+  // The audience of the identity token of Steward that the runner sends in CredentialServiceResolveRequest.identity_token, such as
   // `sts.amazonaws.com`. Empty when the kind takes no token.
   string identity_audience = 6;
 }
@@ -403,7 +402,7 @@ message ProviderServiceGrantAccessRequest {
   reserved 3, 4, 10;
   reserved "role", "permissions", "grant_inputs";
 
-  Connector connector = 1;
+  Credential credential = 1;
   Identity identity = 2;
 
   // A name declared in ProviderDefinition.grants.
@@ -431,7 +430,7 @@ message ProviderServiceRevokeAccessRequest {
   reserved 3, 5, 10;
   reserved "role", "permissions", "grant_inputs";
 
-  Connector connector = 1;
+  Credential credential = 1;
   Identity identity = 2;
 
   // The id GrantAccess returned for this grant, when it returned one.
@@ -449,7 +448,7 @@ message ProviderServiceGetAccessRequest {
   reserved 10;
   reserved "grant_inputs";
 
-  Connector connector = 1;
+  Credential credential = 1;
   Identity identity = 2;
 
   string grant = 3;
@@ -480,7 +479,7 @@ message ProviderServiceGetAccessResponse {
 //
 // Idempotent: granting what is already granted succeeds.
 message ResourceServiceGrantAccessRequest {
-  Connector connector = 1;
+  Credential credential = 1;
   Resource resource = 2;
   Identity identity = 3;
   Role role = 4;
@@ -505,7 +504,7 @@ message ResourceServiceGrantAccessResponse {
 // Idempotent: revoking what is already absent succeeds. Steward works out overlap between roles
 // before it sends a revoke, so the role here is safe to remove in full.
 message ResourceServiceRevokeAccessRequest {
-  Connector connector = 1;
+  Credential credential = 1;
   Resource resource = 2;
   Identity identity = 3;
   Role role = 4;
@@ -519,7 +518,7 @@ message ResourceServiceRevokeAccessResponse {}
 
 // Asks what an identity holds on a resource now.
 message ResourceServiceGetAccessRequest {
-  Connector connector = 1;
+  Credential credential = 1;
   Resource resource = 2;
   Identity identity = 3;
 }
@@ -536,7 +535,7 @@ message ResourceServiceGetAccessResponse {
 // Idempotent: provisioning something that already exists with the same kind and name succeeds, and
 // still returns its outputs. Steward works out what changed by comparing the state it stores.
 message ResourceServiceProvisionRequest {
-  Connector connector = 1;
+  Credential credential = 1;
 
   // The kind to create, as declared in ProviderDefinition.resources.
   string kind = 2;
@@ -561,14 +560,14 @@ message ResourceServiceProvisionResponse {
 
 // Idempotent: removing something that is already gone succeeds.
 message ResourceServiceDeprovisionRequest {
-  Connector connector = 1;
+  Credential credential = 1;
   Resource resource = 2;
 }
 
 message ResourceServiceDeprovisionResponse {}
 
 message ResourceServiceListRequest {
-  Connector connector = 1;
+  Credential credential = 1;
   string kind = 2;
   string page_token = 3;
 }
@@ -586,7 +585,7 @@ message ResourceServiceListResponse {
 
 // Idempotent: creating an application that already exists with the same identity returns it.
 message ApplicationServiceCreateRequest {
-  Connector connector = 1;
+  Credential credential = 1;
 
   // A kind declared in ProviderDefinition.applications, with its inputs and secrets, where it is
   // deployed from, and its starting variables.
@@ -604,7 +603,7 @@ message ApplicationServiceCreateResponse {
 
 // Idempotent: removing an application that is already gone succeeds.
 message ApplicationServiceDestroyRequest {
-  Connector connector = 1;
+  Credential credential = 1;
   Application application = 2;
 }
 
@@ -615,7 +614,7 @@ message ApplicationServiceDestroyResponse {}
 // from it is removed. A locked variable cannot be changed or removed, and the call fails with
 // FAILED_PRECONDITION.
 message ApplicationServiceDeployRequest {
-  Connector connector = 1;
+  Credential credential = 1;
   Application application = 2;
   // What to deploy. Unset means redeploy from the application's current source.
   ApplicationSource source = 3;
@@ -626,42 +625,42 @@ message ApplicationServiceDeployResponse {
   Application application = 1;
 }
 
-// Turns a connector of a kind into what a tool reads: environment variables and files. The runner calls it before a task
-// invokes any provider, once for each connector shared with the task, and merges the results. A value is a secret of the call: the
+// Turns a credential of a kind into what a tool reads: environment variables and files. The runner calls it before a task
+// invokes any provider, once for each credential shared with the task, and merges the results. A value is a secret of the call: the
 // provider must not persist it or write it to a log.
-message ConnectorServiceResolveRequest {
-  // The name of a kind declared in ProviderDefinition.connectors.
+message CredentialServiceResolveRequest {
+  // The name of a kind declared in ProviderDefinition.credentials.
   string kind = 1;
 
-  // The settings of the connector, keyed by the inputs the kind declared.
+  // The settings of the credential, keyed by the inputs the kind declared.
   google.protobuf.Struct inputs = 2;
 
-  // The secrets of the connector, keyed by the secrets the kind declared. Resolved by the runner for this call only.
+  // The secrets of the credential, keyed by the secrets the kind declared. Resolved by the runner for this call only.
   map<string, string> secrets = 3;
 
-  // A token that proves who the connector is, for the audience the kind declared. Valid for minutes, and never persisted.
+  // A token that proves who the credential is, for the audience the kind declared. Valid for minutes, and never persisted.
   string identity_token = 4;
 
-  // Who the connector is, and the organization it belongs to, so that a provider can name what it makes after them.
-  string connector_ulid = 5;
-  string connector_name = 6;
+  // Who the credential is, and the organization it belongs to, so that a provider can name what it makes after them.
+  string credential_ulid = 5;
+  string credential_name = 6;
   Organization organization = 7;
 }
 
-message ConnectorServiceResolveResponse {
+message CredentialServiceResolveResponse {
   // Environment variables for the process of the task, such as AWS_ACCESS_KEY_ID.
   map<string, string> env = 1;
 
   // Files for the process of the task, which the runner writes into a directory of the task and removes after it. The path of each
   // file is given to the process in the variable named by its env_name.
-  repeated ConnectorFile files = 2;
+  repeated CredentialFile files = 2;
 
   // When the credentials stop working, as seconds since the epoch. 0 when they do not expire. The runner calls Resolve again before
   // then when a task is still running.
   int64 expires_at = 3;
 }
 
-message ConnectorFile {
+message CredentialFile {
   // The name of the environment variable that holds the path of the file, such as AWS_WEB_IDENTITY_TOKEN_FILE.
   string env_name = 1;
   bytes content = 2;
@@ -674,7 +673,7 @@ message ConnectorFile {
 // Mandatory for every provider. Describe is always served. GrantAccess, RevokeAccess and
 // GetAccess apply only to a provider that declares grants, and answer UNIMPLEMENTED otherwise.
 service ProviderService {
-  // Describes the provider: the connectors it offers, the resources and applications it manages, and the grants it gives.
+  // Describes the provider: the credentials it offers, the resources and applications it manages, and the grants it gives.
   rpc Describe(DescribeRequest) returns (DescribeResponse);
 
   // Access to the provider as a whole: giving identities a grant, taking it away, and checking
@@ -703,7 +702,7 @@ service ApplicationService {
   rpc Deploy(ApplicationServiceDeployRequest) returns (ApplicationServiceDeployResponse);
 }
 
-// For providers that offer ways to reach a tool (ProviderDefinition.connectors).
-service ConnectorService {
-  rpc Resolve(ConnectorServiceResolveRequest) returns (ConnectorServiceResolveResponse);
+// For providers that offer ways to reach a tool (ProviderDefinition.credentials).
+service CredentialService {
+  rpc Resolve(CredentialServiceResolveRequest) returns (CredentialServiceResolveResponse);
 }

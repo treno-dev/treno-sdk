@@ -22,38 +22,38 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// A connector is a way of reaching a tool that an organization set up from a kind of connector that a provider offers, such as a role of
-// one AWS account. A call that is made on behalf of a connector says which. What the connector holds, its inputs and its secrets, is
-// handed to the provider that declared its kind in ConnectorService.Resolve, and a task reads the result as its environment.
-type Connector struct {
+// A credential is a way of reaching a tool that an organization set up from a kind of credential that a provider offers, such as a role of
+// one AWS account. A call that is made on behalf of a credential says which. What the credential holds, its inputs and its secrets, is
+// handed to the provider that declared its kind in CredentialService.Resolve, and a task reads the result as its environment.
+type Credential struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Who the connector is. A provider can name what it makes in a tool after it, such as a role.
+	// Who the credential is. A provider can name what it makes in a tool after it, such as a role.
 	Ulid string `protobuf:"bytes,3,opt,name=ulid,proto3" json:"ulid,omitempty"`
 	Name string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
-	// The organization the connector belongs to.
+	// The organization the credential belongs to.
 	Organization *Organization `protobuf:"bytes,5,opt,name=organization,proto3" json:"organization,omitempty"`
 	// The address of Steward as an issuer of identity tokens: the `iss` of the token, which a cloud is
 	// told to trust. A provider that sets up trust in it, such as with a link to a guide, uses this
-	// address. It is set in Describe, for the connector the provider is described for.
+	// address. It is set in Describe, for the credential the provider is described for.
 	IdentityIssuer string `protobuf:"bytes,7,opt,name=identity_issuer,json=identityIssuer,proto3" json:"identity_issuer,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
 
-func (x *Connector) Reset() {
-	*x = Connector{}
+func (x *Credential) Reset() {
+	*x = Credential{}
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Connector) String() string {
+func (x *Credential) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Connector) ProtoMessage() {}
+func (*Credential) ProtoMessage() {}
 
-func (x *Connector) ProtoReflect() protoreflect.Message {
+func (x *Credential) ProtoReflect() protoreflect.Message {
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -65,33 +65,33 @@ func (x *Connector) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Connector.ProtoReflect.Descriptor instead.
-func (*Connector) Descriptor() ([]byte, []int) {
+// Deprecated: Use Credential.ProtoReflect.Descriptor instead.
+func (*Credential) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Connector) GetUlid() string {
+func (x *Credential) GetUlid() string {
 	if x != nil {
 		return x.Ulid
 	}
 	return ""
 }
 
-func (x *Connector) GetName() string {
+func (x *Credential) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-func (x *Connector) GetOrganization() *Organization {
+func (x *Credential) GetOrganization() *Organization {
 	if x != nil {
 		return x.Organization
 	}
 	return nil
 }
 
-func (x *Connector) GetIdentityIssuer() string {
+func (x *Credential) GetIdentityIssuer() string {
 	if x != nil {
 		return x.IdentityIssuer
 	}
@@ -162,7 +162,7 @@ type Resource struct {
 	// Values for the inputs declared in ResourceDefinition.inputs, keyed by input name.
 	Inputs *structpb.Struct `protobuf:"bytes,3,opt,name=inputs,proto3" json:"inputs,omitempty"`
 	// Values for the secrets declared in ResourceDefinition.secrets, keyed by secret name. Resolved
-	// by the runner for this call only, like Connector.secrets.
+	// by the runner for this call only, like Credential.secrets.
 	Secrets map[string]string `protobuf:"bytes,4,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	// Values the resource produced, as declared in ResourceDefinition.outputs, keyed by output name.
 	// Set by the provider when it lists a resource; ignored on calls. Provision returns its outputs
@@ -685,10 +685,10 @@ func (x *Permission) GetDescription() string {
 
 type DescribeRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The connector the provider is being added for, when there is one. Steward sets it when a runner
-	// installs a connector, so that the provider can say what the person does in the tool before the
+	// The credential the provider is being added for, when there is one. Steward sets it when a runner
+	// installs a credential, so that the provider can say what the person does in the tool before the
 	// settings. Tools that only read the description, such as the generator of docs, leave it empty.
-	Connector     *Connector `protobuf:"bytes,1,opt,name=connector,proto3" json:"connector,omitempty"`
+	Credential    *Credential `protobuf:"bytes,1,opt,name=credential,proto3" json:"credential,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -723,9 +723,9 @@ func (*DescribeRequest) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *DescribeRequest) GetConnector() *Connector {
+func (x *DescribeRequest) GetCredential() *Credential {
 	if x != nil {
-		return x.Connector
+		return x.Credential
 	}
 	return nil
 }
@@ -734,13 +734,12 @@ type DescribeResponse struct {
 	state   protoimpl.MessageState `protogen:"open.v1"`
 	Name    string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Version string                 `protobuf:"bytes,2,opt,name=version,proto3" json:"version,omitempty"`
-	// What the provider offers. A provider that needs several tools takes the credentials for each as
-	// secrets.
+	// What the provider offers. A provider that needs several tools takes a secret for each tool.
 	Definition *ProviderDefinition `protobuf:"bytes,3,opt,name=definition,proto3" json:"definition,omitempty"`
-	// Steps the person takes in another tool before the settings of this connector, such as a page
-	// that creates a stack. They are for the connector of the request and are kept with it: the
-	// definition is the same for every connector of a version of the provider, and these are not.
-	// Empty when the request has no connector.
+	// Steps the person takes in another tool before the settings of this credential, such as a page
+	// that creates a stack. They are for the credential of the request and are kept with it: the
+	// definition is the same for every credential of a version of the provider, and these are not.
+	// Empty when the request has no credential.
 	SetupLinks    []*SetupLink `protobuf:"bytes,4,rep,name=setup_links,json=setupLinks,proto3" json:"setup_links,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -877,9 +876,9 @@ type ProviderDefinition struct {
 	// people edit over time. Kinds are unique within the provider. Empty when the provider runs no
 	// applications.
 	Applications []*ApplicationDefinition `protobuf:"bytes,7,rep,name=applications,proto3" json:"applications,omitempty"`
-	// The kinds of connector this provider offers, which are the ways it can reach its tool. Empty when the provider offers none, such as one that
+	// The kinds of credential this provider offers, which are the ways it can reach its tool. Empty when the provider offers none, such as one that
 	// only reads the environment its tool reads.
-	Connectors []*ConnectorDefinition `protobuf:"bytes,11,rep,name=connectors,proto3" json:"connectors,omitempty"`
+	Credentials []*CredentialDefinition `protobuf:"bytes,11,rep,name=credentials,proto3" json:"credentials,omitempty"`
 	// What a person can be given in the tool as a whole, such as access to an AWS account through a role, or membership of a GitHub
 	// organization. Names are unique within the provider. Declaring grants is what says the provider supports access.
 	Grants        []*GrantDefinition `protobuf:"bytes,13,rep,name=grants,proto3" json:"grants,omitempty"`
@@ -945,9 +944,9 @@ func (x *ProviderDefinition) GetApplications() []*ApplicationDefinition {
 	return nil
 }
 
-func (x *ProviderDefinition) GetConnectors() []*ConnectorDefinition {
+func (x *ProviderDefinition) GetCredentials() []*CredentialDefinition {
 	if x != nil {
-		return x.Connectors
+		return x.Credentials
 	}
 	return nil
 }
@@ -960,7 +959,7 @@ func (x *ProviderDefinition) GetGrants() []*GrantDefinition {
 }
 
 // One setting a provider, a resource or an application takes, declared the way a variable is: a name
-// and a type, with the value passed separately, keyed by `name`, in Connector.inputs,
+// and a type, with the value passed separately, keyed by `name`, in Credential.inputs,
 // Resource.inputs or Application.inputs.
 type InputDefinition struct {
 	state       protoimpl.MessageState `protogen:"open.v1"`
@@ -1075,7 +1074,7 @@ func (x *InputDefinition) GetMax() float64 {
 	return 0
 }
 
-// One credential a provider, a resource or an application takes, such as an API token or a private
+// One secret a provider, a resource or an application takes, such as an API token or a private
 // key. Secrets are separate from inputs: they are stored, sent and shown differently. The value is
 // passed in the `secrets` map, keyed by `name`, for one call only, and is never shown back once set.
 type SecretDefinition struct {
@@ -1226,7 +1225,7 @@ type ResourceDefinition struct {
 	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	// What is required to create a resource of this kind. Provision takes values for these.
 	Inputs []*InputDefinition `protobuf:"bytes,4,rep,name=inputs,proto3" json:"inputs,omitempty"`
-	// The credentials a resource of this kind takes, separate from its inputs.
+	// The secrets a resource of this kind takes, separate from its inputs.
 	Secrets []*SecretDefinition `protobuf:"bytes,8,rep,name=secrets,proto3" json:"secrets,omitempty"`
 	// What can be granted on this type. Declaring permissions or roles is what says the type supports
 	// access. A tool may expose permissions, roles, or both, as separate lists. Steward lets
@@ -1338,7 +1337,7 @@ type ApplicationDefinition struct {
 	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	// Fixed settings of the application itself, such as a runtime or a region. Not its variables.
 	Inputs []*InputDefinition `protobuf:"bytes,4,rep,name=inputs,proto3" json:"inputs,omitempty"`
-	// The credentials the application takes, separate from its inputs.
+	// The secrets the application takes, separate from its inputs.
 	Secrets []*SecretDefinition `protobuf:"bytes,7,rep,name=secrets,proto3" json:"secrets,omitempty"`
 	// The source types it can be deployed from, by name: "github", "registry", "s3" or "raw", as
 	// described on ApplicationSource.
@@ -1428,42 +1427,42 @@ func (x *ApplicationDefinition) GetOutputs() []*OutputDefinition {
 	return nil
 }
 
-// A kind of connector that a provider offers: a way of reaching the tool, such as an AWS role assumed with the identity token of Steward, or
-// a pair of access keys. A connector is an instance of a kind. Before a task calls any provider, the runner calls Resolve on the connectors
+// A kind of credential that a provider offers: a way of reaching the tool, such as an AWS role assumed with the identity token of Steward, or
+// a pair of access keys. A credential is an instance of a kind. Before a task calls any provider, the runner calls Resolve on the credentials
 // shared with the task and hands what they return to the provider as its environment and files, so a provider that only reads the
-// environment of its tool needs nothing from the connectors of another provider.
-type ConnectorDefinition struct {
+// environment of its tool needs nothing from the credentials of another provider.
+type CredentialDefinition struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Unique within the provider, such as "oidc-role".
 	Name        string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Title       string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
 	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	// The settings of a connector of this kind, such as the ARN of a role. Not secrets.
+	// The settings of a credential of this kind, such as the ARN of a role. Not secrets.
 	Inputs []*InputDefinition `protobuf:"bytes,4,rep,name=inputs,proto3" json:"inputs,omitempty"`
-	// The secrets of a connector of this kind, such as an access key. A value is a reference to a vault that the runner
-	// resolves for the call; it is never kept in the connector.
+	// The secrets of a credential of this kind, such as an access key. A value is a reference to a vault that the runner
+	// resolves for the call; it is never kept in the credential.
 	Secrets []*SecretDefinition `protobuf:"bytes,5,rep,name=secrets,proto3" json:"secrets,omitempty"`
-	// The audience of the identity token of Steward that the runner sends in ConnectorServiceResolveRequest.identity_token, such as
+	// The audience of the identity token of Steward that the runner sends in CredentialServiceResolveRequest.identity_token, such as
 	// `sts.amazonaws.com`. Empty when the kind takes no token.
 	IdentityAudience string `protobuf:"bytes,6,opt,name=identity_audience,json=identityAudience,proto3" json:"identity_audience,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
 
-func (x *ConnectorDefinition) Reset() {
-	*x = ConnectorDefinition{}
+func (x *CredentialDefinition) Reset() {
+	*x = CredentialDefinition{}
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ConnectorDefinition) String() string {
+func (x *CredentialDefinition) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ConnectorDefinition) ProtoMessage() {}
+func (*CredentialDefinition) ProtoMessage() {}
 
-func (x *ConnectorDefinition) ProtoReflect() protoreflect.Message {
+func (x *CredentialDefinition) ProtoReflect() protoreflect.Message {
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1475,47 +1474,47 @@ func (x *ConnectorDefinition) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ConnectorDefinition.ProtoReflect.Descriptor instead.
-func (*ConnectorDefinition) Descriptor() ([]byte, []int) {
+// Deprecated: Use CredentialDefinition.ProtoReflect.Descriptor instead.
+func (*CredentialDefinition) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{18}
 }
 
-func (x *ConnectorDefinition) GetName() string {
+func (x *CredentialDefinition) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-func (x *ConnectorDefinition) GetTitle() string {
+func (x *CredentialDefinition) GetTitle() string {
 	if x != nil {
 		return x.Title
 	}
 	return ""
 }
 
-func (x *ConnectorDefinition) GetDescription() string {
+func (x *CredentialDefinition) GetDescription() string {
 	if x != nil {
 		return x.Description
 	}
 	return ""
 }
 
-func (x *ConnectorDefinition) GetInputs() []*InputDefinition {
+func (x *CredentialDefinition) GetInputs() []*InputDefinition {
 	if x != nil {
 		return x.Inputs
 	}
 	return nil
 }
 
-func (x *ConnectorDefinition) GetSecrets() []*SecretDefinition {
+func (x *CredentialDefinition) GetSecrets() []*SecretDefinition {
 	if x != nil {
 		return x.Secrets
 	}
 	return nil
 }
 
-func (x *ConnectorDefinition) GetIdentityAudience() string {
+func (x *CredentialDefinition) GetIdentityAudience() string {
 	if x != nil {
 		return x.IdentityAudience
 	}
@@ -1731,9 +1730,9 @@ func (x *RoleDefinition) GetDescription() string {
 //
 // Idempotent: granting what is already granted succeeds.
 type ProviderServiceGrantAccessRequest struct {
-	state     protoimpl.MessageState `protogen:"open.v1"`
-	Connector *Connector             `protobuf:"bytes,1,opt,name=connector,proto3" json:"connector,omitempty"`
-	Identity  *Identity              `protobuf:"bytes,2,opt,name=identity,proto3" json:"identity,omitempty"`
+	state      protoimpl.MessageState `protogen:"open.v1"`
+	Credential *Credential            `protobuf:"bytes,1,opt,name=credential,proto3" json:"credential,omitempty"`
+	Identity   *Identity              `protobuf:"bytes,2,opt,name=identity,proto3" json:"identity,omitempty"`
 	// A name declared in ProviderDefinition.grants.
 	Grant string `protobuf:"bytes,5,opt,name=grant,proto3" json:"grant,omitempty"`
 	// The values of the inputs that grant declared, keyed by input name.
@@ -1772,9 +1771,9 @@ func (*ProviderServiceGrantAccessRequest) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{22}
 }
 
-func (x *ProviderServiceGrantAccessRequest) GetConnector() *Connector {
+func (x *ProviderServiceGrantAccessRequest) GetCredential() *Credential {
 	if x != nil {
-		return x.Connector
+		return x.Credential
 	}
 	return nil
 }
@@ -1858,9 +1857,9 @@ func (x *ProviderServiceGrantAccessResponse) GetPending() bool {
 
 // Idempotent: revoking what is already absent succeeds.
 type ProviderServiceRevokeAccessRequest struct {
-	state     protoimpl.MessageState `protogen:"open.v1"`
-	Connector *Connector             `protobuf:"bytes,1,opt,name=connector,proto3" json:"connector,omitempty"`
-	Identity  *Identity              `protobuf:"bytes,2,opt,name=identity,proto3" json:"identity,omitempty"`
+	state      protoimpl.MessageState `protogen:"open.v1"`
+	Credential *Credential            `protobuf:"bytes,1,opt,name=credential,proto3" json:"credential,omitempty"`
+	Identity   *Identity              `protobuf:"bytes,2,opt,name=identity,proto3" json:"identity,omitempty"`
 	// The id GrantAccess returned for this grant, when it returned one.
 	Id            string           `protobuf:"bytes,4,opt,name=id,proto3" json:"id,omitempty"`
 	Grant         string           `protobuf:"bytes,6,opt,name=grant,proto3" json:"grant,omitempty"`
@@ -1899,9 +1898,9 @@ func (*ProviderServiceRevokeAccessRequest) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{24}
 }
 
-func (x *ProviderServiceRevokeAccessRequest) GetConnector() *Connector {
+func (x *ProviderServiceRevokeAccessRequest) GetCredential() *Credential {
 	if x != nil {
-		return x.Connector
+		return x.Credential
 	}
 	return nil
 }
@@ -1974,7 +1973,7 @@ func (*ProviderServiceRevokeAccessResponse) Descriptor() ([]byte, []int) {
 // is already a member, or to find drift.
 type ProviderServiceGetAccessRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Connector     *Connector             `protobuf:"bytes,1,opt,name=connector,proto3" json:"connector,omitempty"`
+	Credential    *Credential            `protobuf:"bytes,1,opt,name=credential,proto3" json:"credential,omitempty"`
 	Identity      *Identity              `protobuf:"bytes,2,opt,name=identity,proto3" json:"identity,omitempty"`
 	Grant         string                 `protobuf:"bytes,3,opt,name=grant,proto3" json:"grant,omitempty"`
 	Inputs        *structpb.Struct       `protobuf:"bytes,4,opt,name=inputs,proto3" json:"inputs,omitempty"`
@@ -2012,9 +2011,9 @@ func (*ProviderServiceGetAccessRequest) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{26}
 }
 
-func (x *ProviderServiceGetAccessRequest) GetConnector() *Connector {
+func (x *ProviderServiceGetAccessRequest) GetCredential() *Credential {
 	if x != nil {
-		return x.Connector
+		return x.Credential
 	}
 	return nil
 }
@@ -2110,7 +2109,7 @@ func (x *ProviderServiceGetAccessResponse) GetIdentity() *Identity {
 // Idempotent: granting what is already granted succeeds.
 type ResourceServiceGrantAccessRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Connector     *Connector             `protobuf:"bytes,1,opt,name=connector,proto3" json:"connector,omitempty"`
+	Credential    *Credential            `protobuf:"bytes,1,opt,name=credential,proto3" json:"credential,omitempty"`
 	Resource      *Resource              `protobuf:"bytes,2,opt,name=resource,proto3" json:"resource,omitempty"`
 	Identity      *Identity              `protobuf:"bytes,3,opt,name=identity,proto3" json:"identity,omitempty"`
 	Role          *Role                  `protobuf:"bytes,4,opt,name=role,proto3" json:"role,omitempty"`
@@ -2149,9 +2148,9 @@ func (*ResourceServiceGrantAccessRequest) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{28}
 }
 
-func (x *ResourceServiceGrantAccessRequest) GetConnector() *Connector {
+func (x *ResourceServiceGrantAccessRequest) GetCredential() *Credential {
 	if x != nil {
-		return x.Connector
+		return x.Credential
 	}
 	return nil
 }
@@ -2262,7 +2261,7 @@ func (x *ResourceServiceGrantAccessResponse) GetPending() bool {
 // before it sends a revoke, so the role here is safe to remove in full.
 type ResourceServiceRevokeAccessRequest struct {
 	state       protoimpl.MessageState `protogen:"open.v1"`
-	Connector   *Connector             `protobuf:"bytes,1,opt,name=connector,proto3" json:"connector,omitempty"`
+	Credential  *Credential            `protobuf:"bytes,1,opt,name=credential,proto3" json:"credential,omitempty"`
 	Resource    *Resource              `protobuf:"bytes,2,opt,name=resource,proto3" json:"resource,omitempty"`
 	Identity    *Identity              `protobuf:"bytes,3,opt,name=identity,proto3" json:"identity,omitempty"`
 	Role        *Role                  `protobuf:"bytes,4,opt,name=role,proto3" json:"role,omitempty"`
@@ -2303,9 +2302,9 @@ func (*ResourceServiceRevokeAccessRequest) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{30}
 }
 
-func (x *ResourceServiceRevokeAccessRequest) GetConnector() *Connector {
+func (x *ResourceServiceRevokeAccessRequest) GetCredential() *Credential {
 	if x != nil {
-		return x.Connector
+		return x.Credential
 	}
 	return nil
 }
@@ -2384,7 +2383,7 @@ func (*ResourceServiceRevokeAccessResponse) Descriptor() ([]byte, []int) {
 // Asks what an identity holds on a resource now.
 type ResourceServiceGetAccessRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Connector     *Connector             `protobuf:"bytes,1,opt,name=connector,proto3" json:"connector,omitempty"`
+	Credential    *Credential            `protobuf:"bytes,1,opt,name=credential,proto3" json:"credential,omitempty"`
 	Resource      *Resource              `protobuf:"bytes,2,opt,name=resource,proto3" json:"resource,omitempty"`
 	Identity      *Identity              `protobuf:"bytes,3,opt,name=identity,proto3" json:"identity,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -2421,9 +2420,9 @@ func (*ResourceServiceGetAccessRequest) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{32}
 }
 
-func (x *ResourceServiceGetAccessRequest) GetConnector() *Connector {
+func (x *ResourceServiceGetAccessRequest) GetCredential() *Credential {
 	if x != nil {
-		return x.Connector
+		return x.Credential
 	}
 	return nil
 }
@@ -2507,8 +2506,8 @@ func (x *ResourceServiceGetAccessResponse) GetPending() bool {
 // Idempotent: provisioning something that already exists with the same kind and name succeeds, and
 // still returns its outputs. Steward works out what changed by comparing the state it stores.
 type ResourceServiceProvisionRequest struct {
-	state     protoimpl.MessageState `protogen:"open.v1"`
-	Connector *Connector             `protobuf:"bytes,1,opt,name=connector,proto3" json:"connector,omitempty"`
+	state      protoimpl.MessageState `protogen:"open.v1"`
+	Credential *Credential            `protobuf:"bytes,1,opt,name=credential,proto3" json:"credential,omitempty"`
 	// The kind to create, as declared in ProviderDefinition.resources.
 	Kind string `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
 	// What to call it in the tool. Steward stores the name with the kind.
@@ -2552,9 +2551,9 @@ func (*ResourceServiceProvisionRequest) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{34}
 }
 
-func (x *ResourceServiceProvisionRequest) GetConnector() *Connector {
+func (x *ResourceServiceProvisionRequest) GetCredential() *Credential {
 	if x != nil {
-		return x.Connector
+		return x.Credential
 	}
 	return nil
 }
@@ -2637,7 +2636,7 @@ func (x *ResourceServiceProvisionResponse) GetOutputs() *structpb.Struct {
 // Idempotent: removing something that is already gone succeeds.
 type ResourceServiceDeprovisionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Connector     *Connector             `protobuf:"bytes,1,opt,name=connector,proto3" json:"connector,omitempty"`
+	Credential    *Credential            `protobuf:"bytes,1,opt,name=credential,proto3" json:"credential,omitempty"`
 	Resource      *Resource              `protobuf:"bytes,2,opt,name=resource,proto3" json:"resource,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -2673,9 +2672,9 @@ func (*ResourceServiceDeprovisionRequest) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{36}
 }
 
-func (x *ResourceServiceDeprovisionRequest) GetConnector() *Connector {
+func (x *ResourceServiceDeprovisionRequest) GetCredential() *Credential {
 	if x != nil {
-		return x.Connector
+		return x.Credential
 	}
 	return nil
 }
@@ -2725,7 +2724,7 @@ func (*ResourceServiceDeprovisionResponse) Descriptor() ([]byte, []int) {
 
 type ResourceServiceListRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Connector     *Connector             `protobuf:"bytes,1,opt,name=connector,proto3" json:"connector,omitempty"`
+	Credential    *Credential            `protobuf:"bytes,1,opt,name=credential,proto3" json:"credential,omitempty"`
 	Kind          string                 `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
 	PageToken     string                 `protobuf:"bytes,3,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -2762,9 +2761,9 @@ func (*ResourceServiceListRequest) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{38}
 }
 
-func (x *ResourceServiceListRequest) GetConnector() *Connector {
+func (x *ResourceServiceListRequest) GetCredential() *Credential {
 	if x != nil {
-		return x.Connector
+		return x.Credential
 	}
 	return nil
 }
@@ -2838,8 +2837,8 @@ func (x *ResourceServiceListResponse) GetNextPageToken() string {
 
 // Idempotent: creating an application that already exists with the same identity returns it.
 type ApplicationServiceCreateRequest struct {
-	state     protoimpl.MessageState `protogen:"open.v1"`
-	Connector *Connector             `protobuf:"bytes,1,opt,name=connector,proto3" json:"connector,omitempty"`
+	state      protoimpl.MessageState `protogen:"open.v1"`
+	Credential *Credential            `protobuf:"bytes,1,opt,name=credential,proto3" json:"credential,omitempty"`
 	// A kind declared in ProviderDefinition.applications, with its inputs and secrets, where it is
 	// deployed from, and its starting variables.
 	Kind          string             `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
@@ -2881,9 +2880,9 @@ func (*ApplicationServiceCreateRequest) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{40}
 }
 
-func (x *ApplicationServiceCreateRequest) GetConnector() *Connector {
+func (x *ApplicationServiceCreateRequest) GetCredential() *Credential {
 	if x != nil {
-		return x.Connector
+		return x.Credential
 	}
 	return nil
 }
@@ -2971,7 +2970,7 @@ func (x *ApplicationServiceCreateResponse) GetApplication() *Application {
 // Idempotent: removing an application that is already gone succeeds.
 type ApplicationServiceDestroyRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Connector     *Connector             `protobuf:"bytes,1,opt,name=connector,proto3" json:"connector,omitempty"`
+	Credential    *Credential            `protobuf:"bytes,1,opt,name=credential,proto3" json:"credential,omitempty"`
 	Application   *Application           `protobuf:"bytes,2,opt,name=application,proto3" json:"application,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -3007,9 +3006,9 @@ func (*ApplicationServiceDestroyRequest) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{42}
 }
 
-func (x *ApplicationServiceDestroyRequest) GetConnector() *Connector {
+func (x *ApplicationServiceDestroyRequest) GetCredential() *Credential {
 	if x != nil {
-		return x.Connector
+		return x.Credential
 	}
 	return nil
 }
@@ -3063,7 +3062,7 @@ func (*ApplicationServiceDestroyResponse) Descriptor() ([]byte, []int) {
 // FAILED_PRECONDITION.
 type ApplicationServiceDeployRequest struct {
 	state       protoimpl.MessageState `protogen:"open.v1"`
-	Connector   *Connector             `protobuf:"bytes,1,opt,name=connector,proto3" json:"connector,omitempty"`
+	Credential  *Credential            `protobuf:"bytes,1,opt,name=credential,proto3" json:"credential,omitempty"`
 	Application *Application           `protobuf:"bytes,2,opt,name=application,proto3" json:"application,omitempty"`
 	// What to deploy. Unset means redeploy from the application's current source.
 	Source        *ApplicationSource `protobuf:"bytes,3,opt,name=source,proto3" json:"source,omitempty"`
@@ -3101,9 +3100,9 @@ func (*ApplicationServiceDeployRequest) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{44}
 }
 
-func (x *ApplicationServiceDeployRequest) GetConnector() *Connector {
+func (x *ApplicationServiceDeployRequest) GetCredential() *Credential {
 	if x != nil {
-		return x.Connector
+		return x.Credential
 	}
 	return nil
 }
@@ -3167,41 +3166,41 @@ func (x *ApplicationServiceDeployResponse) GetApplication() *Application {
 	return nil
 }
 
-// Turns a connector of a kind into what a tool reads: environment variables and files. The runner calls it before a task
-// invokes any provider, once for each connector shared with the task, and merges the results. A value is a secret of the call: the
+// Turns a credential of a kind into what a tool reads: environment variables and files. The runner calls it before a task
+// invokes any provider, once for each credential shared with the task, and merges the results. A value is a secret of the call: the
 // provider must not persist it or write it to a log.
-type ConnectorServiceResolveRequest struct {
+type CredentialServiceResolveRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The name of a kind declared in ProviderDefinition.connectors.
+	// The name of a kind declared in ProviderDefinition.credentials.
 	Kind string `protobuf:"bytes,1,opt,name=kind,proto3" json:"kind,omitempty"`
-	// The settings of the connector, keyed by the inputs the kind declared.
+	// The settings of the credential, keyed by the inputs the kind declared.
 	Inputs *structpb.Struct `protobuf:"bytes,2,opt,name=inputs,proto3" json:"inputs,omitempty"`
-	// The secrets of the connector, keyed by the secrets the kind declared. Resolved by the runner for this call only.
+	// The secrets of the credential, keyed by the secrets the kind declared. Resolved by the runner for this call only.
 	Secrets map[string]string `protobuf:"bytes,3,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	// A token that proves who the connector is, for the audience the kind declared. Valid for minutes, and never persisted.
+	// A token that proves who the credential is, for the audience the kind declared. Valid for minutes, and never persisted.
 	IdentityToken string `protobuf:"bytes,4,opt,name=identity_token,json=identityToken,proto3" json:"identity_token,omitempty"`
-	// Who the connector is, and the organization it belongs to, so that a provider can name what it makes after them.
-	ConnectorUlid string        `protobuf:"bytes,5,opt,name=connector_ulid,json=connectorUlid,proto3" json:"connector_ulid,omitempty"`
-	ConnectorName string        `protobuf:"bytes,6,opt,name=connector_name,json=connectorName,proto3" json:"connector_name,omitempty"`
-	Organization  *Organization `protobuf:"bytes,7,opt,name=organization,proto3" json:"organization,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	// Who the credential is, and the organization it belongs to, so that a provider can name what it makes after them.
+	CredentialUlid string        `protobuf:"bytes,5,opt,name=credential_ulid,json=credentialUlid,proto3" json:"credential_ulid,omitempty"`
+	CredentialName string        `protobuf:"bytes,6,opt,name=credential_name,json=credentialName,proto3" json:"credential_name,omitempty"`
+	Organization   *Organization `protobuf:"bytes,7,opt,name=organization,proto3" json:"organization,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
-func (x *ConnectorServiceResolveRequest) Reset() {
-	*x = ConnectorServiceResolveRequest{}
+func (x *CredentialServiceResolveRequest) Reset() {
+	*x = CredentialServiceResolveRequest{}
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ConnectorServiceResolveRequest) String() string {
+func (x *CredentialServiceResolveRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ConnectorServiceResolveRequest) ProtoMessage() {}
+func (*CredentialServiceResolveRequest) ProtoMessage() {}
 
-func (x *ConnectorServiceResolveRequest) ProtoReflect() protoreflect.Message {
+func (x *CredentialServiceResolveRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3213,67 +3212,67 @@ func (x *ConnectorServiceResolveRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ConnectorServiceResolveRequest.ProtoReflect.Descriptor instead.
-func (*ConnectorServiceResolveRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use CredentialServiceResolveRequest.ProtoReflect.Descriptor instead.
+func (*CredentialServiceResolveRequest) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{46}
 }
 
-func (x *ConnectorServiceResolveRequest) GetKind() string {
+func (x *CredentialServiceResolveRequest) GetKind() string {
 	if x != nil {
 		return x.Kind
 	}
 	return ""
 }
 
-func (x *ConnectorServiceResolveRequest) GetInputs() *structpb.Struct {
+func (x *CredentialServiceResolveRequest) GetInputs() *structpb.Struct {
 	if x != nil {
 		return x.Inputs
 	}
 	return nil
 }
 
-func (x *ConnectorServiceResolveRequest) GetSecrets() map[string]string {
+func (x *CredentialServiceResolveRequest) GetSecrets() map[string]string {
 	if x != nil {
 		return x.Secrets
 	}
 	return nil
 }
 
-func (x *ConnectorServiceResolveRequest) GetIdentityToken() string {
+func (x *CredentialServiceResolveRequest) GetIdentityToken() string {
 	if x != nil {
 		return x.IdentityToken
 	}
 	return ""
 }
 
-func (x *ConnectorServiceResolveRequest) GetConnectorUlid() string {
+func (x *CredentialServiceResolveRequest) GetCredentialUlid() string {
 	if x != nil {
-		return x.ConnectorUlid
+		return x.CredentialUlid
 	}
 	return ""
 }
 
-func (x *ConnectorServiceResolveRequest) GetConnectorName() string {
+func (x *CredentialServiceResolveRequest) GetCredentialName() string {
 	if x != nil {
-		return x.ConnectorName
+		return x.CredentialName
 	}
 	return ""
 }
 
-func (x *ConnectorServiceResolveRequest) GetOrganization() *Organization {
+func (x *CredentialServiceResolveRequest) GetOrganization() *Organization {
 	if x != nil {
 		return x.Organization
 	}
 	return nil
 }
 
-type ConnectorServiceResolveResponse struct {
+type CredentialServiceResolveResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Environment variables for the process of the task, such as AWS_ACCESS_KEY_ID.
 	Env map[string]string `protobuf:"bytes,1,rep,name=env,proto3" json:"env,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	// Files for the process of the task, which the runner writes into a directory of the task and removes after it. The path of each
 	// file is given to the process in the variable named by its env_name.
-	Files []*ConnectorFile `protobuf:"bytes,2,rep,name=files,proto3" json:"files,omitempty"`
+	Files []*CredentialFile `protobuf:"bytes,2,rep,name=files,proto3" json:"files,omitempty"`
 	// When the credentials stop working, as seconds since the epoch. 0 when they do not expire. The runner calls Resolve again before
 	// then when a task is still running.
 	ExpiresAt     int64 `protobuf:"varint,3,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
@@ -3281,20 +3280,20 @@ type ConnectorServiceResolveResponse struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ConnectorServiceResolveResponse) Reset() {
-	*x = ConnectorServiceResolveResponse{}
+func (x *CredentialServiceResolveResponse) Reset() {
+	*x = CredentialServiceResolveResponse{}
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ConnectorServiceResolveResponse) String() string {
+func (x *CredentialServiceResolveResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ConnectorServiceResolveResponse) ProtoMessage() {}
+func (*CredentialServiceResolveResponse) ProtoMessage() {}
 
-func (x *ConnectorServiceResolveResponse) ProtoReflect() protoreflect.Message {
+func (x *CredentialServiceResolveResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3306,33 +3305,33 @@ func (x *ConnectorServiceResolveResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ConnectorServiceResolveResponse.ProtoReflect.Descriptor instead.
-func (*ConnectorServiceResolveResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use CredentialServiceResolveResponse.ProtoReflect.Descriptor instead.
+func (*CredentialServiceResolveResponse) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{47}
 }
 
-func (x *ConnectorServiceResolveResponse) GetEnv() map[string]string {
+func (x *CredentialServiceResolveResponse) GetEnv() map[string]string {
 	if x != nil {
 		return x.Env
 	}
 	return nil
 }
 
-func (x *ConnectorServiceResolveResponse) GetFiles() []*ConnectorFile {
+func (x *CredentialServiceResolveResponse) GetFiles() []*CredentialFile {
 	if x != nil {
 		return x.Files
 	}
 	return nil
 }
 
-func (x *ConnectorServiceResolveResponse) GetExpiresAt() int64 {
+func (x *CredentialServiceResolveResponse) GetExpiresAt() int64 {
 	if x != nil {
 		return x.ExpiresAt
 	}
 	return 0
 }
 
-type ConnectorFile struct {
+type CredentialFile struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The name of the environment variable that holds the path of the file, such as AWS_WEB_IDENTITY_TOKEN_FILE.
 	EnvName       string `protobuf:"bytes,1,opt,name=env_name,json=envName,proto3" json:"env_name,omitempty"`
@@ -3341,20 +3340,20 @@ type ConnectorFile struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ConnectorFile) Reset() {
-	*x = ConnectorFile{}
+func (x *CredentialFile) Reset() {
+	*x = CredentialFile{}
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ConnectorFile) String() string {
+func (x *CredentialFile) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ConnectorFile) ProtoMessage() {}
+func (*CredentialFile) ProtoMessage() {}
 
-func (x *ConnectorFile) ProtoReflect() protoreflect.Message {
+func (x *CredentialFile) ProtoReflect() protoreflect.Message {
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -3366,19 +3365,19 @@ func (x *ConnectorFile) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ConnectorFile.ProtoReflect.Descriptor instead.
-func (*ConnectorFile) Descriptor() ([]byte, []int) {
+// Deprecated: Use CredentialFile.ProtoReflect.Descriptor instead.
+func (*CredentialFile) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{48}
 }
 
-func (x *ConnectorFile) GetEnvName() string {
+func (x *CredentialFile) GetEnvName() string {
 	if x != nil {
 		return x.EnvName
 	}
 	return ""
 }
 
-func (x *ConnectorFile) GetContent() []byte {
+func (x *CredentialFile) GetContent() []byte {
 	if x != nil {
 		return x.Content
 	}
@@ -3389,8 +3388,9 @@ var File_steward_provider_v1_provider_proto protoreflect.FileDescriptor
 
 const file_steward_provider_v1_provider_proto_rawDesc = "" +
 	"\n" +
-	"\"steward/provider/v1/provider.proto\x12\x13steward.provider.v1\x1a\x1cgoogle/protobuf/struct.proto\"\xd6\x01\n" +
-	"\tConnector\x12\x12\n" +
+	"\"steward/provider/v1/provider.proto\x12\x13steward.provider.v1\x1a\x1cgoogle/protobuf/struct.proto\"\xd7\x01\n" +
+	"\n" +
+	"Credential\x12\x12\n" +
 	"\x04ulid\x18\x03 \x01(\tR\x04ulid\x12\x12\n" +
 	"\x04name\x18\x04 \x01(\tR\x04name\x12E\n" +
 	"\forganization\x18\x05 \x01(\v2!.steward.provider.v1.OrganizationR\forganization\x12'\n" +
@@ -3445,9 +3445,11 @@ const file_steward_provider_v1_provider_proto_rawDesc = "" +
 	"\x05level\x18\x02 \x01(\tH\x00R\x05level\x88\x01\x01\x12%\n" +
 	"\vdescription\x18\x03 \x01(\tH\x01R\vdescription\x88\x01\x01B\b\n" +
 	"\x06_levelB\x0e\n" +
-	"\f_description\"O\n" +
-	"\x0fDescribeRequest\x12<\n" +
-	"\tconnector\x18\x01 \x01(\v2\x1e.steward.provider.v1.ConnectorR\tconnector\"\xca\x01\n" +
+	"\f_description\"R\n" +
+	"\x0fDescribeRequest\x12?\n" +
+	"\n" +
+	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
+	"credential\"\xca\x01\n" +
 	"\x10DescribeResponse\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
 	"\aversion\x18\x02 \x01(\tR\aversion\x12G\n" +
@@ -3459,15 +3461,13 @@ const file_steward_provider_v1_provider_proto_rawDesc = "" +
 	"\tSetupLink\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x10\n" +
-	"\x03url\x18\x03 \x01(\tR\x03url\"\xeb\x03\n" +
+	"\x03url\x18\x03 \x01(\tR\x03url\"\xee\x03\n" +
 	"\x12ProviderDefinition\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12E\n" +
 	"\tresources\x18\x04 \x03(\v2'.steward.provider.v1.ResourceDefinitionR\tresources\x12N\n" +
-	"\fapplications\x18\a \x03(\v2*.steward.provider.v1.ApplicationDefinitionR\fapplications\x12H\n" +
-	"\n" +
-	"connectors\x18\v \x03(\v2(.steward.provider.v1.ConnectorDefinitionR\n" +
-	"connectors\x12<\n" +
+	"\fapplications\x18\a \x03(\v2*.steward.provider.v1.ApplicationDefinitionR\fapplications\x12K\n" +
+	"\vcredentials\x18\v \x03(\v2).steward.provider.v1.CredentialDefinitionR\vcredentials\x12<\n" +
 	"\x06grants\x18\r \x03(\v2$.steward.provider.v1.GrantDefinitionR\x06grantsJ\x04\b\x03\x10\x04J\x04\b\b\x10\tJ\x04\b\x05\x10\x06J\x04\b\x06\x10\aJ\x04\b\f\x10\rJ\x04\b\t\x10\n" +
 	"J\x04\b\n" +
 	"\x10\vR\x06inputsR\asecretsR\vpermissionsR\x05rolesR\fgrant_inputsR\x0esecret_enginesR\x11identity_audience\"\x97\x02\n" +
@@ -3509,8 +3509,8 @@ const file_steward_provider_v1_provider_proto_rawDesc = "" +
 	"\x06inputs\x18\x04 \x03(\v2$.steward.provider.v1.InputDefinitionR\x06inputs\x12?\n" +
 	"\asecrets\x18\a \x03(\v2%.steward.provider.v1.SecretDefinitionR\asecrets\x12\x18\n" +
 	"\asources\x18\x05 \x03(\tR\asources\x12?\n" +
-	"\aoutputs\x18\x06 \x03(\v2%.steward.provider.v1.OutputDefinitionR\aoutputs\"\x8d\x02\n" +
-	"\x13ConnectorDefinition\x12\x12\n" +
+	"\aoutputs\x18\x06 \x03(\v2%.steward.provider.v1.OutputDefinitionR\aoutputs\"\x8e\x02\n" +
+	"\x14CredentialDefinition\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12<\n" +
@@ -3530,26 +3530,32 @@ const file_steward_provider_v1_provider_proto_rawDesc = "" +
 	"\x0eRoleDefinition\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\"\x96\x02\n" +
-	"!ProviderServiceGrantAccessRequest\x12<\n" +
-	"\tconnector\x18\x01 \x01(\v2\x1e.steward.provider.v1.ConnectorR\tconnector\x129\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\"\x99\x02\n" +
+	"!ProviderServiceGrantAccessRequest\x12?\n" +
+	"\n" +
+	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
+	"credential\x129\n" +
 	"\bidentity\x18\x02 \x01(\v2\x1d.steward.provider.v1.IdentityR\bidentity\x12\x14\n" +
 	"\x05grant\x18\x05 \x01(\tR\x05grant\x12/\n" +
 	"\x06inputs\x18\x06 \x01(\v2\x17.google.protobuf.StructR\x06inputsJ\x04\b\x03\x10\x04J\x04\b\x04\x10\x05J\x04\b\n" +
 	"\x10\vR\x04roleR\vpermissionsR\fgrant_inputs\"m\n" +
 	"\"ProviderServiceGrantAccessResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
-	"\apending\x18\x03 \x01(\bR\apendingJ\x04\b\x02\x10\x03J\x04\b\x04\x10\x05R\x04roleR\vpermissions\"\xa7\x02\n" +
-	"\"ProviderServiceRevokeAccessRequest\x12<\n" +
-	"\tconnector\x18\x01 \x01(\v2\x1e.steward.provider.v1.ConnectorR\tconnector\x129\n" +
+	"\apending\x18\x03 \x01(\bR\apendingJ\x04\b\x02\x10\x03J\x04\b\x04\x10\x05R\x04roleR\vpermissions\"\xaa\x02\n" +
+	"\"ProviderServiceRevokeAccessRequest\x12?\n" +
+	"\n" +
+	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
+	"credential\x129\n" +
 	"\bidentity\x18\x02 \x01(\v2\x1d.steward.provider.v1.IdentityR\bidentity\x12\x0e\n" +
 	"\x02id\x18\x04 \x01(\tR\x02id\x12\x14\n" +
 	"\x05grant\x18\x06 \x01(\tR\x05grant\x12/\n" +
 	"\x06inputs\x18\a \x01(\v2\x17.google.protobuf.StructR\x06inputsJ\x04\b\x03\x10\x04J\x04\b\x05\x10\x06J\x04\b\n" +
 	"\x10\vR\x04roleR\vpermissionsR\fgrant_inputs\"%\n" +
-	"#ProviderServiceRevokeAccessResponse\"\xf5\x01\n" +
-	"\x1fProviderServiceGetAccessRequest\x12<\n" +
-	"\tconnector\x18\x01 \x01(\v2\x1e.steward.provider.v1.ConnectorR\tconnector\x129\n" +
+	"#ProviderServiceRevokeAccessResponse\"\xf8\x01\n" +
+	"\x1fProviderServiceGetAccessRequest\x12?\n" +
+	"\n" +
+	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
+	"credential\x129\n" +
 	"\bidentity\x18\x02 \x01(\v2\x1d.steward.provider.v1.IdentityR\bidentity\x12\x14\n" +
 	"\x05grant\x18\x03 \x01(\tR\x05grant\x12/\n" +
 	"\x06inputs\x18\x04 \x01(\v2\x17.google.protobuf.StructR\x06inputsJ\x04\b\n" +
@@ -3557,9 +3563,11 @@ const file_steward_provider_v1_provider_proto_rawDesc = "" +
 	" ProviderServiceGetAccessResponse\x12\x18\n" +
 	"\agranted\x18\x05 \x01(\bR\agranted\x12\x18\n" +
 	"\apending\x18\x02 \x01(\bR\apending\x129\n" +
-	"\bidentity\x18\x03 \x01(\v2\x1d.steward.provider.v1.IdentityR\bidentityJ\x04\b\x01\x10\x02J\x04\b\x04\x10\x05R\x05rolesR\vpermissions\"\xc9\x02\n" +
-	"!ResourceServiceGrantAccessRequest\x12<\n" +
-	"\tconnector\x18\x01 \x01(\v2\x1e.steward.provider.v1.ConnectorR\tconnector\x129\n" +
+	"\bidentity\x18\x03 \x01(\v2\x1d.steward.provider.v1.IdentityR\bidentityJ\x04\b\x01\x10\x02J\x04\b\x04\x10\x05R\x05rolesR\vpermissions\"\xcc\x02\n" +
+	"!ResourceServiceGrantAccessRequest\x12?\n" +
+	"\n" +
+	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
+	"credential\x129\n" +
 	"\bresource\x18\x02 \x01(\v2\x1d.steward.provider.v1.ResourceR\bresource\x129\n" +
 	"\bidentity\x18\x03 \x01(\v2\x1d.steward.provider.v1.IdentityR\bidentity\x12-\n" +
 	"\x04role\x18\x04 \x01(\v2\x19.steward.provider.v1.RoleR\x04role\x12A\n" +
@@ -3568,25 +3576,31 @@ const file_steward_provider_v1_provider_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12-\n" +
 	"\x04role\x18\x02 \x01(\v2\x19.steward.provider.v1.RoleR\x04role\x12A\n" +
 	"\vpermissions\x18\x04 \x03(\v2\x1f.steward.provider.v1.PermissionR\vpermissions\x12\x18\n" +
-	"\apending\x18\x03 \x01(\bR\apending\"\xda\x02\n" +
-	"\"ResourceServiceRevokeAccessRequest\x12<\n" +
-	"\tconnector\x18\x01 \x01(\v2\x1e.steward.provider.v1.ConnectorR\tconnector\x129\n" +
+	"\apending\x18\x03 \x01(\bR\apending\"\xdd\x02\n" +
+	"\"ResourceServiceRevokeAccessRequest\x12?\n" +
+	"\n" +
+	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
+	"credential\x129\n" +
 	"\bresource\x18\x02 \x01(\v2\x1d.steward.provider.v1.ResourceR\bresource\x129\n" +
 	"\bidentity\x18\x03 \x01(\v2\x1d.steward.provider.v1.IdentityR\bidentity\x12-\n" +
 	"\x04role\x18\x04 \x01(\v2\x19.steward.provider.v1.RoleR\x04role\x12A\n" +
 	"\vpermissions\x18\x06 \x03(\v2\x1f.steward.provider.v1.PermissionR\vpermissions\x12\x0e\n" +
 	"\x02id\x18\x05 \x01(\tR\x02id\"%\n" +
-	"#ResourceServiceRevokeAccessResponse\"\xd5\x01\n" +
-	"\x1fResourceServiceGetAccessRequest\x12<\n" +
-	"\tconnector\x18\x01 \x01(\v2\x1e.steward.provider.v1.ConnectorR\tconnector\x129\n" +
+	"#ResourceServiceRevokeAccessResponse\"\xd8\x01\n" +
+	"\x1fResourceServiceGetAccessRequest\x12?\n" +
+	"\n" +
+	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
+	"credential\x129\n" +
 	"\bresource\x18\x02 \x01(\v2\x1d.steward.provider.v1.ResourceR\bresource\x129\n" +
 	"\bidentity\x18\x03 \x01(\v2\x1d.steward.provider.v1.IdentityR\bidentity\"\xb0\x01\n" +
 	" ResourceServiceGetAccessResponse\x12/\n" +
 	"\x05roles\x18\x01 \x03(\v2\x19.steward.provider.v1.RoleR\x05roles\x12A\n" +
 	"\vpermissions\x18\x03 \x03(\v2\x1f.steward.provider.v1.PermissionR\vpermissions\x12\x18\n" +
-	"\apending\x18\x02 \x01(\bR\apending\"\xd1\x02\n" +
-	"\x1fResourceServiceProvisionRequest\x12<\n" +
-	"\tconnector\x18\x01 \x01(\v2\x1e.steward.provider.v1.ConnectorR\tconnector\x12\x12\n" +
+	"\apending\x18\x02 \x01(\bR\apending\"\xd4\x02\n" +
+	"\x1fResourceServiceProvisionRequest\x12?\n" +
+	"\n" +
+	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
+	"credential\x12\x12\n" +
 	"\x04kind\x18\x02 \x01(\tR\x04kind\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12/\n" +
 	"\x06inputs\x18\x04 \x01(\v2\x17.google.protobuf.StructR\x06inputs\x12[\n" +
@@ -3595,21 +3609,27 @@ const file_steward_provider_v1_provider_proto_rawDesc = "" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"U\n" +
 	" ResourceServiceProvisionResponse\x121\n" +
-	"\aoutputs\x18\x01 \x01(\v2\x17.google.protobuf.StructR\aoutputs\"\x9c\x01\n" +
-	"!ResourceServiceDeprovisionRequest\x12<\n" +
-	"\tconnector\x18\x01 \x01(\v2\x1e.steward.provider.v1.ConnectorR\tconnector\x129\n" +
+	"\aoutputs\x18\x01 \x01(\v2\x17.google.protobuf.StructR\aoutputs\"\x9f\x01\n" +
+	"!ResourceServiceDeprovisionRequest\x12?\n" +
+	"\n" +
+	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
+	"credential\x129\n" +
 	"\bresource\x18\x02 \x01(\v2\x1d.steward.provider.v1.ResourceR\bresource\"$\n" +
-	"\"ResourceServiceDeprovisionResponse\"\x8d\x01\n" +
-	"\x1aResourceServiceListRequest\x12<\n" +
-	"\tconnector\x18\x01 \x01(\v2\x1e.steward.provider.v1.ConnectorR\tconnector\x12\x12\n" +
+	"\"ResourceServiceDeprovisionResponse\"\x90\x01\n" +
+	"\x1aResourceServiceListRequest\x12?\n" +
+	"\n" +
+	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
+	"credential\x12\x12\n" +
 	"\x04kind\x18\x02 \x01(\tR\x04kind\x12\x1d\n" +
 	"\n" +
 	"page_token\x18\x03 \x01(\tR\tpageToken\"\x82\x01\n" +
 	"\x1bResourceServiceListResponse\x12;\n" +
 	"\tresources\x18\x01 \x03(\v2\x1d.steward.provider.v1.ResourceR\tresources\x12&\n" +
-	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"\xba\x03\n" +
-	"\x1fApplicationServiceCreateRequest\x12<\n" +
-	"\tconnector\x18\x01 \x01(\v2\x1e.steward.provider.v1.ConnectorR\tconnector\x12\x12\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"\xbd\x03\n" +
+	"\x1fApplicationServiceCreateRequest\x12?\n" +
+	"\n" +
+	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
+	"credential\x12\x12\n" +
 	"\x04kind\x18\x02 \x01(\tR\x04kind\x12/\n" +
 	"\x06inputs\x18\x03 \x01(\v2\x17.google.protobuf.StructR\x06inputs\x12[\n" +
 	"\asecrets\x18\x04 \x03(\v2A.steward.provider.v1.ApplicationServiceCreateRequest.SecretsEntryR\asecrets\x12>\n" +
@@ -3619,37 +3639,41 @@ const file_steward_provider_v1_provider_proto_rawDesc = "" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"f\n" +
 	" ApplicationServiceCreateResponse\x12B\n" +
-	"\vapplication\x18\x01 \x01(\v2 .steward.provider.v1.ApplicationR\vapplication\"\xa4\x01\n" +
-	" ApplicationServiceDestroyRequest\x12<\n" +
-	"\tconnector\x18\x01 \x01(\v2\x1e.steward.provider.v1.ConnectorR\tconnector\x12B\n" +
+	"\vapplication\x18\x01 \x01(\v2 .steward.provider.v1.ApplicationR\vapplication\"\xa7\x01\n" +
+	" ApplicationServiceDestroyRequest\x12?\n" +
+	"\n" +
+	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
+	"credential\x12B\n" +
 	"\vapplication\x18\x02 \x01(\v2 .steward.provider.v1.ApplicationR\vapplication\"#\n" +
-	"!ApplicationServiceDestroyResponse\"\xe3\x01\n" +
-	"\x1fApplicationServiceDeployRequest\x12<\n" +
-	"\tconnector\x18\x01 \x01(\v2\x1e.steward.provider.v1.ConnectorR\tconnector\x12B\n" +
+	"!ApplicationServiceDestroyResponse\"\xe6\x01\n" +
+	"\x1fApplicationServiceDeployRequest\x12?\n" +
+	"\n" +
+	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
+	"credential\x12B\n" +
 	"\vapplication\x18\x02 \x01(\v2 .steward.provider.v1.ApplicationR\vapplication\x12>\n" +
 	"\x06source\x18\x03 \x01(\v2&.steward.provider.v1.ApplicationSourceR\x06source\"f\n" +
 	" ApplicationServiceDeployResponse\x12B\n" +
-	"\vapplication\x18\x01 \x01(\v2 .steward.provider.v1.ApplicationR\vapplication\"\xb9\x03\n" +
-	"\x1eConnectorServiceResolveRequest\x12\x12\n" +
+	"\vapplication\x18\x01 \x01(\v2 .steward.provider.v1.ApplicationR\vapplication\"\xbf\x03\n" +
+	"\x1fCredentialServiceResolveRequest\x12\x12\n" +
 	"\x04kind\x18\x01 \x01(\tR\x04kind\x12/\n" +
-	"\x06inputs\x18\x02 \x01(\v2\x17.google.protobuf.StructR\x06inputs\x12Z\n" +
-	"\asecrets\x18\x03 \x03(\v2@.steward.provider.v1.ConnectorServiceResolveRequest.SecretsEntryR\asecrets\x12%\n" +
-	"\x0eidentity_token\x18\x04 \x01(\tR\ridentityToken\x12%\n" +
-	"\x0econnector_ulid\x18\x05 \x01(\tR\rconnectorUlid\x12%\n" +
-	"\x0econnector_name\x18\x06 \x01(\tR\rconnectorName\x12E\n" +
+	"\x06inputs\x18\x02 \x01(\v2\x17.google.protobuf.StructR\x06inputs\x12[\n" +
+	"\asecrets\x18\x03 \x03(\v2A.steward.provider.v1.CredentialServiceResolveRequest.SecretsEntryR\asecrets\x12%\n" +
+	"\x0eidentity_token\x18\x04 \x01(\tR\ridentityToken\x12'\n" +
+	"\x0fcredential_ulid\x18\x05 \x01(\tR\x0ecredentialUlid\x12'\n" +
+	"\x0fcredential_name\x18\x06 \x01(\tR\x0ecredentialName\x12E\n" +
 	"\forganization\x18\a \x01(\v2!.steward.provider.v1.OrganizationR\forganization\x1a:\n" +
 	"\fSecretsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x83\x02\n" +
-	"\x1fConnectorServiceResolveResponse\x12O\n" +
-	"\x03env\x18\x01 \x03(\v2=.steward.provider.v1.ConnectorServiceResolveResponse.EnvEntryR\x03env\x128\n" +
-	"\x05files\x18\x02 \x03(\v2\".steward.provider.v1.ConnectorFileR\x05files\x12\x1d\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x86\x02\n" +
+	" CredentialServiceResolveResponse\x12P\n" +
+	"\x03env\x18\x01 \x03(\v2>.steward.provider.v1.CredentialServiceResolveResponse.EnvEntryR\x03env\x129\n" +
+	"\x05files\x18\x02 \x03(\v2#.steward.provider.v1.CredentialFileR\x05files\x12\x1d\n" +
 	"\n" +
 	"expires_at\x18\x03 \x01(\x03R\texpiresAt\x1a6\n" +
 	"\bEnvEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"D\n" +
-	"\rConnectorFile\x12\x19\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"E\n" +
+	"\x0eCredentialFile\x12\x19\n" +
 	"\benv_name\x18\x01 \x01(\tR\aenvName\x12\x18\n" +
 	"\acontent\x18\x02 \x01(\fR\acontent2\xe8\x03\n" +
 	"\x0fProviderService\x12W\n" +
@@ -3667,9 +3691,9 @@ const file_steward_provider_v1_provider_proto_rawDesc = "" +
 	"\x12ApplicationService\x12u\n" +
 	"\x06Create\x124.steward.provider.v1.ApplicationServiceCreateRequest\x1a5.steward.provider.v1.ApplicationServiceCreateResponse\x12x\n" +
 	"\aDestroy\x125.steward.provider.v1.ApplicationServiceDestroyRequest\x1a6.steward.provider.v1.ApplicationServiceDestroyResponse\x12u\n" +
-	"\x06Deploy\x124.steward.provider.v1.ApplicationServiceDeployRequest\x1a5.steward.provider.v1.ApplicationServiceDeployResponse2\x88\x01\n" +
-	"\x10ConnectorService\x12t\n" +
-	"\aResolve\x123.steward.provider.v1.ConnectorServiceResolveRequest\x1a4.steward.provider.v1.ConnectorServiceResolveResponseB\xde\x01\n" +
+	"\x06Deploy\x124.steward.provider.v1.ApplicationServiceDeployRequest\x1a5.steward.provider.v1.ApplicationServiceDeployResponse2\x8b\x01\n" +
+	"\x11CredentialService\x12v\n" +
+	"\aResolve\x124.steward.provider.v1.CredentialServiceResolveRequest\x1a5.steward.provider.v1.CredentialServiceResolveResponseB\xde\x01\n" +
 	"\x17com.steward.provider.v1B\rProviderProtoP\x01ZFgithub.com/treno-dev/steward-sdk/go/gen/steward/provider/v1;providerv1\xa2\x02\x03SPX\xaa\x02\x13Steward.Provider.V1\xca\x02\x13Steward\\Provider\\V1\xe2\x02\x1fSteward\\Provider\\V1\\GPBMetadata\xea\x02\x15Steward::Provider::V1b\x06proto3"
 
 var (
@@ -3686,7 +3710,7 @@ func file_steward_provider_v1_provider_proto_rawDescGZIP() []byte {
 
 var file_steward_provider_v1_provider_proto_msgTypes = make([]protoimpl.MessageInfo, 55)
 var file_steward_provider_v1_provider_proto_goTypes = []any{
-	(*Connector)(nil),                           // 0: steward.provider.v1.Connector
+	(*Credential)(nil),                          // 0: steward.provider.v1.Credential
 	(*Organization)(nil),                        // 1: steward.provider.v1.Organization
 	(*Resource)(nil),                            // 2: steward.provider.v1.Resource
 	(*Application)(nil),                         // 3: steward.provider.v1.Application
@@ -3704,7 +3728,7 @@ var file_steward_provider_v1_provider_proto_goTypes = []any{
 	(*OutputDefinition)(nil),                    // 15: steward.provider.v1.OutputDefinition
 	(*ResourceDefinition)(nil),                  // 16: steward.provider.v1.ResourceDefinition
 	(*ApplicationDefinition)(nil),               // 17: steward.provider.v1.ApplicationDefinition
-	(*ConnectorDefinition)(nil),                 // 18: steward.provider.v1.ConnectorDefinition
+	(*CredentialDefinition)(nil),                // 18: steward.provider.v1.CredentialDefinition
 	(*GrantDefinition)(nil),                     // 19: steward.provider.v1.GrantDefinition
 	(*PermissionDefinition)(nil),                // 20: steward.provider.v1.PermissionDefinition
 	(*RoleDefinition)(nil),                      // 21: steward.provider.v1.RoleDefinition
@@ -3732,20 +3756,20 @@ var file_steward_provider_v1_provider_proto_goTypes = []any{
 	(*ApplicationServiceDestroyResponse)(nil),   // 43: steward.provider.v1.ApplicationServiceDestroyResponse
 	(*ApplicationServiceDeployRequest)(nil),     // 44: steward.provider.v1.ApplicationServiceDeployRequest
 	(*ApplicationServiceDeployResponse)(nil),    // 45: steward.provider.v1.ApplicationServiceDeployResponse
-	(*ConnectorServiceResolveRequest)(nil),      // 46: steward.provider.v1.ConnectorServiceResolveRequest
-	(*ConnectorServiceResolveResponse)(nil),     // 47: steward.provider.v1.ConnectorServiceResolveResponse
-	(*ConnectorFile)(nil),                       // 48: steward.provider.v1.ConnectorFile
+	(*CredentialServiceResolveRequest)(nil),     // 46: steward.provider.v1.CredentialServiceResolveRequest
+	(*CredentialServiceResolveResponse)(nil),    // 47: steward.provider.v1.CredentialServiceResolveResponse
+	(*CredentialFile)(nil),                      // 48: steward.provider.v1.CredentialFile
 	nil,                                         // 49: steward.provider.v1.Resource.SecretsEntry
 	nil,                                         // 50: steward.provider.v1.Application.SecretsEntry
 	nil,                                         // 51: steward.provider.v1.ResourceServiceProvisionRequest.SecretsEntry
 	nil,                                         // 52: steward.provider.v1.ApplicationServiceCreateRequest.SecretsEntry
-	nil,                                         // 53: steward.provider.v1.ConnectorServiceResolveRequest.SecretsEntry
-	nil,                                         // 54: steward.provider.v1.ConnectorServiceResolveResponse.EnvEntry
+	nil,                                         // 53: steward.provider.v1.CredentialServiceResolveRequest.SecretsEntry
+	nil,                                         // 54: steward.provider.v1.CredentialServiceResolveResponse.EnvEntry
 	(*structpb.Struct)(nil),                     // 55: google.protobuf.Struct
 	(*structpb.Value)(nil),                      // 56: google.protobuf.Value
 }
 var file_steward_provider_v1_provider_proto_depIdxs = []int32{
-	1,  // 0: steward.provider.v1.Connector.organization:type_name -> steward.provider.v1.Organization
+	1,  // 0: steward.provider.v1.Credential.organization:type_name -> steward.provider.v1.Organization
 	55, // 1: steward.provider.v1.Resource.inputs:type_name -> google.protobuf.Struct
 	49, // 2: steward.provider.v1.Resource.secrets:type_name -> steward.provider.v1.Resource.SecretsEntry
 	55, // 3: steward.provider.v1.Resource.outputs:type_name -> google.protobuf.Struct
@@ -3756,12 +3780,12 @@ var file_steward_provider_v1_provider_proto_depIdxs = []int32{
 	5,  // 8: steward.provider.v1.Application.variables:type_name -> steward.provider.v1.Variable
 	55, // 9: steward.provider.v1.ApplicationSource.config:type_name -> google.protobuf.Struct
 	55, // 10: steward.provider.v1.Identity.attrs:type_name -> google.protobuf.Struct
-	0,  // 11: steward.provider.v1.DescribeRequest.connector:type_name -> steward.provider.v1.Connector
+	0,  // 11: steward.provider.v1.DescribeRequest.credential:type_name -> steward.provider.v1.Credential
 	12, // 12: steward.provider.v1.DescribeResponse.definition:type_name -> steward.provider.v1.ProviderDefinition
 	11, // 13: steward.provider.v1.DescribeResponse.setup_links:type_name -> steward.provider.v1.SetupLink
 	16, // 14: steward.provider.v1.ProviderDefinition.resources:type_name -> steward.provider.v1.ResourceDefinition
 	17, // 15: steward.provider.v1.ProviderDefinition.applications:type_name -> steward.provider.v1.ApplicationDefinition
-	18, // 16: steward.provider.v1.ProviderDefinition.connectors:type_name -> steward.provider.v1.ConnectorDefinition
+	18, // 16: steward.provider.v1.ProviderDefinition.credentials:type_name -> steward.provider.v1.CredentialDefinition
 	19, // 17: steward.provider.v1.ProviderDefinition.grants:type_name -> steward.provider.v1.GrantDefinition
 	56, // 18: steward.provider.v1.InputDefinition.default:type_name -> google.protobuf.Value
 	13, // 19: steward.provider.v1.ResourceDefinition.inputs:type_name -> steward.provider.v1.InputDefinition
@@ -3772,61 +3796,61 @@ var file_steward_provider_v1_provider_proto_depIdxs = []int32{
 	13, // 24: steward.provider.v1.ApplicationDefinition.inputs:type_name -> steward.provider.v1.InputDefinition
 	14, // 25: steward.provider.v1.ApplicationDefinition.secrets:type_name -> steward.provider.v1.SecretDefinition
 	15, // 26: steward.provider.v1.ApplicationDefinition.outputs:type_name -> steward.provider.v1.OutputDefinition
-	13, // 27: steward.provider.v1.ConnectorDefinition.inputs:type_name -> steward.provider.v1.InputDefinition
-	14, // 28: steward.provider.v1.ConnectorDefinition.secrets:type_name -> steward.provider.v1.SecretDefinition
+	13, // 27: steward.provider.v1.CredentialDefinition.inputs:type_name -> steward.provider.v1.InputDefinition
+	14, // 28: steward.provider.v1.CredentialDefinition.secrets:type_name -> steward.provider.v1.SecretDefinition
 	13, // 29: steward.provider.v1.GrantDefinition.inputs:type_name -> steward.provider.v1.InputDefinition
-	0,  // 30: steward.provider.v1.ProviderServiceGrantAccessRequest.connector:type_name -> steward.provider.v1.Connector
+	0,  // 30: steward.provider.v1.ProviderServiceGrantAccessRequest.credential:type_name -> steward.provider.v1.Credential
 	6,  // 31: steward.provider.v1.ProviderServiceGrantAccessRequest.identity:type_name -> steward.provider.v1.Identity
 	55, // 32: steward.provider.v1.ProviderServiceGrantAccessRequest.inputs:type_name -> google.protobuf.Struct
-	0,  // 33: steward.provider.v1.ProviderServiceRevokeAccessRequest.connector:type_name -> steward.provider.v1.Connector
+	0,  // 33: steward.provider.v1.ProviderServiceRevokeAccessRequest.credential:type_name -> steward.provider.v1.Credential
 	6,  // 34: steward.provider.v1.ProviderServiceRevokeAccessRequest.identity:type_name -> steward.provider.v1.Identity
 	55, // 35: steward.provider.v1.ProviderServiceRevokeAccessRequest.inputs:type_name -> google.protobuf.Struct
-	0,  // 36: steward.provider.v1.ProviderServiceGetAccessRequest.connector:type_name -> steward.provider.v1.Connector
+	0,  // 36: steward.provider.v1.ProviderServiceGetAccessRequest.credential:type_name -> steward.provider.v1.Credential
 	6,  // 37: steward.provider.v1.ProviderServiceGetAccessRequest.identity:type_name -> steward.provider.v1.Identity
 	55, // 38: steward.provider.v1.ProviderServiceGetAccessRequest.inputs:type_name -> google.protobuf.Struct
 	6,  // 39: steward.provider.v1.ProviderServiceGetAccessResponse.identity:type_name -> steward.provider.v1.Identity
-	0,  // 40: steward.provider.v1.ResourceServiceGrantAccessRequest.connector:type_name -> steward.provider.v1.Connector
+	0,  // 40: steward.provider.v1.ResourceServiceGrantAccessRequest.credential:type_name -> steward.provider.v1.Credential
 	2,  // 41: steward.provider.v1.ResourceServiceGrantAccessRequest.resource:type_name -> steward.provider.v1.Resource
 	6,  // 42: steward.provider.v1.ResourceServiceGrantAccessRequest.identity:type_name -> steward.provider.v1.Identity
 	7,  // 43: steward.provider.v1.ResourceServiceGrantAccessRequest.role:type_name -> steward.provider.v1.Role
 	8,  // 44: steward.provider.v1.ResourceServiceGrantAccessRequest.permissions:type_name -> steward.provider.v1.Permission
 	7,  // 45: steward.provider.v1.ResourceServiceGrantAccessResponse.role:type_name -> steward.provider.v1.Role
 	8,  // 46: steward.provider.v1.ResourceServiceGrantAccessResponse.permissions:type_name -> steward.provider.v1.Permission
-	0,  // 47: steward.provider.v1.ResourceServiceRevokeAccessRequest.connector:type_name -> steward.provider.v1.Connector
+	0,  // 47: steward.provider.v1.ResourceServiceRevokeAccessRequest.credential:type_name -> steward.provider.v1.Credential
 	2,  // 48: steward.provider.v1.ResourceServiceRevokeAccessRequest.resource:type_name -> steward.provider.v1.Resource
 	6,  // 49: steward.provider.v1.ResourceServiceRevokeAccessRequest.identity:type_name -> steward.provider.v1.Identity
 	7,  // 50: steward.provider.v1.ResourceServiceRevokeAccessRequest.role:type_name -> steward.provider.v1.Role
 	8,  // 51: steward.provider.v1.ResourceServiceRevokeAccessRequest.permissions:type_name -> steward.provider.v1.Permission
-	0,  // 52: steward.provider.v1.ResourceServiceGetAccessRequest.connector:type_name -> steward.provider.v1.Connector
+	0,  // 52: steward.provider.v1.ResourceServiceGetAccessRequest.credential:type_name -> steward.provider.v1.Credential
 	2,  // 53: steward.provider.v1.ResourceServiceGetAccessRequest.resource:type_name -> steward.provider.v1.Resource
 	6,  // 54: steward.provider.v1.ResourceServiceGetAccessRequest.identity:type_name -> steward.provider.v1.Identity
 	7,  // 55: steward.provider.v1.ResourceServiceGetAccessResponse.roles:type_name -> steward.provider.v1.Role
 	8,  // 56: steward.provider.v1.ResourceServiceGetAccessResponse.permissions:type_name -> steward.provider.v1.Permission
-	0,  // 57: steward.provider.v1.ResourceServiceProvisionRequest.connector:type_name -> steward.provider.v1.Connector
+	0,  // 57: steward.provider.v1.ResourceServiceProvisionRequest.credential:type_name -> steward.provider.v1.Credential
 	55, // 58: steward.provider.v1.ResourceServiceProvisionRequest.inputs:type_name -> google.protobuf.Struct
 	51, // 59: steward.provider.v1.ResourceServiceProvisionRequest.secrets:type_name -> steward.provider.v1.ResourceServiceProvisionRequest.SecretsEntry
 	55, // 60: steward.provider.v1.ResourceServiceProvisionResponse.outputs:type_name -> google.protobuf.Struct
-	0,  // 61: steward.provider.v1.ResourceServiceDeprovisionRequest.connector:type_name -> steward.provider.v1.Connector
+	0,  // 61: steward.provider.v1.ResourceServiceDeprovisionRequest.credential:type_name -> steward.provider.v1.Credential
 	2,  // 62: steward.provider.v1.ResourceServiceDeprovisionRequest.resource:type_name -> steward.provider.v1.Resource
-	0,  // 63: steward.provider.v1.ResourceServiceListRequest.connector:type_name -> steward.provider.v1.Connector
+	0,  // 63: steward.provider.v1.ResourceServiceListRequest.credential:type_name -> steward.provider.v1.Credential
 	2,  // 64: steward.provider.v1.ResourceServiceListResponse.resources:type_name -> steward.provider.v1.Resource
-	0,  // 65: steward.provider.v1.ApplicationServiceCreateRequest.connector:type_name -> steward.provider.v1.Connector
+	0,  // 65: steward.provider.v1.ApplicationServiceCreateRequest.credential:type_name -> steward.provider.v1.Credential
 	55, // 66: steward.provider.v1.ApplicationServiceCreateRequest.inputs:type_name -> google.protobuf.Struct
 	52, // 67: steward.provider.v1.ApplicationServiceCreateRequest.secrets:type_name -> steward.provider.v1.ApplicationServiceCreateRequest.SecretsEntry
 	4,  // 68: steward.provider.v1.ApplicationServiceCreateRequest.source:type_name -> steward.provider.v1.ApplicationSource
 	5,  // 69: steward.provider.v1.ApplicationServiceCreateRequest.variables:type_name -> steward.provider.v1.Variable
 	3,  // 70: steward.provider.v1.ApplicationServiceCreateResponse.application:type_name -> steward.provider.v1.Application
-	0,  // 71: steward.provider.v1.ApplicationServiceDestroyRequest.connector:type_name -> steward.provider.v1.Connector
+	0,  // 71: steward.provider.v1.ApplicationServiceDestroyRequest.credential:type_name -> steward.provider.v1.Credential
 	3,  // 72: steward.provider.v1.ApplicationServiceDestroyRequest.application:type_name -> steward.provider.v1.Application
-	0,  // 73: steward.provider.v1.ApplicationServiceDeployRequest.connector:type_name -> steward.provider.v1.Connector
+	0,  // 73: steward.provider.v1.ApplicationServiceDeployRequest.credential:type_name -> steward.provider.v1.Credential
 	3,  // 74: steward.provider.v1.ApplicationServiceDeployRequest.application:type_name -> steward.provider.v1.Application
 	4,  // 75: steward.provider.v1.ApplicationServiceDeployRequest.source:type_name -> steward.provider.v1.ApplicationSource
 	3,  // 76: steward.provider.v1.ApplicationServiceDeployResponse.application:type_name -> steward.provider.v1.Application
-	55, // 77: steward.provider.v1.ConnectorServiceResolveRequest.inputs:type_name -> google.protobuf.Struct
-	53, // 78: steward.provider.v1.ConnectorServiceResolveRequest.secrets:type_name -> steward.provider.v1.ConnectorServiceResolveRequest.SecretsEntry
-	1,  // 79: steward.provider.v1.ConnectorServiceResolveRequest.organization:type_name -> steward.provider.v1.Organization
-	54, // 80: steward.provider.v1.ConnectorServiceResolveResponse.env:type_name -> steward.provider.v1.ConnectorServiceResolveResponse.EnvEntry
-	48, // 81: steward.provider.v1.ConnectorServiceResolveResponse.files:type_name -> steward.provider.v1.ConnectorFile
+	55, // 77: steward.provider.v1.CredentialServiceResolveRequest.inputs:type_name -> google.protobuf.Struct
+	53, // 78: steward.provider.v1.CredentialServiceResolveRequest.secrets:type_name -> steward.provider.v1.CredentialServiceResolveRequest.SecretsEntry
+	1,  // 79: steward.provider.v1.CredentialServiceResolveRequest.organization:type_name -> steward.provider.v1.Organization
+	54, // 80: steward.provider.v1.CredentialServiceResolveResponse.env:type_name -> steward.provider.v1.CredentialServiceResolveResponse.EnvEntry
+	48, // 81: steward.provider.v1.CredentialServiceResolveResponse.files:type_name -> steward.provider.v1.CredentialFile
 	9,  // 82: steward.provider.v1.ProviderService.Describe:input_type -> steward.provider.v1.DescribeRequest
 	22, // 83: steward.provider.v1.ProviderService.GrantAccess:input_type -> steward.provider.v1.ProviderServiceGrantAccessRequest
 	24, // 84: steward.provider.v1.ProviderService.RevokeAccess:input_type -> steward.provider.v1.ProviderServiceRevokeAccessRequest
@@ -3840,7 +3864,7 @@ var file_steward_provider_v1_provider_proto_depIdxs = []int32{
 	40, // 92: steward.provider.v1.ApplicationService.Create:input_type -> steward.provider.v1.ApplicationServiceCreateRequest
 	42, // 93: steward.provider.v1.ApplicationService.Destroy:input_type -> steward.provider.v1.ApplicationServiceDestroyRequest
 	44, // 94: steward.provider.v1.ApplicationService.Deploy:input_type -> steward.provider.v1.ApplicationServiceDeployRequest
-	46, // 95: steward.provider.v1.ConnectorService.Resolve:input_type -> steward.provider.v1.ConnectorServiceResolveRequest
+	46, // 95: steward.provider.v1.CredentialService.Resolve:input_type -> steward.provider.v1.CredentialServiceResolveRequest
 	10, // 96: steward.provider.v1.ProviderService.Describe:output_type -> steward.provider.v1.DescribeResponse
 	23, // 97: steward.provider.v1.ProviderService.GrantAccess:output_type -> steward.provider.v1.ProviderServiceGrantAccessResponse
 	25, // 98: steward.provider.v1.ProviderService.RevokeAccess:output_type -> steward.provider.v1.ProviderServiceRevokeAccessResponse
@@ -3854,7 +3878,7 @@ var file_steward_provider_v1_provider_proto_depIdxs = []int32{
 	41, // 106: steward.provider.v1.ApplicationService.Create:output_type -> steward.provider.v1.ApplicationServiceCreateResponse
 	43, // 107: steward.provider.v1.ApplicationService.Destroy:output_type -> steward.provider.v1.ApplicationServiceDestroyResponse
 	45, // 108: steward.provider.v1.ApplicationService.Deploy:output_type -> steward.provider.v1.ApplicationServiceDeployResponse
-	47, // 109: steward.provider.v1.ConnectorService.Resolve:output_type -> steward.provider.v1.ConnectorServiceResolveResponse
+	47, // 109: steward.provider.v1.CredentialService.Resolve:output_type -> steward.provider.v1.CredentialServiceResolveResponse
 	96, // [96:110] is the sub-list for method output_type
 	82, // [82:96] is the sub-list for method input_type
 	82, // [82:82] is the sub-list for extension type_name

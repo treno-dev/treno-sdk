@@ -32,8 +32,8 @@ it depends on. To work on the SDK and its templates together, point it at a loca
 The generated provider, with a resource that can be provisioned and given access to, is
 [`../templates/go/main.go.tmpl`](../templates/go/main.go.tmpl). A provider needs one
 `provider.New(...)`, any number of `Resource(...)` and `Application(...)` declarations, and a final
-`Serve()`. If it needs more than one tool, for example both Cloudflare and AWS, take the credentials for
-each as secrets.
+`Serve()`. If it needs more than one tool, for example both Cloudflare and AWS, take a secret for
+each tool.
 
 ```go
 p := provider.New(provider.Options{Name: "github", Version: "0.1.0", Inputs: inputs, Validate: validate})
@@ -55,8 +55,8 @@ p.Serve()
 | `Name`, `Version` | Required. |
 | `Title`, `Description` | Shown in Steward. |
 | `Inputs` | The settings the provider is configured with. |
-| `Secrets` | The credentials it is configured with, such as an API token. |
-| `Validate` | Optional. Checks the credentials, which Steward cannot. Returns `ValidationError`s the user can fix, in the list of what they are about: `InputErrors`, `SecretErrors`, or `Errors` for the connector as a whole. Without it, every connector is accepted. |
+| `Secrets` | The secrets it is configured with, such as an API token. |
+| `Validate` | Optional. Checks the secrets, which Steward cannot. Returns `ValidationError`s the user can fix, in the list of what they are about: `InputErrors`, `SecretErrors`, or `Errors` for the credential as a whole. Without it, every credential is accepted. |
 | `Roles`, `Permissions`, `GrantAccess`, `RevokeAccess`, `GetAccess` | Access to the provider as a whole, such as membership of an organization. |
 
 **A resource**, with `p.Resource("kind", provider.ResourceOptions{...})`, and **an application**,
@@ -78,7 +78,7 @@ image digest or an object version, and is empty for the newest.
 `TypeMap`. Mark an output `Sensitive: true` when it is a secret, such as a generated password, and it
 stays with the runner.
 
-**Secrets** are credentials, and are kept, sent and shown apart from inputs. Each has a `Name`, used as
+**Secrets** are kept, sent and shown apart from inputs. Each has a `Name`, used as
 it is, a `Description` and whether it is `Required`. Its value is never shown back once set.
 
 ```go
@@ -162,11 +162,11 @@ A handler is `func(context.Context, *Request) (*Response, error)`, with the requ
 for the entity and the call: `ResourceProvisionRequest`, `ResourceProvisionResponse`. They are the
 generated contract messages, re-exported by the package so a provider imports one thing.
 
-- **Getters are nil-safe.** Use `request.GetConnector().GetSecrets()["API_TOKEN"]`: anything the runner
+- **Getters are nil-safe.** Use `request.GetCredential().GetSecrets()["API_TOKEN"]`: anything the runner
   did not send reads as empty.
-- **Inputs and secrets.** `Connector.Inputs` and `Inputs` hold the values of the inputs; call `.AsMap()`
+- **Inputs and secrets.** `Credential.Inputs` and `Inputs` hold the values of the inputs; call `.AsMap()`
   on one for a plain `map[string]any` (numbers arrive as `float64`). The values of secrets arrive apart
-  from them, keyed by secret name, in `Connector.Secrets` (and a resource's or application's `Secrets`)
+  from them, keyed by secret name, in `Credential.Secrets` (and a resource's or application's `Secrets`)
   as a `map[string]string`. Never store them.
 - **Open-ended values in a response**, such as `Outputs`, are built with `provider.Struct(map[string]any{...})`,
   and an input's `Default` with `provider.Value(...)`. They take what JSON can hold; anything else

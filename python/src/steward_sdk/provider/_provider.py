@@ -388,7 +388,7 @@ async def _serve(provider: Provider) -> None:
     async def describe(_request: Message) -> Message:
         return provider.describe()
 
-    # Every provider must answer Validate; without a handler of its own, every connector is accepted.
+    # Every provider must answer Validate; without a handler of its own, every credential is accepted.
     async def accept(_request: Message) -> None:
         return None
 
