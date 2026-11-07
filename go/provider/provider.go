@@ -102,7 +102,7 @@ type CredentialOptions struct {
 	Title       string
 	Description string
 
-	// Inputs are the settings of a credential of this kind, and Secrets its secrets, which are references to a vault that the
+	// Inputs are the settings of a credential of this kind, and Secrets its secrets, which are references to a secret store that the
 	// runner resolves for the call.
 	Inputs  []*InputDefinition
 	Secrets []*SecretDefinition

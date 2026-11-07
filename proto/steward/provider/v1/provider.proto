@@ -243,7 +243,7 @@ message ProviderDefinition {
   // applications.
   repeated ApplicationDefinition applications = 7;
 
-  // Providers keep no secrets: they are in vaults, and a credential refers to them.
+  // Providers keep no secrets: they are in secret stores, and a credential refers to them.
   reserved 9;
   reserved "secret_engines";
 
@@ -375,7 +375,7 @@ message CredentialDefinition {
   // The settings of a credential of this kind, such as the ARN of a role. Not secrets.
   repeated InputDefinition inputs = 4;
 
-  // The secrets of a credential of this kind, such as an access key. A value is a reference to a vault that the runner
+  // The secrets of a credential of this kind, such as an access key. A value is a reference to a secret store that the runner
   // resolves for the call; it is never kept in the credential.
   repeated SecretDefinition secrets = 5;
 

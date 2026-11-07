@@ -1511,7 +1511,7 @@ type CredentialDefinition struct {
 	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	// The settings of a credential of this kind, such as the ARN of a role. Not secrets.
 	Inputs []*InputDefinition `protobuf:"bytes,4,rep,name=inputs,proto3" json:"inputs,omitempty"`
-	// The secrets of a credential of this kind, such as an access key. A value is a reference to a vault that the runner
+	// The secrets of a credential of this kind, such as an access key. A value is a reference to a secret store that the runner
 	// resolves for the call; it is never kept in the credential.
 	Secrets []*SecretDefinition `protobuf:"bytes,5,rep,name=secrets,proto3" json:"secrets,omitempty"`
 	// The audience of the identity token of Steward that the runner sends in CredentialServiceResolveRequest.identity_token, such as
