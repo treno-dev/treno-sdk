@@ -49,6 +49,7 @@ type (
 	InputDefinition      = providerv1.InputDefinition
 	SecretDefinition     = providerv1.SecretDefinition
 	OutputDefinition     = providerv1.OutputDefinition
+	VariadicVariables    = providerv1.VariadicVariables
 	PermissionDefinition = providerv1.PermissionDefinition
 	RoleDefinition       = providerv1.RoleDefinition
 
@@ -95,4 +96,16 @@ const (
 	TypeSelect  = "select"
 	TypeList    = "list"
 	TypeMap     = "map"
+
+	// TypeSource is a type that Steward defines: where something is fetched from, as `{ type, config }`. The input lists the source
+	// types it accepts as its options, and the console asks for it with the same fields as the source of a provider.
+	TypeSource = "steward::source"
+
+	// TypeStringMap is a type that Steward defines: names and values, text to text, that the console asks for as a list of rows, such as
+	// the settings of a backend.
+	TypeStringMap = "map(string)"
+
+	// TypeJSON is a type that Steward defines: any JSON value, which the console asks for in a dialog that checks it, so that a value that is
+	// not a string, such as a map or a list of numbers, can be given.
+	TypeJSON = "steward::json"
 )

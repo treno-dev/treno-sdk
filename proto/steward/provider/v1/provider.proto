@@ -68,6 +68,18 @@ message Component {
   // separately. Values of outputs declared sensitive stay with the runner and are not passed on to
   // Steward.
   google.protobuf.Struct outputs = 5;
+
+  // Its variables, when the kind takes them (ComponentDefinition.variables).
+  repeated Variable variables = 6;
+}
+
+// Says that a kind takes variables: name and value pairs, of any number, that whoever sets up a component
+// adds to it, such as the variables of a Terraform workspace. Unlike an input, the names are not
+// declared, and Steward keeps the variables apart from the inputs, since they are handled in ways that
+// inputs are not.
+message VariadicVariables {
+  // What the variables are for, said where they are set.
+  string description = 1;
 }
 
 // Something deployed and run in the tool, as opposed to a component, which is provisioned.
@@ -256,8 +268,12 @@ message InputDefinition {
   string label = 2;
   string description = 3;
 
-  // One of "string", "number", "boolean", "select", "list" (of strings) or "map" (string keys and
-  // values). The SDKs export these as constants, and `steward provider validate` rejects any other.
+  // One of "string", "number", "boolean", "select", "list" (of strings), "map" (string keys and
+  // values) or a type of Steward's own, named `steward::<name>`: "steward::source", where something is
+  // fetched from as `{ type, config }`, whose `options` are the source types it accepts, and
+  // "map(string)", names and values asked for as a list of rows, and "steward::json", any JSON value,
+  // asked for in a dialog that checks it. The SDKs export these
+  // as constants, and `steward provider validate` rejects any other.
   string type = 4;
 
   bool required = 5;
@@ -265,7 +281,7 @@ message InputDefinition {
   // Used when no value is given.
   google.protobuf.Value default = 6;
 
-  // The choices for a "select".
+  // The choices for a "select", and the source types a "steward::source" accepts.
   repeated string options = 7;
 
   // For a "number": the least and the greatest value it can have. Left out, there is no limit on that side.
@@ -316,6 +332,10 @@ message ComponentDefinition {
   // What a component of this kind produces, such as a URL or an ARN, known once it exists. The
   // values come back in Component.outputs.
   repeated OutputDefinition outputs = 7;
+
+  // Set when the kind takes variables, which the people who set up a component add to it by name.
+  // Provision and the other calls receive them in `variables`.
+  VariadicVariables variables = 9;
 }
 
 // An application is deployable and has open-ended variables, which a component has neither of. A
@@ -549,6 +569,9 @@ message ComponentServiceProvisionRequest {
   // Values for the secrets the kind declares, keyed by secret name. Resolved by the runner for this
   // call only.
   map<string, string> secrets = 5;
+
+  // Its variables, when the kind takes them.
+  repeated Variable variables = 6;
 }
 
 message ComponentServiceProvisionResponse {

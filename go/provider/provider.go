@@ -61,6 +61,10 @@ type ComponentOptions struct {
 	Secrets []*SecretDefinition
 	Outputs []*OutputDefinition
 
+	// Set when the kind takes variables: name and value pairs, of any number, that whoever sets up a component adds to it, whose names
+	// the provider does not declare. They arrive in the `Variables` of the calls.
+	Variables *VariadicVariables
+
 	// What can be granted on this kind: the tool's roles, the permissions, or both.
 	Permissions []*PermissionDefinition
 	Roles       []*RoleDefinition
@@ -226,6 +230,7 @@ func componentDefinition(kind string, options ComponentOptions) *providerv1.Comp
 		Permissions: options.Permissions,
 		Roles:       options.Roles,
 		Outputs:     options.Outputs,
+		Variables:   options.Variables,
 	}
 }
 

@@ -168,7 +168,9 @@ type Component struct {
 	// Set by the provider when it lists a component; ignored on calls. Provision returns its outputs
 	// separately. Values of outputs declared sensitive stay with the runner and are not passed on to
 	// Steward.
-	Outputs       *structpb.Struct `protobuf:"bytes,5,opt,name=outputs,proto3" json:"outputs,omitempty"`
+	Outputs *structpb.Struct `protobuf:"bytes,5,opt,name=outputs,proto3" json:"outputs,omitempty"`
+	// Its variables, when the kind takes them (ComponentDefinition.variables).
+	Variables     []*Variable `protobuf:"bytes,6,rep,name=variables,proto3" json:"variables,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -238,6 +240,62 @@ func (x *Component) GetOutputs() *structpb.Struct {
 	return nil
 }
 
+func (x *Component) GetVariables() []*Variable {
+	if x != nil {
+		return x.Variables
+	}
+	return nil
+}
+
+// Says that a kind takes variables: name and value pairs, of any number, that whoever sets up a component
+// adds to it, such as the variables of a Terraform workspace. Unlike an input, the names are not
+// declared, and Steward keeps the variables apart from the inputs, since they are handled in ways that
+// inputs are not.
+type VariadicVariables struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// What the variables are for, said where they are set.
+	Description   string `protobuf:"bytes,1,opt,name=description,proto3" json:"description,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VariadicVariables) Reset() {
+	*x = VariadicVariables{}
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VariadicVariables) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VariadicVariables) ProtoMessage() {}
+
+func (x *VariadicVariables) ProtoReflect() protoreflect.Message {
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VariadicVariables.ProtoReflect.Descriptor instead.
+func (*VariadicVariables) Descriptor() ([]byte, []int) {
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *VariadicVariables) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
 // Something deployed and run in the tool, as opposed to a component, which is provisioned.
 type Application struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -261,7 +319,7 @@ type Application struct {
 
 func (x *Application) Reset() {
 	*x = Application{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[3]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -273,7 +331,7 @@ func (x *Application) String() string {
 func (*Application) ProtoMessage() {}
 
 func (x *Application) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[3]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -286,7 +344,7 @@ func (x *Application) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Application.ProtoReflect.Descriptor instead.
 func (*Application) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{3}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *Application) GetKind() string {
@@ -360,7 +418,7 @@ type ApplicationSource struct {
 
 func (x *ApplicationSource) Reset() {
 	*x = ApplicationSource{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[4]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -372,7 +430,7 @@ func (x *ApplicationSource) String() string {
 func (*ApplicationSource) ProtoMessage() {}
 
 func (x *ApplicationSource) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[4]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -385,7 +443,7 @@ func (x *ApplicationSource) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplicationSource.ProtoReflect.Descriptor instead.
 func (*ApplicationSource) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{4}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ApplicationSource) GetType() string {
@@ -429,7 +487,7 @@ type Variable struct {
 
 func (x *Variable) Reset() {
 	*x = Variable{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[5]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -441,7 +499,7 @@ func (x *Variable) String() string {
 func (*Variable) ProtoMessage() {}
 
 func (x *Variable) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[5]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -454,7 +512,7 @@ func (x *Variable) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Variable.ProtoReflect.Descriptor instead.
 func (*Variable) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{5}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *Variable) GetName() string {
@@ -514,7 +572,7 @@ type Identity struct {
 
 func (x *Identity) Reset() {
 	*x = Identity{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[6]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -526,7 +584,7 @@ func (x *Identity) String() string {
 func (*Identity) ProtoMessage() {}
 
 func (x *Identity) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[6]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -539,7 +597,7 @@ func (x *Identity) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Identity.ProtoReflect.Descriptor instead.
 func (*Identity) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{6}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *Identity) GetUlid() string {
@@ -582,7 +640,7 @@ type Role struct {
 
 func (x *Role) Reset() {
 	*x = Role{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[7]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -594,7 +652,7 @@ func (x *Role) String() string {
 func (*Role) ProtoMessage() {}
 
 func (x *Role) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[7]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -607,7 +665,7 @@ func (x *Role) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Role.ProtoReflect.Descriptor instead.
 func (*Role) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{7}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *Role) GetName() string {
@@ -634,7 +692,7 @@ type Permission struct {
 
 func (x *Permission) Reset() {
 	*x = Permission{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[8]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -646,7 +704,7 @@ func (x *Permission) String() string {
 func (*Permission) ProtoMessage() {}
 
 func (x *Permission) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[8]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -659,7 +717,7 @@ func (x *Permission) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Permission.ProtoReflect.Descriptor instead.
 func (*Permission) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{8}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *Permission) GetName() string {
@@ -695,7 +753,7 @@ type DescribeRequest struct {
 
 func (x *DescribeRequest) Reset() {
 	*x = DescribeRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[9]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -707,7 +765,7 @@ func (x *DescribeRequest) String() string {
 func (*DescribeRequest) ProtoMessage() {}
 
 func (x *DescribeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[9]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -720,7 +778,7 @@ func (x *DescribeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DescribeRequest.ProtoReflect.Descriptor instead.
 func (*DescribeRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{9}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *DescribeRequest) GetCredential() *Credential {
@@ -747,7 +805,7 @@ type DescribeResponse struct {
 
 func (x *DescribeResponse) Reset() {
 	*x = DescribeResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[10]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -759,7 +817,7 @@ func (x *DescribeResponse) String() string {
 func (*DescribeResponse) ProtoMessage() {}
 
 func (x *DescribeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[10]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -772,7 +830,7 @@ func (x *DescribeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DescribeResponse.ProtoReflect.Descriptor instead.
 func (*DescribeResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{10}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *DescribeResponse) GetName() string {
@@ -816,7 +874,7 @@ type SetupLink struct {
 
 func (x *SetupLink) Reset() {
 	*x = SetupLink{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[11]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -828,7 +886,7 @@ func (x *SetupLink) String() string {
 func (*SetupLink) ProtoMessage() {}
 
 func (x *SetupLink) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[11]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -841,7 +899,7 @@ func (x *SetupLink) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetupLink.ProtoReflect.Descriptor instead.
 func (*SetupLink) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{11}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *SetupLink) GetTitle() string {
@@ -888,7 +946,7 @@ type ProviderDefinition struct {
 
 func (x *ProviderDefinition) Reset() {
 	*x = ProviderDefinition{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[12]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -900,7 +958,7 @@ func (x *ProviderDefinition) String() string {
 func (*ProviderDefinition) ProtoMessage() {}
 
 func (x *ProviderDefinition) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[12]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -913,7 +971,7 @@ func (x *ProviderDefinition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProviderDefinition.ProtoReflect.Descriptor instead.
 func (*ProviderDefinition) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{12}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ProviderDefinition) GetTitle() string {
@@ -966,13 +1024,17 @@ type InputDefinition struct {
 	Name        string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Label       string                 `protobuf:"bytes,2,opt,name=label,proto3" json:"label,omitempty"`
 	Description string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	// One of "string", "number", "boolean", "select", "list" (of strings) or "map" (string keys and
-	// values). The SDKs export these as constants, and `steward provider validate` rejects any other.
+	// One of "string", "number", "boolean", "select", "list" (of strings), "map" (string keys and
+	// values) or a type of Steward's own, named `steward::<name>`: "steward::source", where something is
+	// fetched from as `{ type, config }`, whose `options` are the source types it accepts, and
+	// "map(string)", names and values asked for as a list of rows, and "steward::json", any JSON value,
+	// asked for in a dialog that checks it. The SDKs export these
+	// as constants, and `steward provider validate` rejects any other.
 	Type     string `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
 	Required bool   `protobuf:"varint,5,opt,name=required,proto3" json:"required,omitempty"`
 	// Used when no value is given.
 	Default *structpb.Value `protobuf:"bytes,6,opt,name=default,proto3" json:"default,omitempty"`
-	// The choices for a "select".
+	// The choices for a "select", and the source types a "steward::source" accepts.
 	Options []string `protobuf:"bytes,7,rep,name=options,proto3" json:"options,omitempty"`
 	// For a "number": the least and the greatest value it can have. Left out, there is no limit on that side.
 	Min           *float64 `protobuf:"fixed64,8,opt,name=min,proto3,oneof" json:"min,omitempty"`
@@ -983,7 +1045,7 @@ type InputDefinition struct {
 
 func (x *InputDefinition) Reset() {
 	*x = InputDefinition{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[13]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -995,7 +1057,7 @@ func (x *InputDefinition) String() string {
 func (*InputDefinition) ProtoMessage() {}
 
 func (x *InputDefinition) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[13]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1008,7 +1070,7 @@ func (x *InputDefinition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InputDefinition.ProtoReflect.Descriptor instead.
 func (*InputDefinition) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{13}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *InputDefinition) GetName() string {
@@ -1088,7 +1150,7 @@ type SecretDefinition struct {
 
 func (x *SecretDefinition) Reset() {
 	*x = SecretDefinition{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[14]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1100,7 +1162,7 @@ func (x *SecretDefinition) String() string {
 func (*SecretDefinition) ProtoMessage() {}
 
 func (x *SecretDefinition) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[14]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1113,7 +1175,7 @@ func (x *SecretDefinition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SecretDefinition.ProtoReflect.Descriptor instead.
 func (*SecretDefinition) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{14}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *SecretDefinition) GetName() string {
@@ -1154,7 +1216,7 @@ type OutputDefinition struct {
 
 func (x *OutputDefinition) Reset() {
 	*x = OutputDefinition{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[15]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1166,7 +1228,7 @@ func (x *OutputDefinition) String() string {
 func (*OutputDefinition) ProtoMessage() {}
 
 func (x *OutputDefinition) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[15]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1179,7 +1241,7 @@ func (x *OutputDefinition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OutputDefinition.ProtoReflect.Descriptor instead.
 func (*OutputDefinition) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{15}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *OutputDefinition) GetName() string {
@@ -1234,14 +1296,17 @@ type ComponentDefinition struct {
 	Roles       []*RoleDefinition       `protobuf:"bytes,6,rep,name=roles,proto3" json:"roles,omitempty"`
 	// What a component of this kind produces, such as a URL or an ARN, known once it exists. The
 	// values come back in Component.outputs.
-	Outputs       []*OutputDefinition `protobuf:"bytes,7,rep,name=outputs,proto3" json:"outputs,omitempty"`
+	Outputs []*OutputDefinition `protobuf:"bytes,7,rep,name=outputs,proto3" json:"outputs,omitempty"`
+	// Set when the kind takes variables, which the people who set up a component add to it by name.
+	// Provision and the other calls receive them in `variables`.
+	Variables     *VariadicVariables `protobuf:"bytes,9,opt,name=variables,proto3" json:"variables,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ComponentDefinition) Reset() {
 	*x = ComponentDefinition{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[16]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1253,7 +1318,7 @@ func (x *ComponentDefinition) String() string {
 func (*ComponentDefinition) ProtoMessage() {}
 
 func (x *ComponentDefinition) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[16]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1266,7 +1331,7 @@ func (x *ComponentDefinition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ComponentDefinition.ProtoReflect.Descriptor instead.
 func (*ComponentDefinition) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{16}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *ComponentDefinition) GetKind() string {
@@ -1325,6 +1390,13 @@ func (x *ComponentDefinition) GetOutputs() []*OutputDefinition {
 	return nil
 }
 
+func (x *ComponentDefinition) GetVariables() *VariadicVariables {
+	if x != nil {
+		return x.Variables
+	}
+	return nil
+}
+
 // An application is deployable and has open-ended variables, which a component has neither of. A
 // component has fixed inputs and outputs that the provider declares; an application also has a source
 // and variables whose names are chosen by the people who run it. Every declared application kind
@@ -1350,7 +1422,7 @@ type ApplicationDefinition struct {
 
 func (x *ApplicationDefinition) Reset() {
 	*x = ApplicationDefinition{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[17]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1362,7 +1434,7 @@ func (x *ApplicationDefinition) String() string {
 func (*ApplicationDefinition) ProtoMessage() {}
 
 func (x *ApplicationDefinition) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[17]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1375,7 +1447,7 @@ func (x *ApplicationDefinition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplicationDefinition.ProtoReflect.Descriptor instead.
 func (*ApplicationDefinition) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{17}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *ApplicationDefinition) GetKind() string {
@@ -1451,7 +1523,7 @@ type CredentialDefinition struct {
 
 func (x *CredentialDefinition) Reset() {
 	*x = CredentialDefinition{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[18]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1463,7 +1535,7 @@ func (x *CredentialDefinition) String() string {
 func (*CredentialDefinition) ProtoMessage() {}
 
 func (x *CredentialDefinition) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[18]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1476,7 +1548,7 @@ func (x *CredentialDefinition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CredentialDefinition.ProtoReflect.Descriptor instead.
 func (*CredentialDefinition) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{18}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *CredentialDefinition) GetName() string {
@@ -1538,7 +1610,7 @@ type GrantDefinition struct {
 
 func (x *GrantDefinition) Reset() {
 	*x = GrantDefinition{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[19]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1550,7 +1622,7 @@ func (x *GrantDefinition) String() string {
 func (*GrantDefinition) ProtoMessage() {}
 
 func (x *GrantDefinition) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[19]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1563,7 +1635,7 @@ func (x *GrantDefinition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GrantDefinition.ProtoReflect.Descriptor instead.
 func (*GrantDefinition) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{19}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *GrantDefinition) GetName() string {
@@ -1608,7 +1680,7 @@ type PermissionDefinition struct {
 
 func (x *PermissionDefinition) Reset() {
 	*x = PermissionDefinition{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[20]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1620,7 +1692,7 @@ func (x *PermissionDefinition) String() string {
 func (*PermissionDefinition) ProtoMessage() {}
 
 func (x *PermissionDefinition) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[20]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1633,7 +1705,7 @@ func (x *PermissionDefinition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PermissionDefinition.ProtoReflect.Descriptor instead.
 func (*PermissionDefinition) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{20}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *PermissionDefinition) GetName() string {
@@ -1676,7 +1748,7 @@ type RoleDefinition struct {
 
 func (x *RoleDefinition) Reset() {
 	*x = RoleDefinition{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[21]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1688,7 +1760,7 @@ func (x *RoleDefinition) String() string {
 func (*RoleDefinition) ProtoMessage() {}
 
 func (x *RoleDefinition) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[21]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1701,7 +1773,7 @@ func (x *RoleDefinition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleDefinition.ProtoReflect.Descriptor instead.
 func (*RoleDefinition) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{21}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *RoleDefinition) GetName() string {
@@ -1743,7 +1815,7 @@ type ProviderServiceGrantAccessRequest struct {
 
 func (x *ProviderServiceGrantAccessRequest) Reset() {
 	*x = ProviderServiceGrantAccessRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[22]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1755,7 +1827,7 @@ func (x *ProviderServiceGrantAccessRequest) String() string {
 func (*ProviderServiceGrantAccessRequest) ProtoMessage() {}
 
 func (x *ProviderServiceGrantAccessRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[22]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1768,7 +1840,7 @@ func (x *ProviderServiceGrantAccessRequest) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use ProviderServiceGrantAccessRequest.ProtoReflect.Descriptor instead.
 func (*ProviderServiceGrantAccessRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{22}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *ProviderServiceGrantAccessRequest) GetCredential() *Credential {
@@ -1813,7 +1885,7 @@ type ProviderServiceGrantAccessResponse struct {
 
 func (x *ProviderServiceGrantAccessResponse) Reset() {
 	*x = ProviderServiceGrantAccessResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[23]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1825,7 +1897,7 @@ func (x *ProviderServiceGrantAccessResponse) String() string {
 func (*ProviderServiceGrantAccessResponse) ProtoMessage() {}
 
 func (x *ProviderServiceGrantAccessResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[23]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1838,7 +1910,7 @@ func (x *ProviderServiceGrantAccessResponse) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use ProviderServiceGrantAccessResponse.ProtoReflect.Descriptor instead.
 func (*ProviderServiceGrantAccessResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{23}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *ProviderServiceGrantAccessResponse) GetId() string {
@@ -1870,7 +1942,7 @@ type ProviderServiceRevokeAccessRequest struct {
 
 func (x *ProviderServiceRevokeAccessRequest) Reset() {
 	*x = ProviderServiceRevokeAccessRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[24]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1882,7 +1954,7 @@ func (x *ProviderServiceRevokeAccessRequest) String() string {
 func (*ProviderServiceRevokeAccessRequest) ProtoMessage() {}
 
 func (x *ProviderServiceRevokeAccessRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[24]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1895,7 +1967,7 @@ func (x *ProviderServiceRevokeAccessRequest) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use ProviderServiceRevokeAccessRequest.ProtoReflect.Descriptor instead.
 func (*ProviderServiceRevokeAccessRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{24}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *ProviderServiceRevokeAccessRequest) GetCredential() *Credential {
@@ -1941,7 +2013,7 @@ type ProviderServiceRevokeAccessResponse struct {
 
 func (x *ProviderServiceRevokeAccessResponse) Reset() {
 	*x = ProviderServiceRevokeAccessResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[25]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1953,7 +2025,7 @@ func (x *ProviderServiceRevokeAccessResponse) String() string {
 func (*ProviderServiceRevokeAccessResponse) ProtoMessage() {}
 
 func (x *ProviderServiceRevokeAccessResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[25]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1966,7 +2038,7 @@ func (x *ProviderServiceRevokeAccessResponse) ProtoReflect() protoreflect.Messag
 
 // Deprecated: Use ProviderServiceRevokeAccessResponse.ProtoReflect.Descriptor instead.
 func (*ProviderServiceRevokeAccessResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{25}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{26}
 }
 
 // Asks whether an identity holds a grant now, for example to skip an invitation to someone who
@@ -1983,7 +2055,7 @@ type ProviderServiceGetAccessRequest struct {
 
 func (x *ProviderServiceGetAccessRequest) Reset() {
 	*x = ProviderServiceGetAccessRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[26]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1995,7 +2067,7 @@ func (x *ProviderServiceGetAccessRequest) String() string {
 func (*ProviderServiceGetAccessRequest) ProtoMessage() {}
 
 func (x *ProviderServiceGetAccessRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[26]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2008,7 +2080,7 @@ func (x *ProviderServiceGetAccessRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProviderServiceGetAccessRequest.ProtoReflect.Descriptor instead.
 func (*ProviderServiceGetAccessRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{26}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *ProviderServiceGetAccessRequest) GetCredential() *Credential {
@@ -2054,7 +2126,7 @@ type ProviderServiceGetAccessResponse struct {
 
 func (x *ProviderServiceGetAccessResponse) Reset() {
 	*x = ProviderServiceGetAccessResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[27]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2066,7 +2138,7 @@ func (x *ProviderServiceGetAccessResponse) String() string {
 func (*ProviderServiceGetAccessResponse) ProtoMessage() {}
 
 func (x *ProviderServiceGetAccessResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[27]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2079,7 +2151,7 @@ func (x *ProviderServiceGetAccessResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProviderServiceGetAccessResponse.ProtoReflect.Descriptor instead.
 func (*ProviderServiceGetAccessResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{27}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *ProviderServiceGetAccessResponse) GetGranted() bool {
@@ -2120,7 +2192,7 @@ type ComponentServiceGrantAccessRequest struct {
 
 func (x *ComponentServiceGrantAccessRequest) Reset() {
 	*x = ComponentServiceGrantAccessRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[28]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2132,7 +2204,7 @@ func (x *ComponentServiceGrantAccessRequest) String() string {
 func (*ComponentServiceGrantAccessRequest) ProtoMessage() {}
 
 func (x *ComponentServiceGrantAccessRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[28]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2145,7 +2217,7 @@ func (x *ComponentServiceGrantAccessRequest) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use ComponentServiceGrantAccessRequest.ProtoReflect.Descriptor instead.
 func (*ComponentServiceGrantAccessRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{28}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *ComponentServiceGrantAccessRequest) GetCredential() *Credential {
@@ -2201,7 +2273,7 @@ type ComponentServiceGrantAccessResponse struct {
 
 func (x *ComponentServiceGrantAccessResponse) Reset() {
 	*x = ComponentServiceGrantAccessResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[29]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2213,7 +2285,7 @@ func (x *ComponentServiceGrantAccessResponse) String() string {
 func (*ComponentServiceGrantAccessResponse) ProtoMessage() {}
 
 func (x *ComponentServiceGrantAccessResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[29]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2226,7 +2298,7 @@ func (x *ComponentServiceGrantAccessResponse) ProtoReflect() protoreflect.Messag
 
 // Deprecated: Use ComponentServiceGrantAccessResponse.ProtoReflect.Descriptor instead.
 func (*ComponentServiceGrantAccessResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{29}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *ComponentServiceGrantAccessResponse) GetId() string {
@@ -2274,7 +2346,7 @@ type ComponentServiceRevokeAccessRequest struct {
 
 func (x *ComponentServiceRevokeAccessRequest) Reset() {
 	*x = ComponentServiceRevokeAccessRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[30]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2286,7 +2358,7 @@ func (x *ComponentServiceRevokeAccessRequest) String() string {
 func (*ComponentServiceRevokeAccessRequest) ProtoMessage() {}
 
 func (x *ComponentServiceRevokeAccessRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[30]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2299,7 +2371,7 @@ func (x *ComponentServiceRevokeAccessRequest) ProtoReflect() protoreflect.Messag
 
 // Deprecated: Use ComponentServiceRevokeAccessRequest.ProtoReflect.Descriptor instead.
 func (*ComponentServiceRevokeAccessRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{30}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *ComponentServiceRevokeAccessRequest) GetCredential() *Credential {
@@ -2352,7 +2424,7 @@ type ComponentServiceRevokeAccessResponse struct {
 
 func (x *ComponentServiceRevokeAccessResponse) Reset() {
 	*x = ComponentServiceRevokeAccessResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[31]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2364,7 +2436,7 @@ func (x *ComponentServiceRevokeAccessResponse) String() string {
 func (*ComponentServiceRevokeAccessResponse) ProtoMessage() {}
 
 func (x *ComponentServiceRevokeAccessResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[31]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2377,7 +2449,7 @@ func (x *ComponentServiceRevokeAccessResponse) ProtoReflect() protoreflect.Messa
 
 // Deprecated: Use ComponentServiceRevokeAccessResponse.ProtoReflect.Descriptor instead.
 func (*ComponentServiceRevokeAccessResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{31}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{32}
 }
 
 // Asks what an identity holds on a component now.
@@ -2392,7 +2464,7 @@ type ComponentServiceGetAccessRequest struct {
 
 func (x *ComponentServiceGetAccessRequest) Reset() {
 	*x = ComponentServiceGetAccessRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[32]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2404,7 +2476,7 @@ func (x *ComponentServiceGetAccessRequest) String() string {
 func (*ComponentServiceGetAccessRequest) ProtoMessage() {}
 
 func (x *ComponentServiceGetAccessRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[32]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2417,7 +2489,7 @@ func (x *ComponentServiceGetAccessRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ComponentServiceGetAccessRequest.ProtoReflect.Descriptor instead.
 func (*ComponentServiceGetAccessRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{32}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *ComponentServiceGetAccessRequest) GetCredential() *Credential {
@@ -2454,7 +2526,7 @@ type ComponentServiceGetAccessResponse struct {
 
 func (x *ComponentServiceGetAccessResponse) Reset() {
 	*x = ComponentServiceGetAccessResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[33]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2466,7 +2538,7 @@ func (x *ComponentServiceGetAccessResponse) String() string {
 func (*ComponentServiceGetAccessResponse) ProtoMessage() {}
 
 func (x *ComponentServiceGetAccessResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[33]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2479,7 +2551,7 @@ func (x *ComponentServiceGetAccessResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use ComponentServiceGetAccessResponse.ProtoReflect.Descriptor instead.
 func (*ComponentServiceGetAccessResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{33}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *ComponentServiceGetAccessResponse) GetRoles() []*Role {
@@ -2516,14 +2588,16 @@ type ComponentServiceProvisionRequest struct {
 	Inputs *structpb.Struct `protobuf:"bytes,4,opt,name=inputs,proto3" json:"inputs,omitempty"`
 	// Values for the secrets the kind declares, keyed by secret name. Resolved by the runner for this
 	// call only.
-	Secrets       map[string]string `protobuf:"bytes,5,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Secrets map[string]string `protobuf:"bytes,5,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// Its variables, when the kind takes them.
+	Variables     []*Variable `protobuf:"bytes,6,rep,name=variables,proto3" json:"variables,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ComponentServiceProvisionRequest) Reset() {
 	*x = ComponentServiceProvisionRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[34]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2535,7 +2609,7 @@ func (x *ComponentServiceProvisionRequest) String() string {
 func (*ComponentServiceProvisionRequest) ProtoMessage() {}
 
 func (x *ComponentServiceProvisionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[34]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2548,7 +2622,7 @@ func (x *ComponentServiceProvisionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ComponentServiceProvisionRequest.ProtoReflect.Descriptor instead.
 func (*ComponentServiceProvisionRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{34}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *ComponentServiceProvisionRequest) GetCredential() *Credential {
@@ -2586,6 +2660,13 @@ func (x *ComponentServiceProvisionRequest) GetSecrets() map[string]string {
 	return nil
 }
 
+func (x *ComponentServiceProvisionRequest) GetVariables() []*Variable {
+	if x != nil {
+		return x.Variables
+	}
+	return nil
+}
+
 type ComponentServiceProvisionResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// What the component produced, as declared in ComponentDefinition.outputs, keyed by output name,
@@ -2598,7 +2679,7 @@ type ComponentServiceProvisionResponse struct {
 
 func (x *ComponentServiceProvisionResponse) Reset() {
 	*x = ComponentServiceProvisionResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[35]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2610,7 +2691,7 @@ func (x *ComponentServiceProvisionResponse) String() string {
 func (*ComponentServiceProvisionResponse) ProtoMessage() {}
 
 func (x *ComponentServiceProvisionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[35]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2623,7 +2704,7 @@ func (x *ComponentServiceProvisionResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use ComponentServiceProvisionResponse.ProtoReflect.Descriptor instead.
 func (*ComponentServiceProvisionResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{35}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *ComponentServiceProvisionResponse) GetOutputs() *structpb.Struct {
@@ -2644,7 +2725,7 @@ type ComponentServiceDeprovisionRequest struct {
 
 func (x *ComponentServiceDeprovisionRequest) Reset() {
 	*x = ComponentServiceDeprovisionRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[36]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2656,7 +2737,7 @@ func (x *ComponentServiceDeprovisionRequest) String() string {
 func (*ComponentServiceDeprovisionRequest) ProtoMessage() {}
 
 func (x *ComponentServiceDeprovisionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[36]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2669,7 +2750,7 @@ func (x *ComponentServiceDeprovisionRequest) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use ComponentServiceDeprovisionRequest.ProtoReflect.Descriptor instead.
 func (*ComponentServiceDeprovisionRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{36}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *ComponentServiceDeprovisionRequest) GetCredential() *Credential {
@@ -2694,7 +2775,7 @@ type ComponentServiceDeprovisionResponse struct {
 
 func (x *ComponentServiceDeprovisionResponse) Reset() {
 	*x = ComponentServiceDeprovisionResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[37]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2706,7 +2787,7 @@ func (x *ComponentServiceDeprovisionResponse) String() string {
 func (*ComponentServiceDeprovisionResponse) ProtoMessage() {}
 
 func (x *ComponentServiceDeprovisionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[37]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2719,7 +2800,7 @@ func (x *ComponentServiceDeprovisionResponse) ProtoReflect() protoreflect.Messag
 
 // Deprecated: Use ComponentServiceDeprovisionResponse.ProtoReflect.Descriptor instead.
 func (*ComponentServiceDeprovisionResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{37}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{38}
 }
 
 type ComponentServiceListRequest struct {
@@ -2733,7 +2814,7 @@ type ComponentServiceListRequest struct {
 
 func (x *ComponentServiceListRequest) Reset() {
 	*x = ComponentServiceListRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[38]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2745,7 +2826,7 @@ func (x *ComponentServiceListRequest) String() string {
 func (*ComponentServiceListRequest) ProtoMessage() {}
 
 func (x *ComponentServiceListRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[38]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2758,7 +2839,7 @@ func (x *ComponentServiceListRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ComponentServiceListRequest.ProtoReflect.Descriptor instead.
 func (*ComponentServiceListRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{38}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *ComponentServiceListRequest) GetCredential() *Credential {
@@ -2793,7 +2874,7 @@ type ComponentServiceListResponse struct {
 
 func (x *ComponentServiceListResponse) Reset() {
 	*x = ComponentServiceListResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[39]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2805,7 +2886,7 @@ func (x *ComponentServiceListResponse) String() string {
 func (*ComponentServiceListResponse) ProtoMessage() {}
 
 func (x *ComponentServiceListResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[39]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2818,7 +2899,7 @@ func (x *ComponentServiceListResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ComponentServiceListResponse.ProtoReflect.Descriptor instead.
 func (*ComponentServiceListResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{39}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *ComponentServiceListResponse) GetComponents() []*Component {
@@ -2852,7 +2933,7 @@ type ApplicationServiceCreateRequest struct {
 
 func (x *ApplicationServiceCreateRequest) Reset() {
 	*x = ApplicationServiceCreateRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[40]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2864,7 +2945,7 @@ func (x *ApplicationServiceCreateRequest) String() string {
 func (*ApplicationServiceCreateRequest) ProtoMessage() {}
 
 func (x *ApplicationServiceCreateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[40]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2877,7 +2958,7 @@ func (x *ApplicationServiceCreateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplicationServiceCreateRequest.ProtoReflect.Descriptor instead.
 func (*ApplicationServiceCreateRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{40}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *ApplicationServiceCreateRequest) GetCredential() *Credential {
@@ -2932,7 +3013,7 @@ type ApplicationServiceCreateResponse struct {
 
 func (x *ApplicationServiceCreateResponse) Reset() {
 	*x = ApplicationServiceCreateResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[41]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2944,7 +3025,7 @@ func (x *ApplicationServiceCreateResponse) String() string {
 func (*ApplicationServiceCreateResponse) ProtoMessage() {}
 
 func (x *ApplicationServiceCreateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[41]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2957,7 +3038,7 @@ func (x *ApplicationServiceCreateResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplicationServiceCreateResponse.ProtoReflect.Descriptor instead.
 func (*ApplicationServiceCreateResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{41}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *ApplicationServiceCreateResponse) GetApplication() *Application {
@@ -2978,7 +3059,7 @@ type ApplicationServiceDestroyRequest struct {
 
 func (x *ApplicationServiceDestroyRequest) Reset() {
 	*x = ApplicationServiceDestroyRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[42]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2990,7 +3071,7 @@ func (x *ApplicationServiceDestroyRequest) String() string {
 func (*ApplicationServiceDestroyRequest) ProtoMessage() {}
 
 func (x *ApplicationServiceDestroyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[42]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3003,7 +3084,7 @@ func (x *ApplicationServiceDestroyRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplicationServiceDestroyRequest.ProtoReflect.Descriptor instead.
 func (*ApplicationServiceDestroyRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{42}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *ApplicationServiceDestroyRequest) GetCredential() *Credential {
@@ -3028,7 +3109,7 @@ type ApplicationServiceDestroyResponse struct {
 
 func (x *ApplicationServiceDestroyResponse) Reset() {
 	*x = ApplicationServiceDestroyResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[43]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3040,7 +3121,7 @@ func (x *ApplicationServiceDestroyResponse) String() string {
 func (*ApplicationServiceDestroyResponse) ProtoMessage() {}
 
 func (x *ApplicationServiceDestroyResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[43]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3053,7 +3134,7 @@ func (x *ApplicationServiceDestroyResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use ApplicationServiceDestroyResponse.ProtoReflect.Descriptor instead.
 func (*ApplicationServiceDestroyResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{43}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{44}
 }
 
 // Deploys the application from a source, replacing what is running. `application.variables` is the
@@ -3072,7 +3153,7 @@ type ApplicationServiceDeployRequest struct {
 
 func (x *ApplicationServiceDeployRequest) Reset() {
 	*x = ApplicationServiceDeployRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[44]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3084,7 +3165,7 @@ func (x *ApplicationServiceDeployRequest) String() string {
 func (*ApplicationServiceDeployRequest) ProtoMessage() {}
 
 func (x *ApplicationServiceDeployRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[44]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3097,7 +3178,7 @@ func (x *ApplicationServiceDeployRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplicationServiceDeployRequest.ProtoReflect.Descriptor instead.
 func (*ApplicationServiceDeployRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{44}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *ApplicationServiceDeployRequest) GetCredential() *Credential {
@@ -3131,7 +3212,7 @@ type ApplicationServiceDeployResponse struct {
 
 func (x *ApplicationServiceDeployResponse) Reset() {
 	*x = ApplicationServiceDeployResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[45]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3143,7 +3224,7 @@ func (x *ApplicationServiceDeployResponse) String() string {
 func (*ApplicationServiceDeployResponse) ProtoMessage() {}
 
 func (x *ApplicationServiceDeployResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[45]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3156,7 +3237,7 @@ func (x *ApplicationServiceDeployResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplicationServiceDeployResponse.ProtoReflect.Descriptor instead.
 func (*ApplicationServiceDeployResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{45}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{46}
 }
 
 func (x *ApplicationServiceDeployResponse) GetApplication() *Application {
@@ -3189,7 +3270,7 @@ type CredentialServiceResolveRequest struct {
 
 func (x *CredentialServiceResolveRequest) Reset() {
 	*x = CredentialServiceResolveRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[46]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3201,7 +3282,7 @@ func (x *CredentialServiceResolveRequest) String() string {
 func (*CredentialServiceResolveRequest) ProtoMessage() {}
 
 func (x *CredentialServiceResolveRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[46]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3214,7 +3295,7 @@ func (x *CredentialServiceResolveRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CredentialServiceResolveRequest.ProtoReflect.Descriptor instead.
 func (*CredentialServiceResolveRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{46}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{47}
 }
 
 func (x *CredentialServiceResolveRequest) GetKind() string {
@@ -3282,7 +3363,7 @@ type CredentialServiceResolveResponse struct {
 
 func (x *CredentialServiceResolveResponse) Reset() {
 	*x = CredentialServiceResolveResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[47]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3294,7 +3375,7 @@ func (x *CredentialServiceResolveResponse) String() string {
 func (*CredentialServiceResolveResponse) ProtoMessage() {}
 
 func (x *CredentialServiceResolveResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[47]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3307,7 +3388,7 @@ func (x *CredentialServiceResolveResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CredentialServiceResolveResponse.ProtoReflect.Descriptor instead.
 func (*CredentialServiceResolveResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{47}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{48}
 }
 
 func (x *CredentialServiceResolveResponse) GetEnv() map[string]string {
@@ -3342,7 +3423,7 @@ type CredentialFile struct {
 
 func (x *CredentialFile) Reset() {
 	*x = CredentialFile{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[48]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[49]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3354,7 +3435,7 @@ func (x *CredentialFile) String() string {
 func (*CredentialFile) ProtoMessage() {}
 
 func (x *CredentialFile) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[48]
+	mi := &file_steward_provider_v1_provider_proto_msgTypes[49]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3367,7 +3448,7 @@ func (x *CredentialFile) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CredentialFile.ProtoReflect.Descriptor instead.
 func (*CredentialFile) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{48}
+	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{49}
 }
 
 func (x *CredentialFile) GetEnvName() string {
@@ -3397,16 +3478,19 @@ const file_steward_provider_v1_provider_proto_rawDesc = "" +
 	"\x0fidentity_issuer\x18\a \x01(\tR\x0eidentityIssuerJ\x04\b\x01\x10\x02J\x04\b\x02\x10\x03J\x04\b\x06\x10\aR\x06inputsR\asecretsR\x0eidentity_token\"6\n" +
 	"\fOrganization\x12\x12\n" +
 	"\x04ulid\x18\x01 \x01(\tR\x04ulid\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\"\x9a\x02\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\"\xd7\x02\n" +
 	"\tComponent\x12\x12\n" +
 	"\x04kind\x18\x01 \x01(\tR\x04kind\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12/\n" +
 	"\x06inputs\x18\x03 \x01(\v2\x17.google.protobuf.StructR\x06inputs\x12E\n" +
 	"\asecrets\x18\x04 \x03(\v2+.steward.provider.v1.Component.SecretsEntryR\asecrets\x121\n" +
-	"\aoutputs\x18\x05 \x01(\v2\x17.google.protobuf.StructR\aoutputs\x1a:\n" +
+	"\aoutputs\x18\x05 \x01(\v2\x17.google.protobuf.StructR\aoutputs\x12;\n" +
+	"\tvariables\x18\x06 \x03(\v2\x1d.steward.provider.v1.VariableR\tvariables\x1a:\n" +
 	"\fSecretsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x97\x03\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"5\n" +
+	"\x11VariadicVariables\x12 \n" +
+	"\vdescription\x18\x01 \x01(\tR\vdescription\"\x97\x03\n" +
 	"\vApplication\x12\x12\n" +
 	"\x04kind\x18\x01 \x01(\tR\x04kind\x12\x0e\n" +
 	"\x02id\x18\x02 \x01(\tR\x02id\x12/\n" +
@@ -3494,7 +3578,7 @@ const file_steward_provider_v1_provider_proto_rawDesc = "" +
 	"\x05label\x18\x02 \x01(\tR\x05label\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x12\n" +
 	"\x04type\x18\x04 \x01(\tR\x04type\x12\x1c\n" +
-	"\tsensitive\x18\x05 \x01(\bR\tsensitive\"\xa9\x03\n" +
+	"\tsensitive\x18\x05 \x01(\bR\tsensitive\"\xef\x03\n" +
 	"\x13ComponentDefinition\x12\x12\n" +
 	"\x04kind\x18\x01 \x01(\tR\x04kind\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
@@ -3503,7 +3587,8 @@ const file_steward_provider_v1_provider_proto_rawDesc = "" +
 	"\asecrets\x18\b \x03(\v2%.steward.provider.v1.SecretDefinitionR\asecrets\x12K\n" +
 	"\vpermissions\x18\x05 \x03(\v2).steward.provider.v1.PermissionDefinitionR\vpermissions\x129\n" +
 	"\x05roles\x18\x06 \x03(\v2#.steward.provider.v1.RoleDefinitionR\x05roles\x12?\n" +
-	"\aoutputs\x18\a \x03(\v2%.steward.provider.v1.OutputDefinitionR\aoutputs\"\xbd\x02\n" +
+	"\aoutputs\x18\a \x03(\v2%.steward.provider.v1.OutputDefinitionR\aoutputs\x12D\n" +
+	"\tvariables\x18\t \x01(\v2&.steward.provider.v1.VariadicVariablesR\tvariables\"\xbd\x02\n" +
 	"\x15ApplicationDefinition\x12\x12\n" +
 	"\x04kind\x18\x01 \x01(\tR\x04kind\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
@@ -3598,7 +3683,7 @@ const file_steward_provider_v1_provider_proto_rawDesc = "" +
 	"!ComponentServiceGetAccessResponse\x12/\n" +
 	"\x05roles\x18\x01 \x03(\v2\x19.steward.provider.v1.RoleR\x05roles\x12A\n" +
 	"\vpermissions\x18\x03 \x03(\v2\x1f.steward.provider.v1.PermissionR\vpermissions\x12\x18\n" +
-	"\apending\x18\x02 \x01(\bR\apending\"\xd6\x02\n" +
+	"\apending\x18\x02 \x01(\bR\apending\"\x93\x03\n" +
 	" ComponentServiceProvisionRequest\x12?\n" +
 	"\n" +
 	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
@@ -3606,7 +3691,8 @@ const file_steward_provider_v1_provider_proto_rawDesc = "" +
 	"\x04kind\x18\x02 \x01(\tR\x04kind\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12/\n" +
 	"\x06inputs\x18\x04 \x01(\v2\x17.google.protobuf.StructR\x06inputs\x12\\\n" +
-	"\asecrets\x18\x05 \x03(\v2B.steward.provider.v1.ComponentServiceProvisionRequest.SecretsEntryR\asecrets\x1a:\n" +
+	"\asecrets\x18\x05 \x03(\v2B.steward.provider.v1.ComponentServiceProvisionRequest.SecretsEntryR\asecrets\x12;\n" +
+	"\tvariables\x18\x06 \x03(\v2\x1d.steward.provider.v1.VariableR\tvariables\x1a:\n" +
 	"\fSecretsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"V\n" +
@@ -3712,182 +3798,186 @@ func file_steward_provider_v1_provider_proto_rawDescGZIP() []byte {
 	return file_steward_provider_v1_provider_proto_rawDescData
 }
 
-var file_steward_provider_v1_provider_proto_msgTypes = make([]protoimpl.MessageInfo, 55)
+var file_steward_provider_v1_provider_proto_msgTypes = make([]protoimpl.MessageInfo, 56)
 var file_steward_provider_v1_provider_proto_goTypes = []any{
 	(*Credential)(nil),                           // 0: steward.provider.v1.Credential
 	(*Organization)(nil),                         // 1: steward.provider.v1.Organization
 	(*Component)(nil),                            // 2: steward.provider.v1.Component
-	(*Application)(nil),                          // 3: steward.provider.v1.Application
-	(*ApplicationSource)(nil),                    // 4: steward.provider.v1.ApplicationSource
-	(*Variable)(nil),                             // 5: steward.provider.v1.Variable
-	(*Identity)(nil),                             // 6: steward.provider.v1.Identity
-	(*Role)(nil),                                 // 7: steward.provider.v1.Role
-	(*Permission)(nil),                           // 8: steward.provider.v1.Permission
-	(*DescribeRequest)(nil),                      // 9: steward.provider.v1.DescribeRequest
-	(*DescribeResponse)(nil),                     // 10: steward.provider.v1.DescribeResponse
-	(*SetupLink)(nil),                            // 11: steward.provider.v1.SetupLink
-	(*ProviderDefinition)(nil),                   // 12: steward.provider.v1.ProviderDefinition
-	(*InputDefinition)(nil),                      // 13: steward.provider.v1.InputDefinition
-	(*SecretDefinition)(nil),                     // 14: steward.provider.v1.SecretDefinition
-	(*OutputDefinition)(nil),                     // 15: steward.provider.v1.OutputDefinition
-	(*ComponentDefinition)(nil),                  // 16: steward.provider.v1.ComponentDefinition
-	(*ApplicationDefinition)(nil),                // 17: steward.provider.v1.ApplicationDefinition
-	(*CredentialDefinition)(nil),                 // 18: steward.provider.v1.CredentialDefinition
-	(*GrantDefinition)(nil),                      // 19: steward.provider.v1.GrantDefinition
-	(*PermissionDefinition)(nil),                 // 20: steward.provider.v1.PermissionDefinition
-	(*RoleDefinition)(nil),                       // 21: steward.provider.v1.RoleDefinition
-	(*ProviderServiceGrantAccessRequest)(nil),    // 22: steward.provider.v1.ProviderServiceGrantAccessRequest
-	(*ProviderServiceGrantAccessResponse)(nil),   // 23: steward.provider.v1.ProviderServiceGrantAccessResponse
-	(*ProviderServiceRevokeAccessRequest)(nil),   // 24: steward.provider.v1.ProviderServiceRevokeAccessRequest
-	(*ProviderServiceRevokeAccessResponse)(nil),  // 25: steward.provider.v1.ProviderServiceRevokeAccessResponse
-	(*ProviderServiceGetAccessRequest)(nil),      // 26: steward.provider.v1.ProviderServiceGetAccessRequest
-	(*ProviderServiceGetAccessResponse)(nil),     // 27: steward.provider.v1.ProviderServiceGetAccessResponse
-	(*ComponentServiceGrantAccessRequest)(nil),   // 28: steward.provider.v1.ComponentServiceGrantAccessRequest
-	(*ComponentServiceGrantAccessResponse)(nil),  // 29: steward.provider.v1.ComponentServiceGrantAccessResponse
-	(*ComponentServiceRevokeAccessRequest)(nil),  // 30: steward.provider.v1.ComponentServiceRevokeAccessRequest
-	(*ComponentServiceRevokeAccessResponse)(nil), // 31: steward.provider.v1.ComponentServiceRevokeAccessResponse
-	(*ComponentServiceGetAccessRequest)(nil),     // 32: steward.provider.v1.ComponentServiceGetAccessRequest
-	(*ComponentServiceGetAccessResponse)(nil),    // 33: steward.provider.v1.ComponentServiceGetAccessResponse
-	(*ComponentServiceProvisionRequest)(nil),     // 34: steward.provider.v1.ComponentServiceProvisionRequest
-	(*ComponentServiceProvisionResponse)(nil),    // 35: steward.provider.v1.ComponentServiceProvisionResponse
-	(*ComponentServiceDeprovisionRequest)(nil),   // 36: steward.provider.v1.ComponentServiceDeprovisionRequest
-	(*ComponentServiceDeprovisionResponse)(nil),  // 37: steward.provider.v1.ComponentServiceDeprovisionResponse
-	(*ComponentServiceListRequest)(nil),          // 38: steward.provider.v1.ComponentServiceListRequest
-	(*ComponentServiceListResponse)(nil),         // 39: steward.provider.v1.ComponentServiceListResponse
-	(*ApplicationServiceCreateRequest)(nil),      // 40: steward.provider.v1.ApplicationServiceCreateRequest
-	(*ApplicationServiceCreateResponse)(nil),     // 41: steward.provider.v1.ApplicationServiceCreateResponse
-	(*ApplicationServiceDestroyRequest)(nil),     // 42: steward.provider.v1.ApplicationServiceDestroyRequest
-	(*ApplicationServiceDestroyResponse)(nil),    // 43: steward.provider.v1.ApplicationServiceDestroyResponse
-	(*ApplicationServiceDeployRequest)(nil),      // 44: steward.provider.v1.ApplicationServiceDeployRequest
-	(*ApplicationServiceDeployResponse)(nil),     // 45: steward.provider.v1.ApplicationServiceDeployResponse
-	(*CredentialServiceResolveRequest)(nil),      // 46: steward.provider.v1.CredentialServiceResolveRequest
-	(*CredentialServiceResolveResponse)(nil),     // 47: steward.provider.v1.CredentialServiceResolveResponse
-	(*CredentialFile)(nil),                       // 48: steward.provider.v1.CredentialFile
-	nil,                                          // 49: steward.provider.v1.Component.SecretsEntry
-	nil,                                          // 50: steward.provider.v1.Application.SecretsEntry
-	nil,                                          // 51: steward.provider.v1.ComponentServiceProvisionRequest.SecretsEntry
-	nil,                                          // 52: steward.provider.v1.ApplicationServiceCreateRequest.SecretsEntry
-	nil,                                          // 53: steward.provider.v1.CredentialServiceResolveRequest.SecretsEntry
-	nil,                                          // 54: steward.provider.v1.CredentialServiceResolveResponse.EnvEntry
-	(*structpb.Struct)(nil),                      // 55: google.protobuf.Struct
-	(*structpb.Value)(nil),                       // 56: google.protobuf.Value
+	(*VariadicVariables)(nil),                    // 3: steward.provider.v1.VariadicVariables
+	(*Application)(nil),                          // 4: steward.provider.v1.Application
+	(*ApplicationSource)(nil),                    // 5: steward.provider.v1.ApplicationSource
+	(*Variable)(nil),                             // 6: steward.provider.v1.Variable
+	(*Identity)(nil),                             // 7: steward.provider.v1.Identity
+	(*Role)(nil),                                 // 8: steward.provider.v1.Role
+	(*Permission)(nil),                           // 9: steward.provider.v1.Permission
+	(*DescribeRequest)(nil),                      // 10: steward.provider.v1.DescribeRequest
+	(*DescribeResponse)(nil),                     // 11: steward.provider.v1.DescribeResponse
+	(*SetupLink)(nil),                            // 12: steward.provider.v1.SetupLink
+	(*ProviderDefinition)(nil),                   // 13: steward.provider.v1.ProviderDefinition
+	(*InputDefinition)(nil),                      // 14: steward.provider.v1.InputDefinition
+	(*SecretDefinition)(nil),                     // 15: steward.provider.v1.SecretDefinition
+	(*OutputDefinition)(nil),                     // 16: steward.provider.v1.OutputDefinition
+	(*ComponentDefinition)(nil),                  // 17: steward.provider.v1.ComponentDefinition
+	(*ApplicationDefinition)(nil),                // 18: steward.provider.v1.ApplicationDefinition
+	(*CredentialDefinition)(nil),                 // 19: steward.provider.v1.CredentialDefinition
+	(*GrantDefinition)(nil),                      // 20: steward.provider.v1.GrantDefinition
+	(*PermissionDefinition)(nil),                 // 21: steward.provider.v1.PermissionDefinition
+	(*RoleDefinition)(nil),                       // 22: steward.provider.v1.RoleDefinition
+	(*ProviderServiceGrantAccessRequest)(nil),    // 23: steward.provider.v1.ProviderServiceGrantAccessRequest
+	(*ProviderServiceGrantAccessResponse)(nil),   // 24: steward.provider.v1.ProviderServiceGrantAccessResponse
+	(*ProviderServiceRevokeAccessRequest)(nil),   // 25: steward.provider.v1.ProviderServiceRevokeAccessRequest
+	(*ProviderServiceRevokeAccessResponse)(nil),  // 26: steward.provider.v1.ProviderServiceRevokeAccessResponse
+	(*ProviderServiceGetAccessRequest)(nil),      // 27: steward.provider.v1.ProviderServiceGetAccessRequest
+	(*ProviderServiceGetAccessResponse)(nil),     // 28: steward.provider.v1.ProviderServiceGetAccessResponse
+	(*ComponentServiceGrantAccessRequest)(nil),   // 29: steward.provider.v1.ComponentServiceGrantAccessRequest
+	(*ComponentServiceGrantAccessResponse)(nil),  // 30: steward.provider.v1.ComponentServiceGrantAccessResponse
+	(*ComponentServiceRevokeAccessRequest)(nil),  // 31: steward.provider.v1.ComponentServiceRevokeAccessRequest
+	(*ComponentServiceRevokeAccessResponse)(nil), // 32: steward.provider.v1.ComponentServiceRevokeAccessResponse
+	(*ComponentServiceGetAccessRequest)(nil),     // 33: steward.provider.v1.ComponentServiceGetAccessRequest
+	(*ComponentServiceGetAccessResponse)(nil),    // 34: steward.provider.v1.ComponentServiceGetAccessResponse
+	(*ComponentServiceProvisionRequest)(nil),     // 35: steward.provider.v1.ComponentServiceProvisionRequest
+	(*ComponentServiceProvisionResponse)(nil),    // 36: steward.provider.v1.ComponentServiceProvisionResponse
+	(*ComponentServiceDeprovisionRequest)(nil),   // 37: steward.provider.v1.ComponentServiceDeprovisionRequest
+	(*ComponentServiceDeprovisionResponse)(nil),  // 38: steward.provider.v1.ComponentServiceDeprovisionResponse
+	(*ComponentServiceListRequest)(nil),          // 39: steward.provider.v1.ComponentServiceListRequest
+	(*ComponentServiceListResponse)(nil),         // 40: steward.provider.v1.ComponentServiceListResponse
+	(*ApplicationServiceCreateRequest)(nil),      // 41: steward.provider.v1.ApplicationServiceCreateRequest
+	(*ApplicationServiceCreateResponse)(nil),     // 42: steward.provider.v1.ApplicationServiceCreateResponse
+	(*ApplicationServiceDestroyRequest)(nil),     // 43: steward.provider.v1.ApplicationServiceDestroyRequest
+	(*ApplicationServiceDestroyResponse)(nil),    // 44: steward.provider.v1.ApplicationServiceDestroyResponse
+	(*ApplicationServiceDeployRequest)(nil),      // 45: steward.provider.v1.ApplicationServiceDeployRequest
+	(*ApplicationServiceDeployResponse)(nil),     // 46: steward.provider.v1.ApplicationServiceDeployResponse
+	(*CredentialServiceResolveRequest)(nil),      // 47: steward.provider.v1.CredentialServiceResolveRequest
+	(*CredentialServiceResolveResponse)(nil),     // 48: steward.provider.v1.CredentialServiceResolveResponse
+	(*CredentialFile)(nil),                       // 49: steward.provider.v1.CredentialFile
+	nil,                                          // 50: steward.provider.v1.Component.SecretsEntry
+	nil,                                          // 51: steward.provider.v1.Application.SecretsEntry
+	nil,                                          // 52: steward.provider.v1.ComponentServiceProvisionRequest.SecretsEntry
+	nil,                                          // 53: steward.provider.v1.ApplicationServiceCreateRequest.SecretsEntry
+	nil,                                          // 54: steward.provider.v1.CredentialServiceResolveRequest.SecretsEntry
+	nil,                                          // 55: steward.provider.v1.CredentialServiceResolveResponse.EnvEntry
+	(*structpb.Struct)(nil),                      // 56: google.protobuf.Struct
+	(*structpb.Value)(nil),                       // 57: google.protobuf.Value
 }
 var file_steward_provider_v1_provider_proto_depIdxs = []int32{
 	1,  // 0: steward.provider.v1.Credential.organization:type_name -> steward.provider.v1.Organization
-	55, // 1: steward.provider.v1.Component.inputs:type_name -> google.protobuf.Struct
-	49, // 2: steward.provider.v1.Component.secrets:type_name -> steward.provider.v1.Component.SecretsEntry
-	55, // 3: steward.provider.v1.Component.outputs:type_name -> google.protobuf.Struct
-	55, // 4: steward.provider.v1.Application.inputs:type_name -> google.protobuf.Struct
-	50, // 5: steward.provider.v1.Application.secrets:type_name -> steward.provider.v1.Application.SecretsEntry
-	55, // 6: steward.provider.v1.Application.outputs:type_name -> google.protobuf.Struct
-	4,  // 7: steward.provider.v1.Application.source:type_name -> steward.provider.v1.ApplicationSource
-	5,  // 8: steward.provider.v1.Application.variables:type_name -> steward.provider.v1.Variable
-	55, // 9: steward.provider.v1.ApplicationSource.config:type_name -> google.protobuf.Struct
-	55, // 10: steward.provider.v1.Identity.attrs:type_name -> google.protobuf.Struct
-	0,  // 11: steward.provider.v1.DescribeRequest.credential:type_name -> steward.provider.v1.Credential
-	12, // 12: steward.provider.v1.DescribeResponse.definition:type_name -> steward.provider.v1.ProviderDefinition
-	11, // 13: steward.provider.v1.DescribeResponse.setup_links:type_name -> steward.provider.v1.SetupLink
-	16, // 14: steward.provider.v1.ProviderDefinition.components:type_name -> steward.provider.v1.ComponentDefinition
-	17, // 15: steward.provider.v1.ProviderDefinition.applications:type_name -> steward.provider.v1.ApplicationDefinition
-	18, // 16: steward.provider.v1.ProviderDefinition.credentials:type_name -> steward.provider.v1.CredentialDefinition
-	19, // 17: steward.provider.v1.ProviderDefinition.grants:type_name -> steward.provider.v1.GrantDefinition
-	56, // 18: steward.provider.v1.InputDefinition.default:type_name -> google.protobuf.Value
-	13, // 19: steward.provider.v1.ComponentDefinition.inputs:type_name -> steward.provider.v1.InputDefinition
-	14, // 20: steward.provider.v1.ComponentDefinition.secrets:type_name -> steward.provider.v1.SecretDefinition
-	20, // 21: steward.provider.v1.ComponentDefinition.permissions:type_name -> steward.provider.v1.PermissionDefinition
-	21, // 22: steward.provider.v1.ComponentDefinition.roles:type_name -> steward.provider.v1.RoleDefinition
-	15, // 23: steward.provider.v1.ComponentDefinition.outputs:type_name -> steward.provider.v1.OutputDefinition
-	13, // 24: steward.provider.v1.ApplicationDefinition.inputs:type_name -> steward.provider.v1.InputDefinition
-	14, // 25: steward.provider.v1.ApplicationDefinition.secrets:type_name -> steward.provider.v1.SecretDefinition
-	15, // 26: steward.provider.v1.ApplicationDefinition.outputs:type_name -> steward.provider.v1.OutputDefinition
-	13, // 27: steward.provider.v1.CredentialDefinition.inputs:type_name -> steward.provider.v1.InputDefinition
-	14, // 28: steward.provider.v1.CredentialDefinition.secrets:type_name -> steward.provider.v1.SecretDefinition
-	13, // 29: steward.provider.v1.GrantDefinition.inputs:type_name -> steward.provider.v1.InputDefinition
-	0,  // 30: steward.provider.v1.ProviderServiceGrantAccessRequest.credential:type_name -> steward.provider.v1.Credential
-	6,  // 31: steward.provider.v1.ProviderServiceGrantAccessRequest.identity:type_name -> steward.provider.v1.Identity
-	55, // 32: steward.provider.v1.ProviderServiceGrantAccessRequest.inputs:type_name -> google.protobuf.Struct
-	0,  // 33: steward.provider.v1.ProviderServiceRevokeAccessRequest.credential:type_name -> steward.provider.v1.Credential
-	6,  // 34: steward.provider.v1.ProviderServiceRevokeAccessRequest.identity:type_name -> steward.provider.v1.Identity
-	55, // 35: steward.provider.v1.ProviderServiceRevokeAccessRequest.inputs:type_name -> google.protobuf.Struct
-	0,  // 36: steward.provider.v1.ProviderServiceGetAccessRequest.credential:type_name -> steward.provider.v1.Credential
-	6,  // 37: steward.provider.v1.ProviderServiceGetAccessRequest.identity:type_name -> steward.provider.v1.Identity
-	55, // 38: steward.provider.v1.ProviderServiceGetAccessRequest.inputs:type_name -> google.protobuf.Struct
-	6,  // 39: steward.provider.v1.ProviderServiceGetAccessResponse.identity:type_name -> steward.provider.v1.Identity
-	0,  // 40: steward.provider.v1.ComponentServiceGrantAccessRequest.credential:type_name -> steward.provider.v1.Credential
-	2,  // 41: steward.provider.v1.ComponentServiceGrantAccessRequest.component:type_name -> steward.provider.v1.Component
-	6,  // 42: steward.provider.v1.ComponentServiceGrantAccessRequest.identity:type_name -> steward.provider.v1.Identity
-	7,  // 43: steward.provider.v1.ComponentServiceGrantAccessRequest.role:type_name -> steward.provider.v1.Role
-	8,  // 44: steward.provider.v1.ComponentServiceGrantAccessRequest.permissions:type_name -> steward.provider.v1.Permission
-	7,  // 45: steward.provider.v1.ComponentServiceGrantAccessResponse.role:type_name -> steward.provider.v1.Role
-	8,  // 46: steward.provider.v1.ComponentServiceGrantAccessResponse.permissions:type_name -> steward.provider.v1.Permission
-	0,  // 47: steward.provider.v1.ComponentServiceRevokeAccessRequest.credential:type_name -> steward.provider.v1.Credential
-	2,  // 48: steward.provider.v1.ComponentServiceRevokeAccessRequest.component:type_name -> steward.provider.v1.Component
-	6,  // 49: steward.provider.v1.ComponentServiceRevokeAccessRequest.identity:type_name -> steward.provider.v1.Identity
-	7,  // 50: steward.provider.v1.ComponentServiceRevokeAccessRequest.role:type_name -> steward.provider.v1.Role
-	8,  // 51: steward.provider.v1.ComponentServiceRevokeAccessRequest.permissions:type_name -> steward.provider.v1.Permission
-	0,  // 52: steward.provider.v1.ComponentServiceGetAccessRequest.credential:type_name -> steward.provider.v1.Credential
-	2,  // 53: steward.provider.v1.ComponentServiceGetAccessRequest.component:type_name -> steward.provider.v1.Component
-	6,  // 54: steward.provider.v1.ComponentServiceGetAccessRequest.identity:type_name -> steward.provider.v1.Identity
-	7,  // 55: steward.provider.v1.ComponentServiceGetAccessResponse.roles:type_name -> steward.provider.v1.Role
-	8,  // 56: steward.provider.v1.ComponentServiceGetAccessResponse.permissions:type_name -> steward.provider.v1.Permission
-	0,  // 57: steward.provider.v1.ComponentServiceProvisionRequest.credential:type_name -> steward.provider.v1.Credential
-	55, // 58: steward.provider.v1.ComponentServiceProvisionRequest.inputs:type_name -> google.protobuf.Struct
-	51, // 59: steward.provider.v1.ComponentServiceProvisionRequest.secrets:type_name -> steward.provider.v1.ComponentServiceProvisionRequest.SecretsEntry
-	55, // 60: steward.provider.v1.ComponentServiceProvisionResponse.outputs:type_name -> google.protobuf.Struct
-	0,  // 61: steward.provider.v1.ComponentServiceDeprovisionRequest.credential:type_name -> steward.provider.v1.Credential
-	2,  // 62: steward.provider.v1.ComponentServiceDeprovisionRequest.component:type_name -> steward.provider.v1.Component
-	0,  // 63: steward.provider.v1.ComponentServiceListRequest.credential:type_name -> steward.provider.v1.Credential
-	2,  // 64: steward.provider.v1.ComponentServiceListResponse.components:type_name -> steward.provider.v1.Component
-	0,  // 65: steward.provider.v1.ApplicationServiceCreateRequest.credential:type_name -> steward.provider.v1.Credential
-	55, // 66: steward.provider.v1.ApplicationServiceCreateRequest.inputs:type_name -> google.protobuf.Struct
-	52, // 67: steward.provider.v1.ApplicationServiceCreateRequest.secrets:type_name -> steward.provider.v1.ApplicationServiceCreateRequest.SecretsEntry
-	4,  // 68: steward.provider.v1.ApplicationServiceCreateRequest.source:type_name -> steward.provider.v1.ApplicationSource
-	5,  // 69: steward.provider.v1.ApplicationServiceCreateRequest.variables:type_name -> steward.provider.v1.Variable
-	3,  // 70: steward.provider.v1.ApplicationServiceCreateResponse.application:type_name -> steward.provider.v1.Application
-	0,  // 71: steward.provider.v1.ApplicationServiceDestroyRequest.credential:type_name -> steward.provider.v1.Credential
-	3,  // 72: steward.provider.v1.ApplicationServiceDestroyRequest.application:type_name -> steward.provider.v1.Application
-	0,  // 73: steward.provider.v1.ApplicationServiceDeployRequest.credential:type_name -> steward.provider.v1.Credential
-	3,  // 74: steward.provider.v1.ApplicationServiceDeployRequest.application:type_name -> steward.provider.v1.Application
-	4,  // 75: steward.provider.v1.ApplicationServiceDeployRequest.source:type_name -> steward.provider.v1.ApplicationSource
-	3,  // 76: steward.provider.v1.ApplicationServiceDeployResponse.application:type_name -> steward.provider.v1.Application
-	55, // 77: steward.provider.v1.CredentialServiceResolveRequest.inputs:type_name -> google.protobuf.Struct
-	53, // 78: steward.provider.v1.CredentialServiceResolveRequest.secrets:type_name -> steward.provider.v1.CredentialServiceResolveRequest.SecretsEntry
-	1,  // 79: steward.provider.v1.CredentialServiceResolveRequest.organization:type_name -> steward.provider.v1.Organization
-	54, // 80: steward.provider.v1.CredentialServiceResolveResponse.env:type_name -> steward.provider.v1.CredentialServiceResolveResponse.EnvEntry
-	48, // 81: steward.provider.v1.CredentialServiceResolveResponse.files:type_name -> steward.provider.v1.CredentialFile
-	9,  // 82: steward.provider.v1.ProviderService.Describe:input_type -> steward.provider.v1.DescribeRequest
-	22, // 83: steward.provider.v1.ProviderService.GrantAccess:input_type -> steward.provider.v1.ProviderServiceGrantAccessRequest
-	24, // 84: steward.provider.v1.ProviderService.RevokeAccess:input_type -> steward.provider.v1.ProviderServiceRevokeAccessRequest
-	26, // 85: steward.provider.v1.ProviderService.GetAccess:input_type -> steward.provider.v1.ProviderServiceGetAccessRequest
-	28, // 86: steward.provider.v1.ComponentService.GrantAccess:input_type -> steward.provider.v1.ComponentServiceGrantAccessRequest
-	30, // 87: steward.provider.v1.ComponentService.RevokeAccess:input_type -> steward.provider.v1.ComponentServiceRevokeAccessRequest
-	32, // 88: steward.provider.v1.ComponentService.GetAccess:input_type -> steward.provider.v1.ComponentServiceGetAccessRequest
-	34, // 89: steward.provider.v1.ComponentService.Provision:input_type -> steward.provider.v1.ComponentServiceProvisionRequest
-	36, // 90: steward.provider.v1.ComponentService.Deprovision:input_type -> steward.provider.v1.ComponentServiceDeprovisionRequest
-	38, // 91: steward.provider.v1.ComponentService.List:input_type -> steward.provider.v1.ComponentServiceListRequest
-	40, // 92: steward.provider.v1.ApplicationService.Create:input_type -> steward.provider.v1.ApplicationServiceCreateRequest
-	42, // 93: steward.provider.v1.ApplicationService.Destroy:input_type -> steward.provider.v1.ApplicationServiceDestroyRequest
-	44, // 94: steward.provider.v1.ApplicationService.Deploy:input_type -> steward.provider.v1.ApplicationServiceDeployRequest
-	46, // 95: steward.provider.v1.CredentialService.Resolve:input_type -> steward.provider.v1.CredentialServiceResolveRequest
-	10, // 96: steward.provider.v1.ProviderService.Describe:output_type -> steward.provider.v1.DescribeResponse
-	23, // 97: steward.provider.v1.ProviderService.GrantAccess:output_type -> steward.provider.v1.ProviderServiceGrantAccessResponse
-	25, // 98: steward.provider.v1.ProviderService.RevokeAccess:output_type -> steward.provider.v1.ProviderServiceRevokeAccessResponse
-	27, // 99: steward.provider.v1.ProviderService.GetAccess:output_type -> steward.provider.v1.ProviderServiceGetAccessResponse
-	29, // 100: steward.provider.v1.ComponentService.GrantAccess:output_type -> steward.provider.v1.ComponentServiceGrantAccessResponse
-	31, // 101: steward.provider.v1.ComponentService.RevokeAccess:output_type -> steward.provider.v1.ComponentServiceRevokeAccessResponse
-	33, // 102: steward.provider.v1.ComponentService.GetAccess:output_type -> steward.provider.v1.ComponentServiceGetAccessResponse
-	35, // 103: steward.provider.v1.ComponentService.Provision:output_type -> steward.provider.v1.ComponentServiceProvisionResponse
-	37, // 104: steward.provider.v1.ComponentService.Deprovision:output_type -> steward.provider.v1.ComponentServiceDeprovisionResponse
-	39, // 105: steward.provider.v1.ComponentService.List:output_type -> steward.provider.v1.ComponentServiceListResponse
-	41, // 106: steward.provider.v1.ApplicationService.Create:output_type -> steward.provider.v1.ApplicationServiceCreateResponse
-	43, // 107: steward.provider.v1.ApplicationService.Destroy:output_type -> steward.provider.v1.ApplicationServiceDestroyResponse
-	45, // 108: steward.provider.v1.ApplicationService.Deploy:output_type -> steward.provider.v1.ApplicationServiceDeployResponse
-	47, // 109: steward.provider.v1.CredentialService.Resolve:output_type -> steward.provider.v1.CredentialServiceResolveResponse
-	96, // [96:110] is the sub-list for method output_type
-	82, // [82:96] is the sub-list for method input_type
-	82, // [82:82] is the sub-list for extension type_name
-	82, // [82:82] is the sub-list for extension extendee
-	0,  // [0:82] is the sub-list for field type_name
+	56, // 1: steward.provider.v1.Component.inputs:type_name -> google.protobuf.Struct
+	50, // 2: steward.provider.v1.Component.secrets:type_name -> steward.provider.v1.Component.SecretsEntry
+	56, // 3: steward.provider.v1.Component.outputs:type_name -> google.protobuf.Struct
+	6,  // 4: steward.provider.v1.Component.variables:type_name -> steward.provider.v1.Variable
+	56, // 5: steward.provider.v1.Application.inputs:type_name -> google.protobuf.Struct
+	51, // 6: steward.provider.v1.Application.secrets:type_name -> steward.provider.v1.Application.SecretsEntry
+	56, // 7: steward.provider.v1.Application.outputs:type_name -> google.protobuf.Struct
+	5,  // 8: steward.provider.v1.Application.source:type_name -> steward.provider.v1.ApplicationSource
+	6,  // 9: steward.provider.v1.Application.variables:type_name -> steward.provider.v1.Variable
+	56, // 10: steward.provider.v1.ApplicationSource.config:type_name -> google.protobuf.Struct
+	56, // 11: steward.provider.v1.Identity.attrs:type_name -> google.protobuf.Struct
+	0,  // 12: steward.provider.v1.DescribeRequest.credential:type_name -> steward.provider.v1.Credential
+	13, // 13: steward.provider.v1.DescribeResponse.definition:type_name -> steward.provider.v1.ProviderDefinition
+	12, // 14: steward.provider.v1.DescribeResponse.setup_links:type_name -> steward.provider.v1.SetupLink
+	17, // 15: steward.provider.v1.ProviderDefinition.components:type_name -> steward.provider.v1.ComponentDefinition
+	18, // 16: steward.provider.v1.ProviderDefinition.applications:type_name -> steward.provider.v1.ApplicationDefinition
+	19, // 17: steward.provider.v1.ProviderDefinition.credentials:type_name -> steward.provider.v1.CredentialDefinition
+	20, // 18: steward.provider.v1.ProviderDefinition.grants:type_name -> steward.provider.v1.GrantDefinition
+	57, // 19: steward.provider.v1.InputDefinition.default:type_name -> google.protobuf.Value
+	14, // 20: steward.provider.v1.ComponentDefinition.inputs:type_name -> steward.provider.v1.InputDefinition
+	15, // 21: steward.provider.v1.ComponentDefinition.secrets:type_name -> steward.provider.v1.SecretDefinition
+	21, // 22: steward.provider.v1.ComponentDefinition.permissions:type_name -> steward.provider.v1.PermissionDefinition
+	22, // 23: steward.provider.v1.ComponentDefinition.roles:type_name -> steward.provider.v1.RoleDefinition
+	16, // 24: steward.provider.v1.ComponentDefinition.outputs:type_name -> steward.provider.v1.OutputDefinition
+	3,  // 25: steward.provider.v1.ComponentDefinition.variables:type_name -> steward.provider.v1.VariadicVariables
+	14, // 26: steward.provider.v1.ApplicationDefinition.inputs:type_name -> steward.provider.v1.InputDefinition
+	15, // 27: steward.provider.v1.ApplicationDefinition.secrets:type_name -> steward.provider.v1.SecretDefinition
+	16, // 28: steward.provider.v1.ApplicationDefinition.outputs:type_name -> steward.provider.v1.OutputDefinition
+	14, // 29: steward.provider.v1.CredentialDefinition.inputs:type_name -> steward.provider.v1.InputDefinition
+	15, // 30: steward.provider.v1.CredentialDefinition.secrets:type_name -> steward.provider.v1.SecretDefinition
+	14, // 31: steward.provider.v1.GrantDefinition.inputs:type_name -> steward.provider.v1.InputDefinition
+	0,  // 32: steward.provider.v1.ProviderServiceGrantAccessRequest.credential:type_name -> steward.provider.v1.Credential
+	7,  // 33: steward.provider.v1.ProviderServiceGrantAccessRequest.identity:type_name -> steward.provider.v1.Identity
+	56, // 34: steward.provider.v1.ProviderServiceGrantAccessRequest.inputs:type_name -> google.protobuf.Struct
+	0,  // 35: steward.provider.v1.ProviderServiceRevokeAccessRequest.credential:type_name -> steward.provider.v1.Credential
+	7,  // 36: steward.provider.v1.ProviderServiceRevokeAccessRequest.identity:type_name -> steward.provider.v1.Identity
+	56, // 37: steward.provider.v1.ProviderServiceRevokeAccessRequest.inputs:type_name -> google.protobuf.Struct
+	0,  // 38: steward.provider.v1.ProviderServiceGetAccessRequest.credential:type_name -> steward.provider.v1.Credential
+	7,  // 39: steward.provider.v1.ProviderServiceGetAccessRequest.identity:type_name -> steward.provider.v1.Identity
+	56, // 40: steward.provider.v1.ProviderServiceGetAccessRequest.inputs:type_name -> google.protobuf.Struct
+	7,  // 41: steward.provider.v1.ProviderServiceGetAccessResponse.identity:type_name -> steward.provider.v1.Identity
+	0,  // 42: steward.provider.v1.ComponentServiceGrantAccessRequest.credential:type_name -> steward.provider.v1.Credential
+	2,  // 43: steward.provider.v1.ComponentServiceGrantAccessRequest.component:type_name -> steward.provider.v1.Component
+	7,  // 44: steward.provider.v1.ComponentServiceGrantAccessRequest.identity:type_name -> steward.provider.v1.Identity
+	8,  // 45: steward.provider.v1.ComponentServiceGrantAccessRequest.role:type_name -> steward.provider.v1.Role
+	9,  // 46: steward.provider.v1.ComponentServiceGrantAccessRequest.permissions:type_name -> steward.provider.v1.Permission
+	8,  // 47: steward.provider.v1.ComponentServiceGrantAccessResponse.role:type_name -> steward.provider.v1.Role
+	9,  // 48: steward.provider.v1.ComponentServiceGrantAccessResponse.permissions:type_name -> steward.provider.v1.Permission
+	0,  // 49: steward.provider.v1.ComponentServiceRevokeAccessRequest.credential:type_name -> steward.provider.v1.Credential
+	2,  // 50: steward.provider.v1.ComponentServiceRevokeAccessRequest.component:type_name -> steward.provider.v1.Component
+	7,  // 51: steward.provider.v1.ComponentServiceRevokeAccessRequest.identity:type_name -> steward.provider.v1.Identity
+	8,  // 52: steward.provider.v1.ComponentServiceRevokeAccessRequest.role:type_name -> steward.provider.v1.Role
+	9,  // 53: steward.provider.v1.ComponentServiceRevokeAccessRequest.permissions:type_name -> steward.provider.v1.Permission
+	0,  // 54: steward.provider.v1.ComponentServiceGetAccessRequest.credential:type_name -> steward.provider.v1.Credential
+	2,  // 55: steward.provider.v1.ComponentServiceGetAccessRequest.component:type_name -> steward.provider.v1.Component
+	7,  // 56: steward.provider.v1.ComponentServiceGetAccessRequest.identity:type_name -> steward.provider.v1.Identity
+	8,  // 57: steward.provider.v1.ComponentServiceGetAccessResponse.roles:type_name -> steward.provider.v1.Role
+	9,  // 58: steward.provider.v1.ComponentServiceGetAccessResponse.permissions:type_name -> steward.provider.v1.Permission
+	0,  // 59: steward.provider.v1.ComponentServiceProvisionRequest.credential:type_name -> steward.provider.v1.Credential
+	56, // 60: steward.provider.v1.ComponentServiceProvisionRequest.inputs:type_name -> google.protobuf.Struct
+	52, // 61: steward.provider.v1.ComponentServiceProvisionRequest.secrets:type_name -> steward.provider.v1.ComponentServiceProvisionRequest.SecretsEntry
+	6,  // 62: steward.provider.v1.ComponentServiceProvisionRequest.variables:type_name -> steward.provider.v1.Variable
+	56, // 63: steward.provider.v1.ComponentServiceProvisionResponse.outputs:type_name -> google.protobuf.Struct
+	0,  // 64: steward.provider.v1.ComponentServiceDeprovisionRequest.credential:type_name -> steward.provider.v1.Credential
+	2,  // 65: steward.provider.v1.ComponentServiceDeprovisionRequest.component:type_name -> steward.provider.v1.Component
+	0,  // 66: steward.provider.v1.ComponentServiceListRequest.credential:type_name -> steward.provider.v1.Credential
+	2,  // 67: steward.provider.v1.ComponentServiceListResponse.components:type_name -> steward.provider.v1.Component
+	0,  // 68: steward.provider.v1.ApplicationServiceCreateRequest.credential:type_name -> steward.provider.v1.Credential
+	56, // 69: steward.provider.v1.ApplicationServiceCreateRequest.inputs:type_name -> google.protobuf.Struct
+	53, // 70: steward.provider.v1.ApplicationServiceCreateRequest.secrets:type_name -> steward.provider.v1.ApplicationServiceCreateRequest.SecretsEntry
+	5,  // 71: steward.provider.v1.ApplicationServiceCreateRequest.source:type_name -> steward.provider.v1.ApplicationSource
+	6,  // 72: steward.provider.v1.ApplicationServiceCreateRequest.variables:type_name -> steward.provider.v1.Variable
+	4,  // 73: steward.provider.v1.ApplicationServiceCreateResponse.application:type_name -> steward.provider.v1.Application
+	0,  // 74: steward.provider.v1.ApplicationServiceDestroyRequest.credential:type_name -> steward.provider.v1.Credential
+	4,  // 75: steward.provider.v1.ApplicationServiceDestroyRequest.application:type_name -> steward.provider.v1.Application
+	0,  // 76: steward.provider.v1.ApplicationServiceDeployRequest.credential:type_name -> steward.provider.v1.Credential
+	4,  // 77: steward.provider.v1.ApplicationServiceDeployRequest.application:type_name -> steward.provider.v1.Application
+	5,  // 78: steward.provider.v1.ApplicationServiceDeployRequest.source:type_name -> steward.provider.v1.ApplicationSource
+	4,  // 79: steward.provider.v1.ApplicationServiceDeployResponse.application:type_name -> steward.provider.v1.Application
+	56, // 80: steward.provider.v1.CredentialServiceResolveRequest.inputs:type_name -> google.protobuf.Struct
+	54, // 81: steward.provider.v1.CredentialServiceResolveRequest.secrets:type_name -> steward.provider.v1.CredentialServiceResolveRequest.SecretsEntry
+	1,  // 82: steward.provider.v1.CredentialServiceResolveRequest.organization:type_name -> steward.provider.v1.Organization
+	55, // 83: steward.provider.v1.CredentialServiceResolveResponse.env:type_name -> steward.provider.v1.CredentialServiceResolveResponse.EnvEntry
+	49, // 84: steward.provider.v1.CredentialServiceResolveResponse.files:type_name -> steward.provider.v1.CredentialFile
+	10, // 85: steward.provider.v1.ProviderService.Describe:input_type -> steward.provider.v1.DescribeRequest
+	23, // 86: steward.provider.v1.ProviderService.GrantAccess:input_type -> steward.provider.v1.ProviderServiceGrantAccessRequest
+	25, // 87: steward.provider.v1.ProviderService.RevokeAccess:input_type -> steward.provider.v1.ProviderServiceRevokeAccessRequest
+	27, // 88: steward.provider.v1.ProviderService.GetAccess:input_type -> steward.provider.v1.ProviderServiceGetAccessRequest
+	29, // 89: steward.provider.v1.ComponentService.GrantAccess:input_type -> steward.provider.v1.ComponentServiceGrantAccessRequest
+	31, // 90: steward.provider.v1.ComponentService.RevokeAccess:input_type -> steward.provider.v1.ComponentServiceRevokeAccessRequest
+	33, // 91: steward.provider.v1.ComponentService.GetAccess:input_type -> steward.provider.v1.ComponentServiceGetAccessRequest
+	35, // 92: steward.provider.v1.ComponentService.Provision:input_type -> steward.provider.v1.ComponentServiceProvisionRequest
+	37, // 93: steward.provider.v1.ComponentService.Deprovision:input_type -> steward.provider.v1.ComponentServiceDeprovisionRequest
+	39, // 94: steward.provider.v1.ComponentService.List:input_type -> steward.provider.v1.ComponentServiceListRequest
+	41, // 95: steward.provider.v1.ApplicationService.Create:input_type -> steward.provider.v1.ApplicationServiceCreateRequest
+	43, // 96: steward.provider.v1.ApplicationService.Destroy:input_type -> steward.provider.v1.ApplicationServiceDestroyRequest
+	45, // 97: steward.provider.v1.ApplicationService.Deploy:input_type -> steward.provider.v1.ApplicationServiceDeployRequest
+	47, // 98: steward.provider.v1.CredentialService.Resolve:input_type -> steward.provider.v1.CredentialServiceResolveRequest
+	11, // 99: steward.provider.v1.ProviderService.Describe:output_type -> steward.provider.v1.DescribeResponse
+	24, // 100: steward.provider.v1.ProviderService.GrantAccess:output_type -> steward.provider.v1.ProviderServiceGrantAccessResponse
+	26, // 101: steward.provider.v1.ProviderService.RevokeAccess:output_type -> steward.provider.v1.ProviderServiceRevokeAccessResponse
+	28, // 102: steward.provider.v1.ProviderService.GetAccess:output_type -> steward.provider.v1.ProviderServiceGetAccessResponse
+	30, // 103: steward.provider.v1.ComponentService.GrantAccess:output_type -> steward.provider.v1.ComponentServiceGrantAccessResponse
+	32, // 104: steward.provider.v1.ComponentService.RevokeAccess:output_type -> steward.provider.v1.ComponentServiceRevokeAccessResponse
+	34, // 105: steward.provider.v1.ComponentService.GetAccess:output_type -> steward.provider.v1.ComponentServiceGetAccessResponse
+	36, // 106: steward.provider.v1.ComponentService.Provision:output_type -> steward.provider.v1.ComponentServiceProvisionResponse
+	38, // 107: steward.provider.v1.ComponentService.Deprovision:output_type -> steward.provider.v1.ComponentServiceDeprovisionResponse
+	40, // 108: steward.provider.v1.ComponentService.List:output_type -> steward.provider.v1.ComponentServiceListResponse
+	42, // 109: steward.provider.v1.ApplicationService.Create:output_type -> steward.provider.v1.ApplicationServiceCreateResponse
+	44, // 110: steward.provider.v1.ApplicationService.Destroy:output_type -> steward.provider.v1.ApplicationServiceDestroyResponse
+	46, // 111: steward.provider.v1.ApplicationService.Deploy:output_type -> steward.provider.v1.ApplicationServiceDeployResponse
+	48, // 112: steward.provider.v1.CredentialService.Resolve:output_type -> steward.provider.v1.CredentialServiceResolveResponse
+	99, // [99:113] is the sub-list for method output_type
+	85, // [85:99] is the sub-list for method input_type
+	85, // [85:85] is the sub-list for extension type_name
+	85, // [85:85] is the sub-list for extension extendee
+	0,  // [0:85] is the sub-list for field type_name
 }
 
 func init() { file_steward_provider_v1_provider_proto_init() }
@@ -3895,16 +3985,16 @@ func file_steward_provider_v1_provider_proto_init() {
 	if File_steward_provider_v1_provider_proto != nil {
 		return
 	}
-	file_steward_provider_v1_provider_proto_msgTypes[6].OneofWrappers = []any{}
-	file_steward_provider_v1_provider_proto_msgTypes[8].OneofWrappers = []any{}
-	file_steward_provider_v1_provider_proto_msgTypes[13].OneofWrappers = []any{}
+	file_steward_provider_v1_provider_proto_msgTypes[7].OneofWrappers = []any{}
+	file_steward_provider_v1_provider_proto_msgTypes[9].OneofWrappers = []any{}
+	file_steward_provider_v1_provider_proto_msgTypes[14].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_steward_provider_v1_provider_proto_rawDesc), len(file_steward_provider_v1_provider_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   55,
+			NumMessages:   56,
 			NumExtensions: 0,
 			NumServices:   4,
 		},
