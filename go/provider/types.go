@@ -53,9 +53,7 @@ type (
 	PermissionDefinition = providerv1.PermissionDefinition
 	RoleDefinition       = providerv1.RoleDefinition
 
-	CredentialDefinition = providerv1.CredentialDefinition
-	CredentialFile       = providerv1.CredentialFile
-	GrantDefinition      = providerv1.GrantDefinition
+	GrantDefinition = providerv1.GrantDefinition
 
 	ProviderGrantAccessRequest   = providerv1.ProviderServiceGrantAccessRequest
 	ProviderGrantAccessResponse  = providerv1.ProviderServiceGrantAccessResponse
@@ -83,9 +81,6 @@ type (
 	ApplicationDestroyResponse = providerv1.ApplicationServiceDestroyResponse
 	ApplicationDeployRequest   = providerv1.ApplicationServiceDeployRequest
 	ApplicationDeployResponse  = providerv1.ApplicationServiceDeployResponse
-
-	CredentialResolveRequest  = providerv1.CredentialServiceResolveRequest
-	CredentialResolveResponse = providerv1.CredentialServiceResolveResponse
 )
 
 // The types an InputDefinition or OutputDefinition can have.

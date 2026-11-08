@@ -32,7 +32,7 @@ const (
 // Mandatory for every provider. Describe is always served. GrantAccess, RevokeAccess and
 // GetAccess apply only to a provider that declares grants, and answer UNIMPLEMENTED otherwise.
 type ProviderServiceClient interface {
-	// Describes the provider: the credentials it offers, the components and applications it manages, and the grants it gives.
+	// Describes the provider: the components and applications it manages, and the grants it gives.
 	Describe(ctx context.Context, in *DescribeRequest, opts ...grpc.CallOption) (*DescribeResponse, error)
 	// Access to the provider as a whole: giving identities a grant, taking it away, and checking
 	// what they hold.
@@ -96,7 +96,7 @@ func (c *providerServiceClient) GetAccess(ctx context.Context, in *ProviderServi
 // Mandatory for every provider. Describe is always served. GrantAccess, RevokeAccess and
 // GetAccess apply only to a provider that declares grants, and answer UNIMPLEMENTED otherwise.
 type ProviderServiceServer interface {
-	// Describes the provider: the credentials it offers, the components and applications it manages, and the grants it gives.
+	// Describes the provider: the components and applications it manages, and the grants it gives.
 	Describe(context.Context, *DescribeRequest) (*DescribeResponse, error)
 	// Access to the provider as a whole: giving identities a grant, taking it away, and checking
 	// what they hold.
@@ -722,112 +722,6 @@ var ApplicationService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Deploy",
 			Handler:    _ApplicationService_Deploy_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "steward/provider/v1/provider.proto",
-}
-
-const (
-	CredentialService_Resolve_FullMethodName = "/steward.provider.v1.CredentialService/Resolve"
-)
-
-// CredentialServiceClient is the client API for CredentialService service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-//
-// For providers that offer ways to reach a tool (ProviderDefinition.credentials).
-type CredentialServiceClient interface {
-	Resolve(ctx context.Context, in *CredentialServiceResolveRequest, opts ...grpc.CallOption) (*CredentialServiceResolveResponse, error)
-}
-
-type credentialServiceClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewCredentialServiceClient(cc grpc.ClientConnInterface) CredentialServiceClient {
-	return &credentialServiceClient{cc}
-}
-
-func (c *credentialServiceClient) Resolve(ctx context.Context, in *CredentialServiceResolveRequest, opts ...grpc.CallOption) (*CredentialServiceResolveResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CredentialServiceResolveResponse)
-	err := c.cc.Invoke(ctx, CredentialService_Resolve_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// CredentialServiceServer is the server API for CredentialService service.
-// All implementations must embed UnimplementedCredentialServiceServer
-// for forward compatibility.
-//
-// For providers that offer ways to reach a tool (ProviderDefinition.credentials).
-type CredentialServiceServer interface {
-	Resolve(context.Context, *CredentialServiceResolveRequest) (*CredentialServiceResolveResponse, error)
-	mustEmbedUnimplementedCredentialServiceServer()
-}
-
-// UnimplementedCredentialServiceServer must be embedded to have
-// forward compatible implementations.
-//
-// NOTE: this should be embedded by value instead of pointer to avoid a nil
-// pointer dereference when methods are called.
-type UnimplementedCredentialServiceServer struct{}
-
-func (UnimplementedCredentialServiceServer) Resolve(context.Context, *CredentialServiceResolveRequest) (*CredentialServiceResolveResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method Resolve not implemented")
-}
-func (UnimplementedCredentialServiceServer) mustEmbedUnimplementedCredentialServiceServer() {}
-func (UnimplementedCredentialServiceServer) testEmbeddedByValue()                           {}
-
-// UnsafeCredentialServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to CredentialServiceServer will
-// result in compilation errors.
-type UnsafeCredentialServiceServer interface {
-	mustEmbedUnimplementedCredentialServiceServer()
-}
-
-func RegisterCredentialServiceServer(s grpc.ServiceRegistrar, srv CredentialServiceServer) {
-	// If the following call panics, it indicates UnimplementedCredentialServiceServer was
-	// embedded by pointer and is nil.  This will cause panics if an
-	// unimplemented method is ever invoked, so we test this at initialization
-	// time to prevent it from happening at runtime later due to I/O.
-	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
-		t.testEmbeddedByValue()
-	}
-	s.RegisterService(&CredentialService_ServiceDesc, srv)
-}
-
-func _CredentialService_Resolve_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CredentialServiceResolveRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(CredentialServiceServer).Resolve(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: CredentialService_Resolve_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CredentialServiceServer).Resolve(ctx, req.(*CredentialServiceResolveRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-// CredentialService_ServiceDesc is the grpc.ServiceDesc for CredentialService service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var CredentialService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "steward.provider.v1.CredentialService",
-	HandlerType: (*CredentialServiceServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "Resolve",
-			Handler:    _CredentialService_Resolve_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -49,10 +49,6 @@ func (g *grpcProvider) GRPCServer(_ *goplugin.GRPCBroker, server *grpc.Server) e
 		providerv1.RegisterApplicationServiceServer(server, applicationService{provider: p})
 	}
 
-	if len(p.credentials) > 0 {
-		providerv1.RegisterCredentialServiceServer(server, credentialService{provider: p})
-	}
-
 	return nil
 }
 
@@ -242,22 +238,4 @@ func (s applicationService) Deploy(ctx context.Context, request *ApplicationDepl
 	}
 
 	return kind.Deploy(ctx, request)
-}
-
-type credentialService struct {
-	providerv1.UnimplementedCredentialServiceServer
-	provider *Provider
-}
-
-func (s credentialService) Resolve(ctx context.Context, request *CredentialResolveRequest) (*CredentialResolveResponse, error) {
-	credential, err := s.provider.credential(request.GetKind())
-	if err != nil {
-		return nil, err
-	}
-
-	if credential.Resolve == nil {
-		return nil, unimplemented("resolve", "credential")
-	}
-
-	return credential.Resolve(ctx, request)
 }

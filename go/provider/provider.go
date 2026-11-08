@@ -2,7 +2,6 @@
 // contract (gRPC, see ../../proto) and the functions a provider writes.
 //
 //	p := provider.New(provider.Options{Name: "github", Version: "0.1.0"})
-//	p.Credential("app", provider.CredentialOptions{Inputs: inputs, Resolve: resolve})
 //	p.Component("repository", provider.ComponentOptions{Provision: provision, Deprovision: deprovision})
 //	p.Serve()
 //
@@ -28,7 +27,7 @@ import (
 )
 
 // Options declare the provider and, when it supports access as a whole, the handlers for that. A provider has no settings or secrets of
-// its own: the credentials, components and applications it offers declare theirs.
+// its own: the components and applications it offers declare theirs.
 type Options struct {
 	Name        string
 	Version     string
@@ -95,37 +94,16 @@ type ApplicationOptions struct {
 	Deploy  func(context.Context, *ApplicationDeployRequest) (*ApplicationDeployResponse, error)
 }
 
-// CredentialOptions describe a kind of credential, a way of reaching the tool such as a role that is assumed with the identity token of
-// Steward. A credential is an instance of a kind. The runner calls Resolve before a task invokes any provider, and hands what it returns
-// to the provider as environment variables and files. A value is a secret of the call: do not persist it or log it.
-type CredentialOptions struct {
-	Title       string
-	Description string
-
-	// Inputs are the settings of a credential of this kind, and Secrets its secrets, which are references to a secret store that the
-	// runner resolves for the call.
-	Inputs  []*InputDefinition
-	Secrets []*SecretDefinition
-
-	// IdentityAudience is the audience of the token that proves who the credential is, such as "sts.amazonaws.com". A kind
-	// that declares it is sent the token in the request.
-	IdentityAudience string
-
-	Resolve func(context.Context, *CredentialResolveRequest) (*CredentialResolveResponse, error)
-}
-
-// Provider is what a provider author builds. Declare its components, applications and credentials,
+// Provider is what a provider author builds. Declare its components and applications,
 // then call Serve.
 type Provider struct {
 	options      Options
 	components   map[string]ComponentOptions
 	applications map[string]ApplicationOptions
-	credentials  map[string]CredentialOptions
 
 	// Declaration order, so the description lists kinds the way the provider declared them.
 	componentOrder   []string
 	applicationOrder []string
-	credentialOrder  []string
 }
 
 // New creates a provider.
@@ -134,19 +112,7 @@ func New(options Options) *Provider {
 		options:      options,
 		components:   map[string]ComponentOptions{},
 		applications: map[string]ApplicationOptions{},
-		credentials:  map[string]CredentialOptions{},
 	}
-}
-
-// Credential declares a kind of credential, a way of reaching the tool. The name is unique within the provider, such as "oidc-role".
-func (p *Provider) Credential(name string, options CredentialOptions) *Provider {
-	if _, declared := p.credentials[name]; !declared {
-		p.credentialOrder = append(p.credentialOrder, name)
-	}
-
-	p.credentials[name] = options
-
-	return p
 }
 
 // Component declares a kind of component the provider manages. The kind is unique within the
@@ -198,18 +164,6 @@ func (p *Provider) describe(ctx context.Context, credential *Credential) *provid
 		})
 	}
 
-	for _, name := range p.credentialOrder {
-		options := p.credentials[name]
-		definition.Credentials = append(definition.Credentials, &providerv1.CredentialDefinition{
-			Name:             name,
-			Title:            options.Title,
-			Description:      options.Description,
-			Inputs:           options.Inputs,
-			Secrets:          options.Secrets,
-			IdentityAudience: options.IdentityAudience,
-		})
-	}
-
 	response := &providerv1.DescribeResponse{Name: o.Name, Version: o.Version, Definition: definition}
 
 	// The links are for a credential, so a description that was asked for without one has none.
@@ -247,15 +201,6 @@ func (p *Provider) application(kind string) (ApplicationOptions, error) {
 	found, ok := p.applications[kind]
 	if !ok {
 		return found, status.Error(codes.NotFound, fmt.Sprintf("this provider has no application %q", kind))
-	}
-
-	return found, nil
-}
-
-func (p *Provider) credential(name string) (CredentialOptions, error) {
-	found, ok := p.credentials[name]
-	if !ok {
-		return found, status.Error(codes.NotFound, fmt.Sprintf("this provider has no credential %q", name))
 	}
 
 	return found, nil
