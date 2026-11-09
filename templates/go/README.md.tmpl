@@ -15,7 +15,7 @@ it. Write logs to standard error.
 
 ## Test
 
-Save this as `context.json`, the credential and components to call the provider with:
+Save this as `context.json`, the credential and units to call the provider with:
 
 ```json
 {
@@ -25,7 +25,7 @@ Save this as `context.json`, the credential and components to call the provider 
   },
   "identity": { "external_id": "someone@example.test" },
   "role": { "name": "viewer", "permissions": [{ "name": "view" }] },
-  "components": [{ "kind": "item", "name": "demo", "inputs": { "description": "A demo item" } }]
+  "units": [{ "kind": "item", "name": "demo", "inputs": { "description": "A demo item" } }]
 }
 ```
 
@@ -34,19 +34,19 @@ steward provider run --context context.json go run .
 steward provider run --context context.json --call provision go run .
 ```
 
-The first creates each component, grants and revokes the role, and removes it. It does this for real, in
+The first creates each unit, grants and revokes the role, and removes it. It does this for real, in
 whatever your secrets reach, and asks before it starts (`--yes` skips the question). `--call` makes
 only the calls you name, once each and without cleaning up: `provision`, `grant-access`, `get-access`,
 `revoke-access` and `deprovision`. `steward provider validate` never changes anything.
 
 ## Where things are
 
-`main.go` declares the provider's inputs (what it needs to connect), each kind of component and the handlers
+`main.go` declares the provider's inputs (what it needs to connect), each kind of unit and the handlers
 Steward calls: `Provision`, `Deprovision`, `GrantAccess`, `RevokeAccess` and `GetAccess`. Handlers take
 and return the typed messages of the contract. Leave out the handlers you do not need: Steward offers
 only what you implement.
 
-To add a kind of component, call `p.Component("kind", provider.ComponentOptions{...})` again with its own
+To add a kind of unit, call `p.Unit("kind", provider.UnitOptions{...})` again with its own
 inputs, outputs and handlers.
 
 See the [SDK README](https://github.com/treno-dev/steward-sdk/blob/main/go/README.md) for

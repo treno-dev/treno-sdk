@@ -1,28 +1,28 @@
 // This is the file you edit. It declares what your provider offers and implements the calls Steward
 // makes. The gRPC plumbing, the handshake and the health check live in the Steward SDK.
 //
-// Declare the provider and each kind of component once, with its handlers attached: Steward's forms
+// Declare the provider and each kind of unit once, with its handlers attached: Steward's forms
 // follow from what you write here, and every call is routed to the right handler by kind. If your
 // provider needs more than one tool, take the secrets for each as inputs.
 //
 // Each handler is annotated with the request and response types the SDK exports, named for the
-// entity and the call (ComponentProvisionRequest, ComponentProvisionResponse). Your editor completes
+// entity and the call (UnitProvisionRequest, UnitProvisionResponse). Your editor completes
 // the request's fields, and the compiler checks what you return.
 
 import {
   createProvider,
   type ProviderValidateRequest,
   type ProviderValidateResponse,
-  type ComponentDeprovisionRequest,
-  type ComponentDeprovisionResponse,
-  type ComponentGetAccessRequest,
-  type ComponentGetAccessResponse,
-  type ComponentGrantAccessRequest,
-  type ComponentGrantAccessResponse,
-  type ComponentProvisionRequest,
-  type ComponentProvisionResponse,
-  type ComponentRevokeAccessRequest,
-  type ComponentRevokeAccessResponse,
+  type UnitDeprovisionRequest,
+  type UnitDeprovisionResponse,
+  type UnitGetAccessRequest,
+  type UnitGetAccessResponse,
+  type UnitGrantAccessRequest,
+  type UnitGrantAccessResponse,
+  type UnitProvisionRequest,
+  type UnitProvisionResponse,
+  type UnitRevokeAccessRequest,
+  type UnitRevokeAccessResponse,
 } from '@treno-dev/steward-sdk/provider';
 
 // Steward builds the provider's form from `inputs` and `secrets`, so they are also the documentation
@@ -56,28 +56,28 @@ const provider = createProvider({
   },
 });
 
-// A kind of component this provider manages. Handlers receive the request as a plain object and return
+// A kind of unit this provider manages. Handlers receive the request as a plain object and return
 // the response as one, leaving out any field they have nothing to say about.
-provider.component({
+provider.unit({
   kind: 'item',
   title: 'Item',
-  description: 'An example component.',
-  // What a component of this kind takes besides its name, which Steward stores with the kind.
+  description: 'An example unit.',
+  // What a unit of this kind takes besides its name, which Steward stores with the kind.
   inputs: [{ name: 'description', label: 'Description', description: 'What the item is for.', type: 'string' }],
   outputs: [{ name: 'url', label: 'URL', description: 'Where the item can be opened.', type: 'string' }],
 
-  // Create a component called `name`. Idempotent: if it already exists, succeed anyway. Return what
+  // Create a unit called `name`. Idempotent: if it already exists, succeed anyway. Return what
   // it produced, as declared in `outputs`.
-  async provision(request: ComponentProvisionRequest): Promise<ComponentProvisionResponse> {
+  async provision(request: UnitProvisionRequest): Promise<UnitProvisionResponse> {
     const { credential, name, inputs } = request;
     const url = `${credential.inputs.base_url}/items/${name}`;
 
     return { outputs: { url } };
   },
 
-  // Remove a component. Idempotent: succeed if it is already gone.
-  async deprovision(request: ComponentDeprovisionRequest): Promise<ComponentDeprovisionResponse> {
-    const { credential, component } = request;
+  // Remove a unit. Idempotent: succeed if it is already gone.
+  async deprovision(request: UnitDeprovisionRequest): Promise<UnitDeprovisionResponse> {
+    const { credential, unit } = request;
 
     return {};
   },
@@ -94,27 +94,27 @@ provider.component({
     { name: 'editor', title: 'Editor' },
   ],
 
-  // Give an identity a role on the component. Idempotent. `role` is always set. For a role Steward
+  // Give an identity a role on the unit. Idempotent. `role` is always set. For a role Steward
   // composed, `permissions` lists its pieces. Return what the tool applied, an `id` for the grant if
   // the tool has one, and `pending: true` if the person has to act first, such as accepting an
   // invitation. `identity` has `externalId`, `name` and `attrs` (an email, say).
-  async grantAccess(request: ComponentGrantAccessRequest): Promise<ComponentGrantAccessResponse> {
-    const { credential, component, identity, role, permissions } = request;
+  async grantAccess(request: UnitGrantAccessRequest): Promise<UnitGrantAccessResponse> {
+    const { credential, unit, identity, role, permissions } = request;
 
     return { role, permissions };
   },
 
   // Take a role away. Idempotent: succeed if the identity does not have it.
-  async revokeAccess(request: ComponentRevokeAccessRequest): Promise<ComponentRevokeAccessResponse> {
-    const { credential, component, identity, role, permissions } = request;
+  async revokeAccess(request: UnitRevokeAccessRequest): Promise<UnitRevokeAccessResponse> {
+    const { credential, unit, identity, role, permissions } = request;
 
     return {};
   },
 
-  // Report the roles and permissions the identity holds on the component now, and whether a grant is
+  // Report the roles and permissions the identity holds on the unit now, and whether a grant is
   // still pending.
-  async getAccess(request: ComponentGetAccessRequest): Promise<ComponentGetAccessResponse> {
-    const { credential, component, identity } = request;
+  async getAccess(request: UnitGetAccessRequest): Promise<UnitGetAccessResponse> {
+    const { credential, unit, identity } = request;
 
     return { roles: [], permissions: [], pending: false };
   },

@@ -1,28 +1,28 @@
 # This is the file you edit. It declares what your provider offers and implements the calls Steward
 # makes. The gRPC plumbing, the handshake and the health check live in the Steward SDK.
 #
-# Declare the provider and each kind of component once, with its handlers attached: Steward's forms
+# Declare the provider and each kind of unit once, with its handlers attached: Steward's forms
 # follow from what you write here, and every call is routed to the right handler by kind. If your
 # provider needs more than one tool, take the secrets for each as inputs.
 #
 # Each handler is annotated with the request and response types the SDK exports, named for the
-# entity and the call (ComponentProvisionRequest, ComponentProvisionResponse). A request is the
+# entity and the call (UnitProvisionRequest, UnitProvisionResponse). A request is the
 # generated message, so your editor completes its fields; a response is a message or a plain dict
 # with the fields you have something to say about. Handlers may be async or plain functions.
 
 from steward_sdk.provider import (
     ProviderValidateRequest,
     ProviderValidateResponse,
-    ComponentDeprovisionRequest,
-    ComponentDeprovisionResponse,
-    ComponentGetAccessRequest,
-    ComponentGetAccessResponse,
-    ComponentGrantAccessRequest,
-    ComponentGrantAccessResponse,
-    ComponentProvisionRequest,
-    ComponentProvisionResponse,
-    ComponentRevokeAccessRequest,
-    ComponentRevokeAccessResponse,
+    UnitDeprovisionRequest,
+    UnitDeprovisionResponse,
+    UnitGetAccessRequest,
+    UnitGetAccessResponse,
+    UnitGrantAccessRequest,
+    UnitGrantAccessResponse,
+    UnitProvisionRequest,
+    UnitProvisionResponse,
+    UnitRevokeAccessRequest,
+    UnitRevokeAccessResponse,
     create_provider,
     plain,
 )
@@ -38,37 +38,37 @@ async def validate(request: ProviderValidateRequest) -> ProviderValidateResponse
     return {"errors": errors}
 
 
-# Create a component called `request.name`. Idempotent: if it already exists, succeed anyway. Return
+# Create a unit called `request.name`. Idempotent: if it already exists, succeed anyway. Return
 # what it produced, as declared in `outputs`. The request also has `credential` and `inputs`.
-async def provision(request: ComponentProvisionRequest) -> ComponentProvisionResponse:
+async def provision(request: UnitProvisionRequest) -> UnitProvisionResponse:
     base_url = request.credential.inputs["base_url"]
 
     return {"outputs": {"url": f"{base_url}/items/{request.name}"}}
 
 
-# Remove a component. Idempotent: succeed if it is already gone. The request has `credential` and
-# `component` (`kind`, `name`).
-async def deprovision(request: ComponentDeprovisionRequest) -> ComponentDeprovisionResponse:
+# Remove a unit. Idempotent: succeed if it is already gone. The request has `credential` and
+# `unit` (`kind`, `name`).
+async def deprovision(request: UnitDeprovisionRequest) -> UnitDeprovisionResponse:
     return {}
 
 
-# Give an identity a role on the component. Idempotent. `role` is always set. For a role Steward
+# Give an identity a role on the unit. Idempotent. `role` is always set. For a role Steward
 # composed, `permissions` lists its pieces. Return what the tool applied, an `id` for the grant if
 # the tool has one, and `pending: True` if the person has to act first, such as accepting an
-# invitation. The request has `credential`, `component`, `identity` (`external_id`, `name`, `attrs`),
+# invitation. The request has `credential`, `unit`, `identity` (`external_id`, `name`, `attrs`),
 # `role` and `permissions`.
-async def grant_access(request: ComponentGrantAccessRequest) -> ComponentGrantAccessResponse:
+async def grant_access(request: UnitGrantAccessRequest) -> UnitGrantAccessResponse:
     return {"role": plain(request.role), "permissions": [plain(item) for item in request.permissions]}
 
 
 # Take a role away. Idempotent: succeed if the identity does not have it.
-async def revoke_access(request: ComponentRevokeAccessRequest) -> ComponentRevokeAccessResponse:
+async def revoke_access(request: UnitRevokeAccessRequest) -> UnitRevokeAccessResponse:
     return {}
 
 
-# Report the roles and permissions the identity holds on the component now, and whether a grant is
+# Report the roles and permissions the identity holds on the unit now, and whether a grant is
 # still pending.
-async def get_access(request: ComponentGetAccessRequest) -> ComponentGetAccessResponse:
+async def get_access(request: UnitGetAccessRequest) -> UnitGetAccessResponse:
     return {"roles": [], "permissions": [], "pending": False}
 
 
@@ -89,12 +89,12 @@ provider = create_provider(
     validate=validate,
 )
 
-# A kind of component this provider manages.
-provider.component(
+# A kind of unit this provider manages.
+provider.unit(
     kind="item",
     title="Item",
-    description="An example component.",
-    # What a component of this kind takes besides its name, which Steward stores with the kind.
+    description="An example unit.",
+    # What a unit of this kind takes besides its name, which Steward stores with the kind.
     inputs=[{"name": "description", "label": "Description", "description": "What the item is for.", "type": "string"}],
     outputs=[{"name": "url", "label": "URL", "description": "Where the item can be opened.", "type": "string"}],
     # What can be granted on this kind. Declaring permissions or roles is what makes the kind accept

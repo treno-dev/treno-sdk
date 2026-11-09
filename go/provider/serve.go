@@ -41,8 +41,8 @@ func (g *grpcProvider) GRPCServer(_ *goplugin.GRPCBroker, server *grpc.Server) e
 
 	providerv1.RegisterProviderServiceServer(server, providerService{provider: p})
 
-	if len(p.components) > 0 {
-		providerv1.RegisterComponentServiceServer(server, componentService{provider: p})
+	if len(p.units) > 0 {
+		providerv1.RegisterUnitServiceServer(server, unitService{provider: p})
 	}
 
 	if len(p.applications) > 0 {
@@ -113,84 +113,84 @@ func (s providerService) GetAccess(ctx context.Context, request *ProviderGetAcce
 	return s.provider.options.GetAccess(ctx, request)
 }
 
-type componentService struct {
-	providerv1.UnimplementedComponentServiceServer
+type unitService struct {
+	providerv1.UnimplementedUnitServiceServer
 	provider *Provider
 }
 
-func (s componentService) Provision(ctx context.Context, request *ComponentProvisionRequest) (*ComponentProvisionResponse, error) {
-	kind, err := s.provider.component(request.GetKind())
+func (s unitService) Provision(ctx context.Context, request *UnitProvisionRequest) (*UnitProvisionResponse, error) {
+	kind, err := s.provider.unit(request.GetKind())
 	if err != nil {
 		return nil, err
 	}
 
 	if kind.Provision == nil {
-		return nil, unimplemented("provision", "component")
+		return nil, unimplemented("provision", "unit")
 	}
 
 	return kind.Provision(ctx, request)
 }
 
-func (s componentService) Deprovision(ctx context.Context, request *ComponentDeprovisionRequest) (*ComponentDeprovisionResponse, error) {
-	kind, err := s.provider.component(request.GetComponent().GetKind())
+func (s unitService) Deprovision(ctx context.Context, request *UnitDeprovisionRequest) (*UnitDeprovisionResponse, error) {
+	kind, err := s.provider.unit(request.GetUnit().GetKind())
 	if err != nil {
 		return nil, err
 	}
 
 	if kind.Deprovision == nil {
-		return nil, unimplemented("deprovision", "component")
+		return nil, unimplemented("deprovision", "unit")
 	}
 
 	return kind.Deprovision(ctx, request)
 }
 
-func (s componentService) List(ctx context.Context, request *ComponentListRequest) (*ComponentListResponse, error) {
-	kind, err := s.provider.component(request.GetKind())
+func (s unitService) List(ctx context.Context, request *UnitListRequest) (*UnitListResponse, error) {
+	kind, err := s.provider.unit(request.GetKind())
 	if err != nil {
 		return nil, err
 	}
 
 	if kind.List == nil {
-		return nil, unimplemented("list", "component")
+		return nil, unimplemented("list", "unit")
 	}
 
 	return kind.List(ctx, request)
 }
 
-func (s componentService) GrantAccess(ctx context.Context, request *ComponentGrantAccessRequest) (*ComponentGrantAccessResponse, error) {
-	kind, err := s.provider.component(request.GetComponent().GetKind())
+func (s unitService) GrantAccess(ctx context.Context, request *UnitGrantAccessRequest) (*UnitGrantAccessResponse, error) {
+	kind, err := s.provider.unit(request.GetUnit().GetKind())
 	if err != nil {
 		return nil, err
 	}
 
 	if kind.GrantAccess == nil {
-		return nil, unimplemented("grant_access", "component")
+		return nil, unimplemented("grant_access", "unit")
 	}
 
 	return kind.GrantAccess(ctx, request)
 }
 
-func (s componentService) RevokeAccess(ctx context.Context, request *ComponentRevokeAccessRequest) (*ComponentRevokeAccessResponse, error) {
-	kind, err := s.provider.component(request.GetComponent().GetKind())
+func (s unitService) RevokeAccess(ctx context.Context, request *UnitRevokeAccessRequest) (*UnitRevokeAccessResponse, error) {
+	kind, err := s.provider.unit(request.GetUnit().GetKind())
 	if err != nil {
 		return nil, err
 	}
 
 	if kind.RevokeAccess == nil {
-		return nil, unimplemented("revoke_access", "component")
+		return nil, unimplemented("revoke_access", "unit")
 	}
 
 	return kind.RevokeAccess(ctx, request)
 }
 
-func (s componentService) GetAccess(ctx context.Context, request *ComponentGetAccessRequest) (*ComponentGetAccessResponse, error) {
-	kind, err := s.provider.component(request.GetComponent().GetKind())
+func (s unitService) GetAccess(ctx context.Context, request *UnitGetAccessRequest) (*UnitGetAccessResponse, error) {
+	kind, err := s.provider.unit(request.GetUnit().GetKind())
 	if err != nil {
 		return nil, err
 	}
 
 	if kind.GetAccess == nil {
-		return nil, unimplemented("get_access", "component")
+		return nil, unimplemented("get_access", "unit")
 	}
 
 	return kind.GetAccess(ctx, request)
