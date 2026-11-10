@@ -30,11 +30,11 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
 // Mandatory for every provider. Describe is always served. GrantAccess, RevokeAccess and
-// GetAccess apply only to a provider that declares grants, and answer UNIMPLEMENTED otherwise.
+// GetAccess apply only to a provider that declares entitlements, and answer UNIMPLEMENTED otherwise.
 type ProviderServiceClient interface {
-	// Describes the provider: the services and applications it manages, and the grants it gives.
+	// Describes the provider: the services and applications it manages, and the entitlements it gives.
 	Describe(ctx context.Context, in *DescribeRequest, opts ...grpc.CallOption) (*DescribeResponse, error)
-	// Access to the provider as a whole: giving identities a grant, taking it away, and checking
+	// Access to the provider as a whole: giving identities an entitlement, taking it away, and checking
 	// what they hold.
 	GrantAccess(ctx context.Context, in *ProviderServiceGrantAccessRequest, opts ...grpc.CallOption) (*ProviderServiceGrantAccessResponse, error)
 	RevokeAccess(ctx context.Context, in *ProviderServiceRevokeAccessRequest, opts ...grpc.CallOption) (*ProviderServiceRevokeAccessResponse, error)
@@ -94,11 +94,11 @@ func (c *providerServiceClient) GetAccess(ctx context.Context, in *ProviderServi
 // for forward compatibility.
 //
 // Mandatory for every provider. Describe is always served. GrantAccess, RevokeAccess and
-// GetAccess apply only to a provider that declares grants, and answer UNIMPLEMENTED otherwise.
+// GetAccess apply only to a provider that declares entitlements, and answer UNIMPLEMENTED otherwise.
 type ProviderServiceServer interface {
-	// Describes the provider: the services and applications it manages, and the grants it gives.
+	// Describes the provider: the services and applications it manages, and the entitlements it gives.
 	Describe(context.Context, *DescribeRequest) (*DescribeResponse, error)
-	// Access to the provider as a whole: giving identities a grant, taking it away, and checking
+	// Access to the provider as a whole: giving identities an entitlement, taking it away, and checking
 	// what they hold.
 	GrantAccess(context.Context, *ProviderServiceGrantAccessRequest) (*ProviderServiceGrantAccessResponse, error)
 	RevokeAccess(context.Context, *ProviderServiceRevokeAccessRequest) (*ProviderServiceRevokeAccessResponse, error)

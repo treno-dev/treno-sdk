@@ -53,7 +53,7 @@ type (
 	PermissionDefinition = providerv1.PermissionDefinition
 	RoleDefinition       = providerv1.RoleDefinition
 
-	GrantDefinition = providerv1.GrantDefinition
+	EntitlementDefinition = providerv1.EntitlementDefinition
 
 	ProviderGrantAccessRequest   = providerv1.ProviderServiceGrantAccessRequest
 	ProviderGrantAccessResponse  = providerv1.ProviderServiceGrantAccessResponse

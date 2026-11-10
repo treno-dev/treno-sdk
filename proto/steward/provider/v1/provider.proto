@@ -4,7 +4,7 @@ package steward.provider.v1;
 
 import "google/protobuf/struct.proto";
 
-// The provider contract. Every provider serves ProviderService: it describes itself and, when it declares grants,
+// The provider contract. Every provider serves ProviderService: it describes itself and, when it declares entitlements,
 // gives access as a whole. A provider that has services also serves ServiceService, and one that
 // runs applications serves ApplicationService. A provider
 // offers a call by implementing it. A call it does not offer fails with UNIMPLEMENTED, and Steward
@@ -149,7 +149,7 @@ message Variable {
 // Who a user is in the tool, such as a GitHub login or an AWS principal.
 //
 // Every field is optional, so an identity can be as complete as Steward knows it. A call that needs
-// more than it was given, such as a grant with neither an external_id nor an attr the tool can
+// more than it was given, such as an entitlement with neither an external_id nor an attr the tool can
 // invite by, fails with INVALID_ARGUMENT.
 message Identity {
   // Steward's own opaque identifier for the identity. A provider does not interpret it; it is there
@@ -232,7 +232,7 @@ message ProviderDefinition {
   // The service kinds this provider manages. Kinds are unique within the provider.
   repeated ServiceDefinition services = 4;
 
-  // What can be granted on the provider as a whole is declared as grants. Roles and permissions are not part of the provider.
+  // What can be granted on the provider as a whole is declared as entitlements. Roles and permissions are not part of the provider.
   reserved 5, 6, 12;
   reserved "permissions", "roles", "grant_inputs";
 
@@ -255,8 +255,8 @@ message ProviderDefinition {
   reserved "credentials";
 
   // What a person can be given in the tool as a whole, such as access to an AWS account through a role, or membership of a GitHub
-  // organization. Names are unique within the provider. Declaring grants is what says the provider supports access.
-  repeated GrantDefinition grants = 13;
+  // organization. Names are unique within the provider. Declaring entitlements is what says the provider supports access.
+  repeated EntitlementDefinition entitlements = 13;
 }
 
 // One setting a provider, a service or an application takes, declared the way a variable is: a name
@@ -361,16 +361,16 @@ message ApplicationDefinition {
   repeated OutputDefinition outputs = 6;
 }
 
-// Something a person can be given in the tool, such as access to an account or a seat. A grant is not always a role: it is whatever
+// Something a person can be given in the tool, such as access to an account or a seat. An entitlement is not always a role: it is whatever
 // the provider can give and take away, and it declares the inputs it wants. An input can be free, such as the ARN of a role, or fixed,
 // such as a "select" of the roles an organization has.
-message GrantDefinition {
+message EntitlementDefinition {
   // Unique within the provider, such as "access" or "member".
   string name = 1;
   string title = 2;
   string description = 3;
 
-  // What a grant of this kind asks to know about. The values are sent in the `inputs` of every access call.
+  // What an entitlement of this kind asks to know about. The values are sent in the `inputs` of every access call.
   repeated InputDefinition inputs = 4;
 }
 
@@ -402,10 +402,10 @@ message ProviderServiceGrantAccessRequest {
   Credential credential = 1;
   Identity identity = 2;
 
-  // A name declared in ProviderDefinition.grants.
-  string grant = 5;
+  // A name declared in ProviderDefinition.entitlements.
+  string entitlement = 5;
 
-  // The values of the inputs that grant declared, keyed by input name.
+  // The values of the inputs that entitlement declared, keyed by input name.
   google.protobuf.Struct inputs = 6;
 }
 
@@ -413,11 +413,11 @@ message ProviderServiceGrantAccessResponse {
   reserved 2, 4;
   reserved "role", "permissions";
 
-  // The grant's own identity in the tool, such as a membership or invitation id. Empty when the
+  // The entitlement's own identity in the tool, such as a membership or invitation id. Empty when the
   // tool has none. Steward records it and sends it back on revoke.
   string id = 1;
 
-  // True when the grant needs the identity to act before it takes effect, such as accepting an
+  // True when the entitlement needs the identity to act before it takes effect, such as accepting an
   // invitation. The access is not in effect yet.
   bool pending = 3;
 }
@@ -433,13 +433,13 @@ message ProviderServiceRevokeAccessRequest {
   // The id GrantAccess returned for this grant, when it returned one.
   string id = 4;
 
-  string grant = 6;
+  string entitlement = 6;
   google.protobuf.Struct inputs = 7;
 }
 
 message ProviderServiceRevokeAccessResponse {}
 
-// Asks whether an identity holds a grant now, for example to skip an invitation to someone who
+// Asks whether an identity holds an entitlement now, for example to skip an invitation to someone who
 // is already a member, or to find drift.
 message ProviderServiceGetAccessRequest {
   reserved 10;
@@ -448,7 +448,7 @@ message ProviderServiceGetAccessRequest {
   Credential credential = 1;
   Identity identity = 2;
 
-  string grant = 3;
+  string entitlement = 3;
   google.protobuf.Struct inputs = 4;
 }
 
@@ -456,7 +456,7 @@ message ProviderServiceGetAccessResponse {
   reserved 1, 4;
   reserved "roles", "permissions";
 
-  // True when the identity holds the grant.
+  // True when the identity holds the entitlement.
   bool granted = 5;
 
   // True when an invitation or similar is outstanding and the access is not yet in effect.
@@ -484,7 +484,7 @@ message ServiceServiceGrantAccessRequest {
 }
 
 message ServiceServiceGrantAccessResponse {
-  // The grant's own identity in the tool, such as an assignment or invitation id. Empty when the
+  // The entitlement's own identity in the tool, such as an assignment or invitation id. Empty when the
   // tool has none. Steward records it and sends it back on revoke.
   string id = 1;
 
@@ -493,7 +493,7 @@ message ServiceServiceGrantAccessResponse {
   Role role = 2;
   repeated Permission permissions = 4;
 
-  // True when the grant needs the identity to act before it takes effect, such as accepting an
+  // True when the entitlement needs the identity to act before it takes effect, such as accepting an
   // invitation. The access is not in effect yet.
   bool pending = 3;
 }
@@ -630,12 +630,12 @@ message ApplicationServiceDeployResponse {
 // ---------------------------------------------------------------------------------------------
 
 // Mandatory for every provider. Describe is always served. GrantAccess, RevokeAccess and
-// GetAccess apply only to a provider that declares grants, and answer UNIMPLEMENTED otherwise.
+// GetAccess apply only to a provider that declares entitlements, and answer UNIMPLEMENTED otherwise.
 service ProviderService {
-  // Describes the provider: the services and applications it manages, and the grants it gives.
+  // Describes the provider: the services and applications it manages, and the entitlements it gives.
   rpc Describe(DescribeRequest) returns (DescribeResponse);
 
-  // Access to the provider as a whole: giving identities a grant, taking it away, and checking
+  // Access to the provider as a whole: giving identities an entitlement, taking it away, and checking
   // what they hold.
   rpc GrantAccess(ProviderServiceGrantAccessRequest) returns (ProviderServiceGrantAccessResponse);
   rpc RevokeAccess(ProviderServiceRevokeAccessRequest) returns (ProviderServiceRevokeAccessResponse);

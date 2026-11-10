@@ -40,8 +40,8 @@ type Options struct {
 	// docs, so it has to answer for a credential that is nil.
 	SetupLinks func(context.Context, *Credential) []*SetupLink
 
-	// What can be given on the provider as a whole, and the handlers that give it. A grant declares the inputs it wants.
-	Grants []*GrantDefinition
+	// What can be given on the provider as a whole, and the handlers that give it. An entitlement declares the inputs it wants.
+	Entitlements []*EntitlementDefinition
 
 	GrantAccess  func(context.Context, *ProviderGrantAccessRequest) (*ProviderGrantAccessResponse, error)
 	RevokeAccess func(context.Context, *ProviderRevokeAccessRequest) (*ProviderRevokeAccessResponse, error)
@@ -142,9 +142,9 @@ func (p *Provider) Application(kind string, options ApplicationOptions) *Provide
 func (p *Provider) describe(ctx context.Context, credential *Credential) *providerv1.DescribeResponse {
 	o := p.options
 	definition := &providerv1.ProviderDefinition{
-		Title:       o.Title,
-		Description: o.Description,
-		Grants:      o.Grants,
+		Title:        o.Title,
+		Description:  o.Description,
+		Entitlements: o.Entitlements,
 	}
 
 	for _, name := range p.serviceOrder {

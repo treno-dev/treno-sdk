@@ -553,7 +553,7 @@ func (x *Variable) GetLocked() bool {
 // Who a user is in the tool, such as a GitHub login or an AWS principal.
 //
 // Every field is optional, so an identity can be as complete as Steward knows it. A call that needs
-// more than it was given, such as a grant with neither an external_id nor an attr the tool can
+// more than it was given, such as an entitlement with neither an external_id nor an attr the tool can
 // invite by, fails with INVALID_ARGUMENT.
 type Identity struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -935,8 +935,8 @@ type ProviderDefinition struct {
 	// applications.
 	Applications []*ApplicationDefinition `protobuf:"bytes,7,rep,name=applications,proto3" json:"applications,omitempty"`
 	// What a person can be given in the tool as a whole, such as access to an AWS account through a role, or membership of a GitHub
-	// organization. Names are unique within the provider. Declaring grants is what says the provider supports access.
-	Grants        []*GrantDefinition `protobuf:"bytes,13,rep,name=grants,proto3" json:"grants,omitempty"`
+	// organization. Names are unique within the provider. Declaring entitlements is what says the provider supports access.
+	Entitlements  []*EntitlementDefinition `protobuf:"bytes,13,rep,name=entitlements,proto3" json:"entitlements,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -999,9 +999,9 @@ func (x *ProviderDefinition) GetApplications() []*ApplicationDefinition {
 	return nil
 }
 
-func (x *ProviderDefinition) GetGrants() []*GrantDefinition {
+func (x *ProviderDefinition) GetEntitlements() []*EntitlementDefinition {
 	if x != nil {
-		return x.Grants
+		return x.Entitlements
 	}
 	return nil
 }
@@ -1489,35 +1489,35 @@ func (x *ApplicationDefinition) GetOutputs() []*OutputDefinition {
 	return nil
 }
 
-// Something a person can be given in the tool, such as access to an account or a seat. A grant is not always a role: it is whatever
+// Something a person can be given in the tool, such as access to an account or a seat. An entitlement is not always a role: it is whatever
 // the provider can give and take away, and it declares the inputs it wants. An input can be free, such as the ARN of a role, or fixed,
 // such as a "select" of the roles an organization has.
-type GrantDefinition struct {
+type EntitlementDefinition struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Unique within the provider, such as "access" or "member".
 	Name        string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Title       string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
 	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	// What a grant of this kind asks to know about. The values are sent in the `inputs` of every access call.
+	// What an entitlement of this kind asks to know about. The values are sent in the `inputs` of every access call.
 	Inputs        []*InputDefinition `protobuf:"bytes,4,rep,name=inputs,proto3" json:"inputs,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GrantDefinition) Reset() {
-	*x = GrantDefinition{}
+func (x *EntitlementDefinition) Reset() {
+	*x = EntitlementDefinition{}
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GrantDefinition) String() string {
+func (x *EntitlementDefinition) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GrantDefinition) ProtoMessage() {}
+func (*EntitlementDefinition) ProtoMessage() {}
 
-func (x *GrantDefinition) ProtoReflect() protoreflect.Message {
+func (x *EntitlementDefinition) ProtoReflect() protoreflect.Message {
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1529,33 +1529,33 @@ func (x *GrantDefinition) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GrantDefinition.ProtoReflect.Descriptor instead.
-func (*GrantDefinition) Descriptor() ([]byte, []int) {
+// Deprecated: Use EntitlementDefinition.ProtoReflect.Descriptor instead.
+func (*EntitlementDefinition) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{19}
 }
 
-func (x *GrantDefinition) GetName() string {
+func (x *EntitlementDefinition) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-func (x *GrantDefinition) GetTitle() string {
+func (x *EntitlementDefinition) GetTitle() string {
 	if x != nil {
 		return x.Title
 	}
 	return ""
 }
 
-func (x *GrantDefinition) GetDescription() string {
+func (x *EntitlementDefinition) GetDescription() string {
 	if x != nil {
 		return x.Description
 	}
 	return ""
 }
 
-func (x *GrantDefinition) GetInputs() []*InputDefinition {
+func (x *EntitlementDefinition) GetInputs() []*InputDefinition {
 	if x != nil {
 		return x.Inputs
 	}
@@ -1701,9 +1701,9 @@ type ProviderServiceGrantAccessRequest struct {
 	state      protoimpl.MessageState `protogen:"open.v1"`
 	Credential *Credential            `protobuf:"bytes,1,opt,name=credential,proto3" json:"credential,omitempty"`
 	Identity   *Identity              `protobuf:"bytes,2,opt,name=identity,proto3" json:"identity,omitempty"`
-	// A name declared in ProviderDefinition.grants.
-	Grant string `protobuf:"bytes,5,opt,name=grant,proto3" json:"grant,omitempty"`
-	// The values of the inputs that grant declared, keyed by input name.
+	// A name declared in ProviderDefinition.entitlements.
+	Entitlement string `protobuf:"bytes,5,opt,name=entitlement,proto3" json:"entitlement,omitempty"`
+	// The values of the inputs that entitlement declared, keyed by input name.
 	Inputs        *structpb.Struct `protobuf:"bytes,6,opt,name=inputs,proto3" json:"inputs,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1753,9 +1753,9 @@ func (x *ProviderServiceGrantAccessRequest) GetIdentity() *Identity {
 	return nil
 }
 
-func (x *ProviderServiceGrantAccessRequest) GetGrant() string {
+func (x *ProviderServiceGrantAccessRequest) GetEntitlement() string {
 	if x != nil {
-		return x.Grant
+		return x.Entitlement
 	}
 	return ""
 }
@@ -1769,10 +1769,10 @@ func (x *ProviderServiceGrantAccessRequest) GetInputs() *structpb.Struct {
 
 type ProviderServiceGrantAccessResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The grant's own identity in the tool, such as a membership or invitation id. Empty when the
+	// The entitlement's own identity in the tool, such as a membership or invitation id. Empty when the
 	// tool has none. Steward records it and sends it back on revoke.
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	// True when the grant needs the identity to act before it takes effect, such as accepting an
+	// True when the entitlement needs the identity to act before it takes effect, such as accepting an
 	// invitation. The access is not in effect yet.
 	Pending       bool `protobuf:"varint,3,opt,name=pending,proto3" json:"pending,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -1830,7 +1830,7 @@ type ProviderServiceRevokeAccessRequest struct {
 	Identity   *Identity              `protobuf:"bytes,2,opt,name=identity,proto3" json:"identity,omitempty"`
 	// The id GrantAccess returned for this grant, when it returned one.
 	Id            string           `protobuf:"bytes,4,opt,name=id,proto3" json:"id,omitempty"`
-	Grant         string           `protobuf:"bytes,6,opt,name=grant,proto3" json:"grant,omitempty"`
+	Entitlement   string           `protobuf:"bytes,6,opt,name=entitlement,proto3" json:"entitlement,omitempty"`
 	Inputs        *structpb.Struct `protobuf:"bytes,7,opt,name=inputs,proto3" json:"inputs,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1887,9 +1887,9 @@ func (x *ProviderServiceRevokeAccessRequest) GetId() string {
 	return ""
 }
 
-func (x *ProviderServiceRevokeAccessRequest) GetGrant() string {
+func (x *ProviderServiceRevokeAccessRequest) GetEntitlement() string {
 	if x != nil {
-		return x.Grant
+		return x.Entitlement
 	}
 	return ""
 }
@@ -1937,13 +1937,13 @@ func (*ProviderServiceRevokeAccessResponse) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{25}
 }
 
-// Asks whether an identity holds a grant now, for example to skip an invitation to someone who
+// Asks whether an identity holds an entitlement now, for example to skip an invitation to someone who
 // is already a member, or to find drift.
 type ProviderServiceGetAccessRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Credential    *Credential            `protobuf:"bytes,1,opt,name=credential,proto3" json:"credential,omitempty"`
 	Identity      *Identity              `protobuf:"bytes,2,opt,name=identity,proto3" json:"identity,omitempty"`
-	Grant         string                 `protobuf:"bytes,3,opt,name=grant,proto3" json:"grant,omitempty"`
+	Entitlement   string                 `protobuf:"bytes,3,opt,name=entitlement,proto3" json:"entitlement,omitempty"`
 	Inputs        *structpb.Struct       `protobuf:"bytes,4,opt,name=inputs,proto3" json:"inputs,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1993,9 +1993,9 @@ func (x *ProviderServiceGetAccessRequest) GetIdentity() *Identity {
 	return nil
 }
 
-func (x *ProviderServiceGetAccessRequest) GetGrant() string {
+func (x *ProviderServiceGetAccessRequest) GetEntitlement() string {
 	if x != nil {
-		return x.Grant
+		return x.Entitlement
 	}
 	return ""
 }
@@ -2009,7 +2009,7 @@ func (x *ProviderServiceGetAccessRequest) GetInputs() *structpb.Struct {
 
 type ProviderServiceGetAccessResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// True when the identity holds the grant.
+	// True when the identity holds the entitlement.
 	Granted bool `protobuf:"varint,5,opt,name=granted,proto3" json:"granted,omitempty"`
 	// True when an invitation or similar is outstanding and the access is not yet in effect.
 	Pending bool `protobuf:"varint,2,opt,name=pending,proto3" json:"pending,omitempty"`
@@ -2153,14 +2153,14 @@ func (x *ServiceServiceGrantAccessRequest) GetPermissions() []*Permission {
 
 type ServiceServiceGrantAccessResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The grant's own identity in the tool, such as an assignment or invitation id. Empty when the
+	// The entitlement's own identity in the tool, such as an assignment or invitation id. Empty when the
 	// tool has none. Steward records it and sends it back on revoke.
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// What the tool actually applied. It can differ from what was requested: a composed role may land
 	// as a native role, or as only the permissions the tool supports.
 	Role        *Role         `protobuf:"bytes,2,opt,name=role,proto3" json:"role,omitempty"`
 	Permissions []*Permission `protobuf:"bytes,4,rep,name=permissions,proto3" json:"permissions,omitempty"`
-	// True when the grant needs the identity to act before it takes effect, such as accepting an
+	// True when the entitlement needs the identity to act before it takes effect, such as accepting an
 	// invitation. The access is not in effect yet.
 	Pending       bool `protobuf:"varint,3,opt,name=pending,proto3" json:"pending,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -3223,13 +3223,13 @@ const file_steward_provider_v1_provider_proto_rawDesc = "" +
 	"\tSetupLink\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x10\n" +
-	"\x03url\x18\x03 \x01(\tR\x03url\"\xb1\x03\n" +
+	"\x03url\x18\x03 \x01(\tR\x03url\"\xc3\x03\n" +
 	"\x12ProviderDefinition\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12B\n" +
 	"\bservices\x18\x04 \x03(\v2&.steward.provider.v1.ServiceDefinitionR\bservices\x12N\n" +
-	"\fapplications\x18\a \x03(\v2*.steward.provider.v1.ApplicationDefinitionR\fapplications\x12<\n" +
-	"\x06grants\x18\r \x03(\v2$.steward.provider.v1.GrantDefinitionR\x06grantsJ\x04\b\x03\x10\x04J\x04\b\b\x10\tJ\x04\b\x05\x10\x06J\x04\b\x06\x10\aJ\x04\b\f\x10\rJ\x04\b\t\x10\n" +
+	"\fapplications\x18\a \x03(\v2*.steward.provider.v1.ApplicationDefinitionR\fapplications\x12N\n" +
+	"\fentitlements\x18\r \x03(\v2*.steward.provider.v1.EntitlementDefinitionR\fentitlementsJ\x04\b\x03\x10\x04J\x04\b\b\x10\tJ\x04\b\x05\x10\x06J\x04\b\x06\x10\aJ\x04\b\f\x10\rJ\x04\b\t\x10\n" +
 	"J\x04\b\n" +
 	"\x10\vJ\x04\b\v\x10\fR\x06inputsR\asecretsR\vpermissionsR\x05rolesR\fgrant_inputsR\x0esecret_enginesR\x11identity_audienceR\vcredentials\"\x97\x02\n" +
 	"\x0fInputDefinition\x12\x12\n" +
@@ -3271,8 +3271,8 @@ const file_steward_provider_v1_provider_proto_rawDesc = "" +
 	"\x06inputs\x18\x04 \x03(\v2$.steward.provider.v1.InputDefinitionR\x06inputs\x12?\n" +
 	"\asecrets\x18\a \x03(\v2%.steward.provider.v1.SecretDefinitionR\asecrets\x12\x18\n" +
 	"\asources\x18\x05 \x03(\tR\asources\x12?\n" +
-	"\aoutputs\x18\x06 \x03(\v2%.steward.provider.v1.OutputDefinitionR\aoutputs\"\x9b\x01\n" +
-	"\x0fGrantDefinition\x12\x12\n" +
+	"\aoutputs\x18\x06 \x03(\v2%.steward.provider.v1.OutputDefinitionR\aoutputs\"\xa1\x01\n" +
+	"\x15EntitlementDefinition\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12<\n" +
@@ -3285,34 +3285,34 @@ const file_steward_provider_v1_provider_proto_rawDesc = "" +
 	"\x0eRoleDefinition\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\"\x99\x02\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\"\xa5\x02\n" +
 	"!ProviderServiceGrantAccessRequest\x12?\n" +
 	"\n" +
 	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
 	"credential\x129\n" +
-	"\bidentity\x18\x02 \x01(\v2\x1d.steward.provider.v1.IdentityR\bidentity\x12\x14\n" +
-	"\x05grant\x18\x05 \x01(\tR\x05grant\x12/\n" +
+	"\bidentity\x18\x02 \x01(\v2\x1d.steward.provider.v1.IdentityR\bidentity\x12 \n" +
+	"\ventitlement\x18\x05 \x01(\tR\ventitlement\x12/\n" +
 	"\x06inputs\x18\x06 \x01(\v2\x17.google.protobuf.StructR\x06inputsJ\x04\b\x03\x10\x04J\x04\b\x04\x10\x05J\x04\b\n" +
 	"\x10\vR\x04roleR\vpermissionsR\fgrant_inputs\"m\n" +
 	"\"ProviderServiceGrantAccessResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
-	"\apending\x18\x03 \x01(\bR\apendingJ\x04\b\x02\x10\x03J\x04\b\x04\x10\x05R\x04roleR\vpermissions\"\xaa\x02\n" +
+	"\apending\x18\x03 \x01(\bR\apendingJ\x04\b\x02\x10\x03J\x04\b\x04\x10\x05R\x04roleR\vpermissions\"\xb6\x02\n" +
 	"\"ProviderServiceRevokeAccessRequest\x12?\n" +
 	"\n" +
 	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
 	"credential\x129\n" +
 	"\bidentity\x18\x02 \x01(\v2\x1d.steward.provider.v1.IdentityR\bidentity\x12\x0e\n" +
-	"\x02id\x18\x04 \x01(\tR\x02id\x12\x14\n" +
-	"\x05grant\x18\x06 \x01(\tR\x05grant\x12/\n" +
+	"\x02id\x18\x04 \x01(\tR\x02id\x12 \n" +
+	"\ventitlement\x18\x06 \x01(\tR\ventitlement\x12/\n" +
 	"\x06inputs\x18\a \x01(\v2\x17.google.protobuf.StructR\x06inputsJ\x04\b\x03\x10\x04J\x04\b\x05\x10\x06J\x04\b\n" +
 	"\x10\vR\x04roleR\vpermissionsR\fgrant_inputs\"%\n" +
-	"#ProviderServiceRevokeAccessResponse\"\xf8\x01\n" +
+	"#ProviderServiceRevokeAccessResponse\"\x84\x02\n" +
 	"\x1fProviderServiceGetAccessRequest\x12?\n" +
 	"\n" +
 	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
 	"credential\x129\n" +
-	"\bidentity\x18\x02 \x01(\v2\x1d.steward.provider.v1.IdentityR\bidentity\x12\x14\n" +
-	"\x05grant\x18\x03 \x01(\tR\x05grant\x12/\n" +
+	"\bidentity\x18\x02 \x01(\v2\x1d.steward.provider.v1.IdentityR\bidentity\x12 \n" +
+	"\ventitlement\x18\x03 \x01(\tR\ventitlement\x12/\n" +
 	"\x06inputs\x18\x04 \x01(\v2\x17.google.protobuf.StructR\x06inputsJ\x04\b\n" +
 	"\x10\vR\fgrant_inputs\"\xb1\x01\n" +
 	" ProviderServiceGetAccessResponse\x12\x18\n" +
@@ -3461,7 +3461,7 @@ var file_steward_provider_v1_provider_proto_goTypes = []any{
 	(*OutputDefinition)(nil),                    // 16: steward.provider.v1.OutputDefinition
 	(*ServiceDefinition)(nil),                   // 17: steward.provider.v1.ServiceDefinition
 	(*ApplicationDefinition)(nil),               // 18: steward.provider.v1.ApplicationDefinition
-	(*GrantDefinition)(nil),                     // 19: steward.provider.v1.GrantDefinition
+	(*EntitlementDefinition)(nil),               // 19: steward.provider.v1.EntitlementDefinition
 	(*PermissionDefinition)(nil),                // 20: steward.provider.v1.PermissionDefinition
 	(*RoleDefinition)(nil),                      // 21: steward.provider.v1.RoleDefinition
 	(*ProviderServiceGrantAccessRequest)(nil),   // 22: steward.provider.v1.ProviderServiceGrantAccessRequest
@@ -3513,7 +3513,7 @@ var file_steward_provider_v1_provider_proto_depIdxs = []int32{
 	12, // 14: steward.provider.v1.DescribeResponse.setup_links:type_name -> steward.provider.v1.SetupLink
 	17, // 15: steward.provider.v1.ProviderDefinition.services:type_name -> steward.provider.v1.ServiceDefinition
 	18, // 16: steward.provider.v1.ProviderDefinition.applications:type_name -> steward.provider.v1.ApplicationDefinition
-	19, // 17: steward.provider.v1.ProviderDefinition.grants:type_name -> steward.provider.v1.GrantDefinition
+	19, // 17: steward.provider.v1.ProviderDefinition.entitlements:type_name -> steward.provider.v1.EntitlementDefinition
 	51, // 18: steward.provider.v1.InputDefinition.default:type_name -> google.protobuf.Value
 	14, // 19: steward.provider.v1.ServiceDefinition.inputs:type_name -> steward.provider.v1.InputDefinition
 	15, // 20: steward.provider.v1.ServiceDefinition.secrets:type_name -> steward.provider.v1.SecretDefinition
@@ -3524,7 +3524,7 @@ var file_steward_provider_v1_provider_proto_depIdxs = []int32{
 	14, // 25: steward.provider.v1.ApplicationDefinition.inputs:type_name -> steward.provider.v1.InputDefinition
 	15, // 26: steward.provider.v1.ApplicationDefinition.secrets:type_name -> steward.provider.v1.SecretDefinition
 	16, // 27: steward.provider.v1.ApplicationDefinition.outputs:type_name -> steward.provider.v1.OutputDefinition
-	14, // 28: steward.provider.v1.GrantDefinition.inputs:type_name -> steward.provider.v1.InputDefinition
+	14, // 28: steward.provider.v1.EntitlementDefinition.inputs:type_name -> steward.provider.v1.InputDefinition
 	0,  // 29: steward.provider.v1.ProviderServiceGrantAccessRequest.credential:type_name -> steward.provider.v1.Credential
 	7,  // 30: steward.provider.v1.ProviderServiceGrantAccessRequest.identity:type_name -> steward.provider.v1.Identity
 	50, // 31: steward.provider.v1.ProviderServiceGrantAccessRequest.inputs:type_name -> google.protobuf.Struct
