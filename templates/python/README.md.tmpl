@@ -19,7 +19,7 @@ to invoke it. Write logs to standard error.
 
 ## Test
 
-Save this as `context.json`, the credential and units to call the provider with:
+Save this as `context.json`, the credential and services to call the provider with:
 
 ```json
 {
@@ -29,7 +29,7 @@ Save this as `context.json`, the credential and units to call the provider with:
   },
   "identity": { "external_id": "someone@example.test" },
   "role": { "name": "viewer", "permissions": [{ "name": "view" }] },
-  "units": [{ "kind": "item", "name": "demo", "inputs": { "description": "A demo item" } }]
+  "services": [{ "kind": "item", "name": "demo", "inputs": { "description": "A demo item" } }]
 }
 ```
 
@@ -38,19 +38,19 @@ steward provider run --context context.json python src/provider.py
 steward provider run --context context.json --call provision python src/provider.py
 ```
 
-The first creates each unit, grants and revokes the role, and removes it. It does this for real, in
+The first creates each service, grants and revokes the role, and removes it. It does this for real, in
 whatever your secrets reach, and asks before it starts (`--yes` skips the question). `--call` makes
 only the calls you name, once each and without cleaning up: `provision`, `grant-access`, `get-access`,
 `revoke-access` and `deprovision`. `steward provider validate` never changes anything.
 
 ## Where things are
 
-`src/provider.py` declares the provider's inputs (what it needs to connect), each kind of unit and the
+`src/provider.py` declares the provider's inputs (what it needs to connect), each kind of service and the
 handlers Steward calls: `provision`, `deprovision`, `grant_access`, `revoke_access` and `get_access`.
 Each handler is annotated with the request and response types the SDK exports. Delete the handlers
 you do not need: Steward offers only what you implement.
 
-To add a kind of unit, call `provider.unit(kind=..., ...)` again with its own inputs, outputs and
+To add a kind of service, call `provider.service(kind=..., ...)` again with its own inputs, outputs and
 handlers.
 
 See the [SDK README](https://github.com/treno-dev/steward-sdk/blob/main/python/README.md) for

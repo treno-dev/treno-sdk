@@ -32,7 +32,7 @@ const (
 // Mandatory for every provider. Describe is always served. GrantAccess, RevokeAccess and
 // GetAccess apply only to a provider that declares grants, and answer UNIMPLEMENTED otherwise.
 type ProviderServiceClient interface {
-	// Describes the provider: the units and applications it manages, and the grants it gives.
+	// Describes the provider: the services and applications it manages, and the grants it gives.
 	Describe(ctx context.Context, in *DescribeRequest, opts ...grpc.CallOption) (*DescribeResponse, error)
 	// Access to the provider as a whole: giving identities a grant, taking it away, and checking
 	// what they hold.
@@ -96,7 +96,7 @@ func (c *providerServiceClient) GetAccess(ctx context.Context, in *ProviderServi
 // Mandatory for every provider. Describe is always served. GrantAccess, RevokeAccess and
 // GetAccess apply only to a provider that declares grants, and answer UNIMPLEMENTED otherwise.
 type ProviderServiceServer interface {
-	// Describes the provider: the units and applications it manages, and the grants it gives.
+	// Describes the provider: the services and applications it manages, and the grants it gives.
 	Describe(context.Context, *DescribeRequest) (*DescribeResponse, error)
 	// Access to the provider as a whole: giving identities a grant, taking it away, and checking
 	// what they hold.
@@ -247,297 +247,297 @@ var ProviderService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	UnitService_GrantAccess_FullMethodName  = "/steward.provider.v1.UnitService/GrantAccess"
-	UnitService_RevokeAccess_FullMethodName = "/steward.provider.v1.UnitService/RevokeAccess"
-	UnitService_GetAccess_FullMethodName    = "/steward.provider.v1.UnitService/GetAccess"
-	UnitService_Provision_FullMethodName    = "/steward.provider.v1.UnitService/Provision"
-	UnitService_Deprovision_FullMethodName  = "/steward.provider.v1.UnitService/Deprovision"
-	UnitService_List_FullMethodName         = "/steward.provider.v1.UnitService/List"
+	ServiceService_GrantAccess_FullMethodName  = "/steward.provider.v1.ServiceService/GrantAccess"
+	ServiceService_RevokeAccess_FullMethodName = "/steward.provider.v1.ServiceService/RevokeAccess"
+	ServiceService_GetAccess_FullMethodName    = "/steward.provider.v1.ServiceService/GetAccess"
+	ServiceService_Provision_FullMethodName    = "/steward.provider.v1.ServiceService/Provision"
+	ServiceService_Deprovision_FullMethodName  = "/steward.provider.v1.ServiceService/Deprovision"
+	ServiceService_List_FullMethodName         = "/steward.provider.v1.ServiceService/List"
 )
 
-// UnitServiceClient is the client API for UnitService service.
+// ServiceServiceClient is the client API for ServiceService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// For providers that manage units. A call a unit kind does not offer answers UNIMPLEMENTED.
+// For providers that manage services. A call a service kind does not offer answers UNIMPLEMENTED.
 // GrantAccess, RevokeAccess and GetAccess are offered by kinds that declare roles or permissions.
-type UnitServiceClient interface {
-	GrantAccess(ctx context.Context, in *UnitServiceGrantAccessRequest, opts ...grpc.CallOption) (*UnitServiceGrantAccessResponse, error)
-	RevokeAccess(ctx context.Context, in *UnitServiceRevokeAccessRequest, opts ...grpc.CallOption) (*UnitServiceRevokeAccessResponse, error)
-	GetAccess(ctx context.Context, in *UnitServiceGetAccessRequest, opts ...grpc.CallOption) (*UnitServiceGetAccessResponse, error)
-	Provision(ctx context.Context, in *UnitServiceProvisionRequest, opts ...grpc.CallOption) (*UnitServiceProvisionResponse, error)
-	Deprovision(ctx context.Context, in *UnitServiceDeprovisionRequest, opts ...grpc.CallOption) (*UnitServiceDeprovisionResponse, error)
-	List(ctx context.Context, in *UnitServiceListRequest, opts ...grpc.CallOption) (*UnitServiceListResponse, error)
+type ServiceServiceClient interface {
+	GrantAccess(ctx context.Context, in *ServiceServiceGrantAccessRequest, opts ...grpc.CallOption) (*ServiceServiceGrantAccessResponse, error)
+	RevokeAccess(ctx context.Context, in *ServiceServiceRevokeAccessRequest, opts ...grpc.CallOption) (*ServiceServiceRevokeAccessResponse, error)
+	GetAccess(ctx context.Context, in *ServiceServiceGetAccessRequest, opts ...grpc.CallOption) (*ServiceServiceGetAccessResponse, error)
+	Provision(ctx context.Context, in *ServiceServiceProvisionRequest, opts ...grpc.CallOption) (*ServiceServiceProvisionResponse, error)
+	Deprovision(ctx context.Context, in *ServiceServiceDeprovisionRequest, opts ...grpc.CallOption) (*ServiceServiceDeprovisionResponse, error)
+	List(ctx context.Context, in *ServiceServiceListRequest, opts ...grpc.CallOption) (*ServiceServiceListResponse, error)
 }
 
-type unitServiceClient struct {
+type serviceServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewUnitServiceClient(cc grpc.ClientConnInterface) UnitServiceClient {
-	return &unitServiceClient{cc}
+func NewServiceServiceClient(cc grpc.ClientConnInterface) ServiceServiceClient {
+	return &serviceServiceClient{cc}
 }
 
-func (c *unitServiceClient) GrantAccess(ctx context.Context, in *UnitServiceGrantAccessRequest, opts ...grpc.CallOption) (*UnitServiceGrantAccessResponse, error) {
+func (c *serviceServiceClient) GrantAccess(ctx context.Context, in *ServiceServiceGrantAccessRequest, opts ...grpc.CallOption) (*ServiceServiceGrantAccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UnitServiceGrantAccessResponse)
-	err := c.cc.Invoke(ctx, UnitService_GrantAccess_FullMethodName, in, out, cOpts...)
+	out := new(ServiceServiceGrantAccessResponse)
+	err := c.cc.Invoke(ctx, ServiceService_GrantAccess_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *unitServiceClient) RevokeAccess(ctx context.Context, in *UnitServiceRevokeAccessRequest, opts ...grpc.CallOption) (*UnitServiceRevokeAccessResponse, error) {
+func (c *serviceServiceClient) RevokeAccess(ctx context.Context, in *ServiceServiceRevokeAccessRequest, opts ...grpc.CallOption) (*ServiceServiceRevokeAccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UnitServiceRevokeAccessResponse)
-	err := c.cc.Invoke(ctx, UnitService_RevokeAccess_FullMethodName, in, out, cOpts...)
+	out := new(ServiceServiceRevokeAccessResponse)
+	err := c.cc.Invoke(ctx, ServiceService_RevokeAccess_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *unitServiceClient) GetAccess(ctx context.Context, in *UnitServiceGetAccessRequest, opts ...grpc.CallOption) (*UnitServiceGetAccessResponse, error) {
+func (c *serviceServiceClient) GetAccess(ctx context.Context, in *ServiceServiceGetAccessRequest, opts ...grpc.CallOption) (*ServiceServiceGetAccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UnitServiceGetAccessResponse)
-	err := c.cc.Invoke(ctx, UnitService_GetAccess_FullMethodName, in, out, cOpts...)
+	out := new(ServiceServiceGetAccessResponse)
+	err := c.cc.Invoke(ctx, ServiceService_GetAccess_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *unitServiceClient) Provision(ctx context.Context, in *UnitServiceProvisionRequest, opts ...grpc.CallOption) (*UnitServiceProvisionResponse, error) {
+func (c *serviceServiceClient) Provision(ctx context.Context, in *ServiceServiceProvisionRequest, opts ...grpc.CallOption) (*ServiceServiceProvisionResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UnitServiceProvisionResponse)
-	err := c.cc.Invoke(ctx, UnitService_Provision_FullMethodName, in, out, cOpts...)
+	out := new(ServiceServiceProvisionResponse)
+	err := c.cc.Invoke(ctx, ServiceService_Provision_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *unitServiceClient) Deprovision(ctx context.Context, in *UnitServiceDeprovisionRequest, opts ...grpc.CallOption) (*UnitServiceDeprovisionResponse, error) {
+func (c *serviceServiceClient) Deprovision(ctx context.Context, in *ServiceServiceDeprovisionRequest, opts ...grpc.CallOption) (*ServiceServiceDeprovisionResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UnitServiceDeprovisionResponse)
-	err := c.cc.Invoke(ctx, UnitService_Deprovision_FullMethodName, in, out, cOpts...)
+	out := new(ServiceServiceDeprovisionResponse)
+	err := c.cc.Invoke(ctx, ServiceService_Deprovision_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *unitServiceClient) List(ctx context.Context, in *UnitServiceListRequest, opts ...grpc.CallOption) (*UnitServiceListResponse, error) {
+func (c *serviceServiceClient) List(ctx context.Context, in *ServiceServiceListRequest, opts ...grpc.CallOption) (*ServiceServiceListResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UnitServiceListResponse)
-	err := c.cc.Invoke(ctx, UnitService_List_FullMethodName, in, out, cOpts...)
+	out := new(ServiceServiceListResponse)
+	err := c.cc.Invoke(ctx, ServiceService_List_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// UnitServiceServer is the server API for UnitService service.
-// All implementations must embed UnimplementedUnitServiceServer
+// ServiceServiceServer is the server API for ServiceService service.
+// All implementations must embed UnimplementedServiceServiceServer
 // for forward compatibility.
 //
-// For providers that manage units. A call a unit kind does not offer answers UNIMPLEMENTED.
+// For providers that manage services. A call a service kind does not offer answers UNIMPLEMENTED.
 // GrantAccess, RevokeAccess and GetAccess are offered by kinds that declare roles or permissions.
-type UnitServiceServer interface {
-	GrantAccess(context.Context, *UnitServiceGrantAccessRequest) (*UnitServiceGrantAccessResponse, error)
-	RevokeAccess(context.Context, *UnitServiceRevokeAccessRequest) (*UnitServiceRevokeAccessResponse, error)
-	GetAccess(context.Context, *UnitServiceGetAccessRequest) (*UnitServiceGetAccessResponse, error)
-	Provision(context.Context, *UnitServiceProvisionRequest) (*UnitServiceProvisionResponse, error)
-	Deprovision(context.Context, *UnitServiceDeprovisionRequest) (*UnitServiceDeprovisionResponse, error)
-	List(context.Context, *UnitServiceListRequest) (*UnitServiceListResponse, error)
-	mustEmbedUnimplementedUnitServiceServer()
+type ServiceServiceServer interface {
+	GrantAccess(context.Context, *ServiceServiceGrantAccessRequest) (*ServiceServiceGrantAccessResponse, error)
+	RevokeAccess(context.Context, *ServiceServiceRevokeAccessRequest) (*ServiceServiceRevokeAccessResponse, error)
+	GetAccess(context.Context, *ServiceServiceGetAccessRequest) (*ServiceServiceGetAccessResponse, error)
+	Provision(context.Context, *ServiceServiceProvisionRequest) (*ServiceServiceProvisionResponse, error)
+	Deprovision(context.Context, *ServiceServiceDeprovisionRequest) (*ServiceServiceDeprovisionResponse, error)
+	List(context.Context, *ServiceServiceListRequest) (*ServiceServiceListResponse, error)
+	mustEmbedUnimplementedServiceServiceServer()
 }
 
-// UnimplementedUnitServiceServer must be embedded to have
+// UnimplementedServiceServiceServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedUnitServiceServer struct{}
+type UnimplementedServiceServiceServer struct{}
 
-func (UnimplementedUnitServiceServer) GrantAccess(context.Context, *UnitServiceGrantAccessRequest) (*UnitServiceGrantAccessResponse, error) {
+func (UnimplementedServiceServiceServer) GrantAccess(context.Context, *ServiceServiceGrantAccessRequest) (*ServiceServiceGrantAccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GrantAccess not implemented")
 }
-func (UnimplementedUnitServiceServer) RevokeAccess(context.Context, *UnitServiceRevokeAccessRequest) (*UnitServiceRevokeAccessResponse, error) {
+func (UnimplementedServiceServiceServer) RevokeAccess(context.Context, *ServiceServiceRevokeAccessRequest) (*ServiceServiceRevokeAccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method RevokeAccess not implemented")
 }
-func (UnimplementedUnitServiceServer) GetAccess(context.Context, *UnitServiceGetAccessRequest) (*UnitServiceGetAccessResponse, error) {
+func (UnimplementedServiceServiceServer) GetAccess(context.Context, *ServiceServiceGetAccessRequest) (*ServiceServiceGetAccessResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetAccess not implemented")
 }
-func (UnimplementedUnitServiceServer) Provision(context.Context, *UnitServiceProvisionRequest) (*UnitServiceProvisionResponse, error) {
+func (UnimplementedServiceServiceServer) Provision(context.Context, *ServiceServiceProvisionRequest) (*ServiceServiceProvisionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Provision not implemented")
 }
-func (UnimplementedUnitServiceServer) Deprovision(context.Context, *UnitServiceDeprovisionRequest) (*UnitServiceDeprovisionResponse, error) {
+func (UnimplementedServiceServiceServer) Deprovision(context.Context, *ServiceServiceDeprovisionRequest) (*ServiceServiceDeprovisionResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method Deprovision not implemented")
 }
-func (UnimplementedUnitServiceServer) List(context.Context, *UnitServiceListRequest) (*UnitServiceListResponse, error) {
+func (UnimplementedServiceServiceServer) List(context.Context, *ServiceServiceListRequest) (*ServiceServiceListResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method List not implemented")
 }
-func (UnimplementedUnitServiceServer) mustEmbedUnimplementedUnitServiceServer() {}
-func (UnimplementedUnitServiceServer) testEmbeddedByValue()                     {}
+func (UnimplementedServiceServiceServer) mustEmbedUnimplementedServiceServiceServer() {}
+func (UnimplementedServiceServiceServer) testEmbeddedByValue()                        {}
 
-// UnsafeUnitServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to UnitServiceServer will
+// UnsafeServiceServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ServiceServiceServer will
 // result in compilation errors.
-type UnsafeUnitServiceServer interface {
-	mustEmbedUnimplementedUnitServiceServer()
+type UnsafeServiceServiceServer interface {
+	mustEmbedUnimplementedServiceServiceServer()
 }
 
-func RegisterUnitServiceServer(s grpc.ServiceRegistrar, srv UnitServiceServer) {
-	// If the following call panics, it indicates UnimplementedUnitServiceServer was
+func RegisterServiceServiceServer(s grpc.ServiceRegistrar, srv ServiceServiceServer) {
+	// If the following call panics, it indicates UnimplementedServiceServiceServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&UnitService_ServiceDesc, srv)
+	s.RegisterService(&ServiceService_ServiceDesc, srv)
 }
 
-func _UnitService_GrantAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UnitServiceGrantAccessRequest)
+func _ServiceService_GrantAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ServiceServiceGrantAccessRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UnitServiceServer).GrantAccess(ctx, in)
+		return srv.(ServiceServiceServer).GrantAccess(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UnitService_GrantAccess_FullMethodName,
+		FullMethod: ServiceService_GrantAccess_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UnitServiceServer).GrantAccess(ctx, req.(*UnitServiceGrantAccessRequest))
+		return srv.(ServiceServiceServer).GrantAccess(ctx, req.(*ServiceServiceGrantAccessRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UnitService_RevokeAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UnitServiceRevokeAccessRequest)
+func _ServiceService_RevokeAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ServiceServiceRevokeAccessRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UnitServiceServer).RevokeAccess(ctx, in)
+		return srv.(ServiceServiceServer).RevokeAccess(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UnitService_RevokeAccess_FullMethodName,
+		FullMethod: ServiceService_RevokeAccess_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UnitServiceServer).RevokeAccess(ctx, req.(*UnitServiceRevokeAccessRequest))
+		return srv.(ServiceServiceServer).RevokeAccess(ctx, req.(*ServiceServiceRevokeAccessRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UnitService_GetAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UnitServiceGetAccessRequest)
+func _ServiceService_GetAccess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ServiceServiceGetAccessRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UnitServiceServer).GetAccess(ctx, in)
+		return srv.(ServiceServiceServer).GetAccess(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UnitService_GetAccess_FullMethodName,
+		FullMethod: ServiceService_GetAccess_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UnitServiceServer).GetAccess(ctx, req.(*UnitServiceGetAccessRequest))
+		return srv.(ServiceServiceServer).GetAccess(ctx, req.(*ServiceServiceGetAccessRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UnitService_Provision_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UnitServiceProvisionRequest)
+func _ServiceService_Provision_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ServiceServiceProvisionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UnitServiceServer).Provision(ctx, in)
+		return srv.(ServiceServiceServer).Provision(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UnitService_Provision_FullMethodName,
+		FullMethod: ServiceService_Provision_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UnitServiceServer).Provision(ctx, req.(*UnitServiceProvisionRequest))
+		return srv.(ServiceServiceServer).Provision(ctx, req.(*ServiceServiceProvisionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UnitService_Deprovision_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UnitServiceDeprovisionRequest)
+func _ServiceService_Deprovision_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ServiceServiceDeprovisionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UnitServiceServer).Deprovision(ctx, in)
+		return srv.(ServiceServiceServer).Deprovision(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UnitService_Deprovision_FullMethodName,
+		FullMethod: ServiceService_Deprovision_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UnitServiceServer).Deprovision(ctx, req.(*UnitServiceDeprovisionRequest))
+		return srv.(ServiceServiceServer).Deprovision(ctx, req.(*ServiceServiceDeprovisionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UnitService_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UnitServiceListRequest)
+func _ServiceService_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ServiceServiceListRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UnitServiceServer).List(ctx, in)
+		return srv.(ServiceServiceServer).List(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UnitService_List_FullMethodName,
+		FullMethod: ServiceService_List_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UnitServiceServer).List(ctx, req.(*UnitServiceListRequest))
+		return srv.(ServiceServiceServer).List(ctx, req.(*ServiceServiceListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// UnitService_ServiceDesc is the grpc.ServiceDesc for UnitService service.
+// ServiceService_ServiceDesc is the grpc.ServiceDesc for ServiceService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var UnitService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "steward.provider.v1.UnitService",
-	HandlerType: (*UnitServiceServer)(nil),
+var ServiceService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "steward.provider.v1.ServiceService",
+	HandlerType: (*ServiceServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "GrantAccess",
-			Handler:    _UnitService_GrantAccess_Handler,
+			Handler:    _ServiceService_GrantAccess_Handler,
 		},
 		{
 			MethodName: "RevokeAccess",
-			Handler:    _UnitService_RevokeAccess_Handler,
+			Handler:    _ServiceService_RevokeAccess_Handler,
 		},
 		{
 			MethodName: "GetAccess",
-			Handler:    _UnitService_GetAccess_Handler,
+			Handler:    _ServiceService_GetAccess_Handler,
 		},
 		{
 			MethodName: "Provision",
-			Handler:    _UnitService_Provision_Handler,
+			Handler:    _ServiceService_Provision_Handler,
 		},
 		{
 			MethodName: "Deprovision",
-			Handler:    _UnitService_Deprovision_Handler,
+			Handler:    _ServiceService_Deprovision_Handler,
 		},
 		{
 			MethodName: "List",
-			Handler:    _UnitService_List_Handler,
+			Handler:    _ServiceService_List_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -10,7 +10,7 @@ covers three things, and treats them all the same way:
 
 - **Access:** who can use what, and with which role. Give Amina write access to the payments
   repositories for a week; remove everything she holds when she leaves.
-- **Units:** provisioning and deprovisioning the things teams work with. Create a repository, a
+- **Services:** provisioning and deprovisioning the things teams work with. Create a repository, a
   storage bucket or a database for a new project; remove them when the project ends.
 - **Applications:** creating, deploying and deleting the things teams run, with their settings and
   secrets. Deploy this web app from that branch with these environment variables.
@@ -23,7 +23,7 @@ None of that work happens inside Steward. It happens in the **external systems**
 uses: GitHub, AWS, Google Cloud, Jira, Cloudflare, a database server, an internal admin panel. Each of
 these has its own vocabulary and its own API:
 
-| System             | Units it provisions      | Applications it runs       | Access it grants                                |
+| System             | Services it provisions      | Applications it runs       | Access it grants                                |
 | ------------------ | ---------------------------- | -------------------------- | ----------------------------------------------- |
 | GitHub             | repositories, teams          |                            | `read`, `write`, `admin` on a repository        |
 | AWS                | buckets, databases, accounts | containers, functions      | policies made of actions such as `s3:GetObject` |
@@ -42,7 +42,7 @@ Steward's questions and that system's API. The GitHub provider, for example:
 - **declares what it needs to connect:** the GitHub organization and an access token. Steward shows
   these as a form when someone adds the provider. A company can add the same provider several times, such
   as for two GitHub organizations, each with its own settings and secrets.
-- **declares what it manages:** kinds of **units**, such as `repository`, each with the settings it
+- **declares what it manages:** kinds of **services**, such as `repository`, each with the settings it
   takes to create one (visibility, description) and what it reports back once it exists (its URL).
 - **declares what can be granted:** the roles and permissions GitHub offers, such as `read`, `write`
   and `admin` on a repository.
@@ -51,28 +51,28 @@ Steward's questions and that system's API. The GitHub provider, for example:
 
 Those calls fall into three kinds of work. A provider supports whichever fit its system:
 
-- **Unit provisioning:** create and remove units, and report what they produced, such as a URL
-  or an id. Optionally, list units that already exist so they can be brought under Steward.
+- **Service provisioning:** create and remove services, and report what they produced, such as a URL
+  or an id. Optionally, list services that already exist so they can be brought under Steward.
 - **Application management:** create, deploy and destroy applications, which are run from a source
   (a GitHub repository, a container image, an S3 archive or a path) and have variables, such as a web app
   and its environment.
 - **Access:** grant, revoke and report someone's roles, on the system as a whole (membership of the
-  GitHub organization) or on one unit (a role on one repository).
+  GitHub organization) or on one service (a role on one repository).
 
-A provider supports whichever it implements, for the system as a whole and for each kind of unit,
+A provider supports whichever it implements, for the system as a whole and for each kind of service,
 and Steward offers only that. The list is designed to grow: new kinds of work are added to the
 contract beside these without breaking providers that already exist.
 
 ### Everything is extensible through providers
 
-Steward has no built-in list of systems, units or applications. Everything it can create, deploy
+Steward has no built-in list of systems, services or applications. Everything it can create, deploy
 or grant comes from a provider, so anything a program can do, Steward can manage:
 
 - **Bring your existing infrastructure as code.** A provider does not have to call a system's API
   directly. Its `provision` can run the infrastructure-as-code, templates or scripts your team already
   maintains, and return their outputs. The code stays yours; Steward puts requests, approvals,
   ownership, expiry and an audit trail around it.
-- **Define your own kinds of units.** A kind is whatever makes sense to your teams: not only "a
+- **Define your own kinds of services.** A kind is whatever makes sense to your teams: not only "a
   bucket", but "a production-ready service" that creates a repository, a database and a pipeline
   together, with the inputs your platform team chooses to expose.
 - **Wrap internal systems.** An admin panel, a homegrown deployment tool or a legacy database can get
@@ -109,7 +109,7 @@ the record of it, and works out what changed. The provider is told what to do, d
 3. **The contract is a protobuf file.** [`proto/steward/provider/v1/provider.proto`](proto/steward/provider/v1/provider.proto)
    defines every message and call. The SDKs are generated from it, so they all behave the same way.
    Within `v1` the contract only grows.
-4. **The SDK hides the protocol.** You declare the provider and its kinds of units, and write
+4. **The SDK hides the protocol.** You declare the provider and its kinds of services, and write
    one function per call. The SDK serves gRPC, prints the handshake, answers the health check, routes
    each call to your function by kind, and answers anything you did not write with `UNIMPLEMENTED`.
 
@@ -121,7 +121,7 @@ so a provider can be written in any language that can serve gRPC. A program is a
 
 1. **prints the handshake line** on stdout once it is listening, `1|1|unix|<socket path>|grpc` (or
    `1|1|tcp|127.0.0.1:<port>|grpc`);
-2. **serves the services of the contract**: `ProviderService` always, and `UnitService` and
+2. **serves the services of the contract**: `ProviderService` always, and `ServiceService` and
    `ApplicationService` for what it supports, generated from
    [the proto](proto/steward/provider/v1/provider.proto) with `protoc` or `buf` in your language; and
 3. **serves the standard gRPC health service**, reporting `SERVING` for the service named `provider`.
@@ -149,14 +149,14 @@ road, and a provider in Rust, Java or anything else is the same contract without
 - **A credential**: an instance of the provider, with the inputs and secrets it is set up with. The provider declares its **inputs**, like variables with a name
   and a type, and its **secrets**, the keys and tokens it needs, with a name and a description. The runner
   passes secrets to each call separately from the inputs so the provider never has to store them.
-- **Units**: the things the tool holds, each declared once under a **kind** (`"repository"`) with
-  its own inputs and **outputs** (what comes back once it exists, such as a URL). A unit is
+- **Services**: the things the tool holds, each declared once under a **kind** (`"repository"`) with
+  its own inputs and **outputs** (what comes back once it exists, such as a URL). A service is
   identified by its kind and name.
-- **Access**: roles and permissions that can be granted on the provider as a whole, or on one unit.
+- **Access**: roles and permissions that can be granted on the provider as a whole, or on one service.
   They are two separate lists: the **roles** the tool defines itself, and the **permissions** Steward
   builds its own roles from. Declaring either says access is supported.
 - **Applications** (optional): things that are deployed from a source and have open-ended variables,
-  as opposed to units, which are provisioned.
+  as opposed to services, which are provisioned.
 
 Steward offers what you implement. With `provision` and `deprovision` a kind can be created and
 removed, with `list` it can be discovered, and with roles or permissions and the access functions it
@@ -221,8 +221,8 @@ const provider = createProvider({
   },
 });
 
-// A kind of unit it manages.
-provider.unit({
+// A kind of service it manages.
+provider.service({
   kind: "item",
   title: "Item",
   outputs: [{ name: "url", label: "URL", type: "string" }],
@@ -235,18 +235,18 @@ provider.unit({
     { name: "editor", title: "Editor" },
   ],
 
-  // Create the unit. Idempotent. Return what it produced.
+  // Create the service. Idempotent. Return what it produced.
   async provision({ credential, name }) {
     return { outputs: { url: `${credential.inputs.base_url}/items/${name}` } };
   },
 
-  async deprovision({ unit }) {
+  async deprovision({ service }) {
     return {};
   },
 
-  // Access to one unit: give an identity a role on it. The role is always set, and `permissions`
+  // Access to one service: give an identity a role on it. The role is always set, and `permissions`
   // lists the pieces of a role Steward composed. Return what the tool applied.
-  async grantAccess({ credential, unit, identity, role, permissions }) {
+  async grantAccess({ credential, service, identity, role, permissions }) {
     return { role, permissions };
   },
 
@@ -278,9 +278,9 @@ The other languages follow the same shape, in their own idiom:
 
 | Language               | Install                                      | Declare                                                 | A handler                                        |
 | ---------------------- | -------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------ |
-| JavaScript, TypeScript | `npm install @treno-dev/steward-sdk`         | `createProvider({...})`, `provider.unit({ kind, ... })` | `async provision({ credential, name }) { ... }`      |
-| Python                 | `pip install treno-dev-steward-sdk`          | `create_provider(...)`, `provider.unit(kind=..., ...)`  | `async def provision(request): ...`              |
-| Go                     | `go get github.com/treno-dev/steward-sdk/go` | `provider.New(...)`, `p.Unit("kind", ...)`            | `func(ctx, *Request) (*Response, error)`         |
+| JavaScript, TypeScript | `npm install @treno-dev/steward-sdk`         | `createProvider({...})`, `provider.service({ kind, ... })` | `async provision({ credential, name }) { ... }`      |
+| Python                 | `pip install treno-dev-steward-sdk`          | `create_provider(...)`, `provider.service(kind=..., ...)`  | `async def provision(request): ...`              |
+| Go                     | `go get github.com/treno-dev/steward-sdk/go` | `provider.New(...)`, `p.Service("kind", ...)`            | `func(ctx, *Request) (*Response, error)`         |
 
 Each is one SDK package per language, and the provider code is its `provider` part: `@treno-dev/steward-sdk/provider`
 in JavaScript, `steward_sdk.provider` in Python and `…/go/provider` in Go. Other parts of the SDK will sit
@@ -343,7 +343,7 @@ steward provider validate go run .
 ```
 ✓ handshake       unix /tmp/steward-2871798330/provider-4855f4bd, contract version 1
 ✓ health          the service "provider" is SERVING
-✓ describe        my-provider 0.1.0: 1 unit kind(s) (item), 0 application kind(s)
+✓ describe        my-provider 0.1.0: 1 service kind(s) (item), 0 application kind(s)
 ✓ inputs          every input and output has a name and a known type
 ✓ kinds           kinds are named and unique
 ✓ roles           roles and permissions are named and unique
@@ -361,7 +361,7 @@ run against real secrets.
 ### Run
 
 `steward provider run` invokes the provider with a context file saying what to use. It gives the identity a
-role on the provider, then for each unit in the context creates it, gives the identity a role on
+role on the provider, then for each service in the context creates it, gives the identity a role on
 it and takes the role away, and removes it. It removes what it created even when a step fails.
 
 It does all of this for real, in whatever the provider's secrets reach, so point it at a test account.
@@ -373,7 +373,7 @@ steward provider run --context context.json node src/provider.js
 steward provider run --yes --context context.json go run .
 ```
 
-To work on one call at a time, name it with `--call`. It makes only that call, once, on every unit in
+To work on one call at a time, name it with `--call`. It makes only that call, once, on every service in
 the context, prints what the provider answered, and cleans nothing up, since leaving what a call made in
 place is the point. The calls are `provision`, `grant-access`, `get-access`, `revoke-access` and
 `deprovision`. Repeat the flag, or separate names with commas, to make several, and they run in lifecycle
@@ -400,7 +400,7 @@ printed as they come, so outputs marked sensitive show in your terminal as well.
   },
   "identity": { "external_id": "someone" },
   "role": { "name": "viewer", "permissions": [{ "name": "view" }] },
-  "units": [
+  "services": [
     { "kind": "item", "name": "demo", "inputs": { "description": "a test item" } },
     { "kind": "item", "name": "second" }
   ]
@@ -409,10 +409,10 @@ printed as they come, so outputs marked sensitive show in your terminal as well.
 
 - **`credential`** holds the values the provider is invoked with, as Steward would supply them: its inputs and
   its secrets.
-- **`units`** is a list of the requests that create units. Each has a `kind` the provider declares, a
+- **`services`** is a list of the requests that create services. Each has a `kind` the provider declares, a
   `name`, and the `inputs` and `secrets` of that kind. They run in the order listed, and you can list
   several of the same kind. Each `kind` and `name` pair can appear once.
-- **`identity`** and **`role`** are who is given which role, on the provider and on each unit. The role
+- **`identity`** and **`role`** are who is given which role, on the provider and on each service. The role
   is always named. Its `permissions` are only for a role Steward composed from the provider's permissions.
 
 `run` needs the file. `validate` can take it too, with `--context`, to give the provider the credential the read-only
@@ -422,7 +422,7 @@ calls are made with. Both commands exit with a failure when a check fails, so th
 ## Document a provider
 
 `steward provider docs` starts a provider, asks it what it describes, and writes markdown reference pages from
-the answer: one for the provider, one for each kind of unit and one for each kind of application, with
+the answer: one for the provider, one for each kind of service and one for each kind of application, with
 their inputs, secrets, outputs, roles and permissions. The pages come from the provider, so they cannot
 differ from it.
 
@@ -440,14 +440,14 @@ default layout:
 | File                                      |                                                    |
 | ----------------------------------------- | -------------------------------------------------- |
 | `templates/index.md.tmpl`                 | The provider page.                                   |
-| `templates/units/<kind>.md.tmpl`      | A unit kind.                                   |
+| `templates/services/<kind>.md.tmpl`      | A service kind.                                   |
 | `templates/applications/<kind>.md.tmpl`   | An application kind.                               |
-| `examples/<kind>.json`                    | A sample unit: `{ "kind", "name", "inputs" }`. |
+| `examples/<kind>.json`                    | A sample service: `{ "kind", "name", "inputs" }`. |
 
 A file ending in `.md.tmpl` is a Go template. Place the generated parts with `{{ .Title }}`,
 `{{ .Description }}`, `{{ .Example }}`, `{{ .Inputs }}`, `{{ .Secrets }}`, `{{ .Outputs }}`,
 `{{ .Sources }}` (applications), `{{ .Roles }}` and `{{ .Permissions }}`, or all the tables at once with
-`{{ .Reference }}`. The provider page also has `{{ .Units }}` and `{{ .Applications }}`, the lists of
+`{{ .Reference }}`. The provider page also has `{{ .Services }}` and `{{ .Applications }}`, the lists of
 links. A part with nothing to show is empty. The same name ending in `.md`, such as
 `templates/index.md`, is used as it is.
 
@@ -457,7 +457,7 @@ links. A part with nothing to show is empty. The same name ending in `.md`, such
 Start here: this provider manages items.
 
 {{ .Secrets }}
-{{ .Units }}
+{{ .Services }}
 ```
 
 Every file is optional. Write a `description` on every input, secret and output, because that is what the

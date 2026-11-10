@@ -41,8 +41,8 @@ func (g *grpcProvider) GRPCServer(_ *goplugin.GRPCBroker, server *grpc.Server) e
 
 	providerv1.RegisterProviderServiceServer(server, providerService{provider: p})
 
-	if len(p.units) > 0 {
-		providerv1.RegisterUnitServiceServer(server, unitService{provider: p})
+	if len(p.services) > 0 {
+		providerv1.RegisterServiceServiceServer(server, serviceService{provider: p})
 	}
 
 	if len(p.applications) > 0 {
@@ -113,84 +113,84 @@ func (s providerService) GetAccess(ctx context.Context, request *ProviderGetAcce
 	return s.provider.options.GetAccess(ctx, request)
 }
 
-type unitService struct {
-	providerv1.UnimplementedUnitServiceServer
+type serviceService struct {
+	providerv1.UnimplementedServiceServiceServer
 	provider *Provider
 }
 
-func (s unitService) Provision(ctx context.Context, request *UnitProvisionRequest) (*UnitProvisionResponse, error) {
-	kind, err := s.provider.unit(request.GetKind())
+func (s serviceService) Provision(ctx context.Context, request *ServiceProvisionRequest) (*ServiceProvisionResponse, error) {
+	kind, err := s.provider.service(request.GetKind())
 	if err != nil {
 		return nil, err
 	}
 
 	if kind.Provision == nil {
-		return nil, unimplemented("provision", "unit")
+		return nil, unimplemented("provision", "service")
 	}
 
 	return kind.Provision(ctx, request)
 }
 
-func (s unitService) Deprovision(ctx context.Context, request *UnitDeprovisionRequest) (*UnitDeprovisionResponse, error) {
-	kind, err := s.provider.unit(request.GetUnit().GetKind())
+func (s serviceService) Deprovision(ctx context.Context, request *ServiceDeprovisionRequest) (*ServiceDeprovisionResponse, error) {
+	kind, err := s.provider.service(request.GetService().GetKind())
 	if err != nil {
 		return nil, err
 	}
 
 	if kind.Deprovision == nil {
-		return nil, unimplemented("deprovision", "unit")
+		return nil, unimplemented("deprovision", "service")
 	}
 
 	return kind.Deprovision(ctx, request)
 }
 
-func (s unitService) List(ctx context.Context, request *UnitListRequest) (*UnitListResponse, error) {
-	kind, err := s.provider.unit(request.GetKind())
+func (s serviceService) List(ctx context.Context, request *ServiceListRequest) (*ServiceListResponse, error) {
+	kind, err := s.provider.service(request.GetKind())
 	if err != nil {
 		return nil, err
 	}
 
 	if kind.List == nil {
-		return nil, unimplemented("list", "unit")
+		return nil, unimplemented("list", "service")
 	}
 
 	return kind.List(ctx, request)
 }
 
-func (s unitService) GrantAccess(ctx context.Context, request *UnitGrantAccessRequest) (*UnitGrantAccessResponse, error) {
-	kind, err := s.provider.unit(request.GetUnit().GetKind())
+func (s serviceService) GrantAccess(ctx context.Context, request *ServiceGrantAccessRequest) (*ServiceGrantAccessResponse, error) {
+	kind, err := s.provider.service(request.GetService().GetKind())
 	if err != nil {
 		return nil, err
 	}
 
 	if kind.GrantAccess == nil {
-		return nil, unimplemented("grant_access", "unit")
+		return nil, unimplemented("grant_access", "service")
 	}
 
 	return kind.GrantAccess(ctx, request)
 }
 
-func (s unitService) RevokeAccess(ctx context.Context, request *UnitRevokeAccessRequest) (*UnitRevokeAccessResponse, error) {
-	kind, err := s.provider.unit(request.GetUnit().GetKind())
+func (s serviceService) RevokeAccess(ctx context.Context, request *ServiceRevokeAccessRequest) (*ServiceRevokeAccessResponse, error) {
+	kind, err := s.provider.service(request.GetService().GetKind())
 	if err != nil {
 		return nil, err
 	}
 
 	if kind.RevokeAccess == nil {
-		return nil, unimplemented("revoke_access", "unit")
+		return nil, unimplemented("revoke_access", "service")
 	}
 
 	return kind.RevokeAccess(ctx, request)
 }
 
-func (s unitService) GetAccess(ctx context.Context, request *UnitGetAccessRequest) (*UnitGetAccessResponse, error) {
-	kind, err := s.provider.unit(request.GetUnit().GetKind())
+func (s serviceService) GetAccess(ctx context.Context, request *ServiceGetAccessRequest) (*ServiceGetAccessResponse, error) {
+	kind, err := s.provider.service(request.GetService().GetKind())
 	if err != nil {
 		return nil, err
 	}
 
 	if kind.GetAccess == nil {
-		return nil, unimplemented("get_access", "unit")
+		return nil, unimplemented("get_access", "service")
 	}
 
 	return kind.GetAccess(ctx, request)

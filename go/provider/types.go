@@ -38,7 +38,7 @@ type (
 	Credential        = providerv1.Credential
 	Organization      = providerv1.Organization
 	SetupLink         = providerv1.SetupLink
-	Unit              = providerv1.Unit
+	Service           = providerv1.Service
 	Application       = providerv1.Application
 	ApplicationSource = providerv1.ApplicationSource
 	Variable          = providerv1.Variable
@@ -62,18 +62,18 @@ type (
 	ProviderGetAccessRequest     = providerv1.ProviderServiceGetAccessRequest
 	ProviderGetAccessResponse    = providerv1.ProviderServiceGetAccessResponse
 
-	UnitProvisionRequest     = providerv1.UnitServiceProvisionRequest
-	UnitProvisionResponse    = providerv1.UnitServiceProvisionResponse
-	UnitDeprovisionRequest   = providerv1.UnitServiceDeprovisionRequest
-	UnitDeprovisionResponse  = providerv1.UnitServiceDeprovisionResponse
-	UnitListRequest          = providerv1.UnitServiceListRequest
-	UnitListResponse         = providerv1.UnitServiceListResponse
-	UnitGrantAccessRequest   = providerv1.UnitServiceGrantAccessRequest
-	UnitGrantAccessResponse  = providerv1.UnitServiceGrantAccessResponse
-	UnitRevokeAccessRequest  = providerv1.UnitServiceRevokeAccessRequest
-	UnitRevokeAccessResponse = providerv1.UnitServiceRevokeAccessResponse
-	UnitGetAccessRequest     = providerv1.UnitServiceGetAccessRequest
-	UnitGetAccessResponse    = providerv1.UnitServiceGetAccessResponse
+	ServiceProvisionRequest     = providerv1.ServiceServiceProvisionRequest
+	ServiceProvisionResponse    = providerv1.ServiceServiceProvisionResponse
+	ServiceDeprovisionRequest   = providerv1.ServiceServiceDeprovisionRequest
+	ServiceDeprovisionResponse  = providerv1.ServiceServiceDeprovisionResponse
+	ServiceListRequest          = providerv1.ServiceServiceListRequest
+	ServiceListResponse         = providerv1.ServiceServiceListResponse
+	ServiceGrantAccessRequest   = providerv1.ServiceServiceGrantAccessRequest
+	ServiceGrantAccessResponse  = providerv1.ServiceServiceGrantAccessResponse
+	ServiceRevokeAccessRequest  = providerv1.ServiceServiceRevokeAccessRequest
+	ServiceRevokeAccessResponse = providerv1.ServiceServiceRevokeAccessResponse
+	ServiceGetAccessRequest     = providerv1.ServiceServiceGetAccessRequest
+	ServiceGetAccessResponse    = providerv1.ServiceServiceGetAccessResponse
 
 	ApplicationCreateRequest   = providerv1.ApplicationServiceCreateRequest
 	ApplicationCreateResponse  = providerv1.ApplicationServiceCreateResponse

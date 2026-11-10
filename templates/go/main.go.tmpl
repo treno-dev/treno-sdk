@@ -1,12 +1,12 @@
 // This is the file you edit. It declares what your provider offers and implements the calls Steward
 // makes. The gRPC plumbing, the handshake and the health check live in the SDK.
 //
-// Declare the provider and each kind of unit once, with its handlers attached: Steward's forms
+// Declare the provider and each kind of service once, with its handlers attached: Steward's forms
 // follow from what you write here, and every call is routed to the right handler by kind. If your
 // provider needs more than one tool, take the secrets for each as inputs.
 //
 // Handlers take the request and return the response, both typed from the contract and named for the
-// entity and the call (UnitProvisionRequest, UnitProvisionResponse). Request getters are safe
+// entity and the call (ServiceProvisionRequest, ServiceProvisionResponse). Request getters are safe
 // on anything the runner did not send. Fail a call with a gRPC status, such as
 // status.Error(codes.NotFound, "..."); any other error is reported as INTERNAL.
 package main
@@ -34,39 +34,39 @@ func validate(ctx context.Context, request *provider.ProviderValidateRequest) (*
 	return response, nil
 }
 
-// Create a unit called request.Name. Idempotent: if it already exists, succeed anyway. Return
+// Create a service called request.Name. Idempotent: if it already exists, succeed anyway. Return
 // what it produced, as declared in Outputs. The request also has the Credential and the Inputs.
-func provision(ctx context.Context, request *provider.UnitProvisionRequest) (*provider.UnitProvisionResponse, error) {
+func provision(ctx context.Context, request *provider.ServiceProvisionRequest) (*provider.ServiceProvisionResponse, error) {
 	baseURL := request.GetCredential().GetInputs().AsMap()["base_url"]
 
-	return &provider.UnitProvisionResponse{
+	return &provider.ServiceProvisionResponse{
 		Outputs: provider.Struct(map[string]any{"url": fmt.Sprintf("%v/items/%s", baseURL, request.GetName())}),
 	}, nil
 }
 
-// Remove a unit. Idempotent: succeed if it is already gone. The request has the Credential and the
-// Unit (Kind, Name).
-func deprovision(ctx context.Context, request *provider.UnitDeprovisionRequest) (*provider.UnitDeprovisionResponse, error) {
-	return &provider.UnitDeprovisionResponse{}, nil
+// Remove a service. Idempotent: succeed if it is already gone. The request has the Credential and the
+// Service (Kind, Name).
+func deprovision(ctx context.Context, request *provider.ServiceDeprovisionRequest) (*provider.ServiceDeprovisionResponse, error) {
+	return &provider.ServiceDeprovisionResponse{}, nil
 }
 
-// Give an identity a role on the unit. Idempotent. The Role is always set. For a role Steward
+// Give an identity a role on the service. Idempotent. The Role is always set. For a role Steward
 // composed, Permissions lists its pieces. Return what the tool applied, an Id for the grant if the
 // tool has one, and Pending if the person has to act first, such as accepting an invitation. The
-// request has the Credential, Unit, Identity (ExternalId, Name, Attrs), Role and Permissions.
-func grantAccess(ctx context.Context, request *provider.UnitGrantAccessRequest) (*provider.UnitGrantAccessResponse, error) {
-	return &provider.UnitGrantAccessResponse{Role: request.GetRole(), Permissions: request.GetPermissions()}, nil
+// request has the Credential, Service, Identity (ExternalId, Name, Attrs), Role and Permissions.
+func grantAccess(ctx context.Context, request *provider.ServiceGrantAccessRequest) (*provider.ServiceGrantAccessResponse, error) {
+	return &provider.ServiceGrantAccessResponse{Role: request.GetRole(), Permissions: request.GetPermissions()}, nil
 }
 
 // Take a role away. Idempotent: succeed if the identity does not have it.
-func revokeAccess(ctx context.Context, request *provider.UnitRevokeAccessRequest) (*provider.UnitRevokeAccessResponse, error) {
-	return &provider.UnitRevokeAccessResponse{}, nil
+func revokeAccess(ctx context.Context, request *provider.ServiceRevokeAccessRequest) (*provider.ServiceRevokeAccessResponse, error) {
+	return &provider.ServiceRevokeAccessResponse{}, nil
 }
 
-// Report the roles and permissions the identity holds on the unit now, and whether a grant is
+// Report the roles and permissions the identity holds on the service now, and whether a grant is
 // still pending.
-func getAccess(ctx context.Context, request *provider.UnitGetAccessRequest) (*provider.UnitGetAccessResponse, error) {
-	return &provider.UnitGetAccessResponse{}, nil
+func getAccess(ctx context.Context, request *provider.ServiceGetAccessRequest) (*provider.ServiceGetAccessResponse, error) {
+	return &provider.ServiceGetAccessResponse{}, nil
 }
 
 func main() {
@@ -92,12 +92,12 @@ func main() {
 		Validate: validate,
 	})
 
-	// A kind of unit this provider manages.
-	p.Unit("item", provider.UnitOptions{
+	// A kind of service this provider manages.
+	p.Service("item", provider.ServiceOptions{
 		Title:       "Item",
-		Description: "An example unit.",
+		Description: "An example service.",
 
-		// What a unit of this kind takes besides its name, which Steward stores with the kind.
+		// What a service of this kind takes besides its name, which Steward stores with the kind.
 		Inputs:  []*provider.InputDefinition{{Name: "description", Label: "Description", Description: "What the item is for.", Type: provider.TypeString}},
 		Outputs: []*provider.OutputDefinition{{Name: "url", Label: "URL", Description: "Where the item can be opened.", Type: provider.TypeString}},
 

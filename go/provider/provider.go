@@ -2,10 +2,10 @@
 // contract (gRPC, see ../../proto) and the functions a provider writes.
 //
 //	p := provider.New(provider.Options{Name: "github", Version: "0.1.0"})
-//	p.Unit("repository", provider.UnitOptions{Provision: provision, Deprovision: deprovision})
+//	p.Service("repository", provider.ServiceOptions{Provision: provision, Deprovision: deprovision})
 //	p.Serve()
 //
-// A provider declares itself and each of its unit or application kinds once, with the handlers
+// A provider declares itself and each of its service or application kinds once, with the handlers
 // attached. The SDK routes every call to the right
 // handler by kind, builds the description Steward asks for, serves the gRPC services, prints the
 // handshake line, answers the health check, and answers any call without a handler with UNIMPLEMENTED.
@@ -27,7 +27,7 @@ import (
 )
 
 // Options declare the provider and, when it supports access as a whole, the handlers for that. A provider has no settings or secrets of
-// its own: the units and applications it offers declare theirs.
+// its own: the services and applications it offers declare theirs.
 type Options struct {
 	Name        string
 	Version     string
@@ -48,19 +48,19 @@ type Options struct {
 	GetAccess    func(context.Context, *ProviderGetAccessRequest) (*ProviderGetAccessResponse, error)
 }
 
-// UnitOptions describe a kind of unit the provider manages, with its handlers. A call
+// ServiceOptions describe a kind of service the provider manages, with its handlers. A call
 // for something without a handler fails with UNIMPLEMENTED.
-type UnitOptions struct {
+type ServiceOptions struct {
 	Title       string
 	Description string
 
-	// Inputs is what a unit of this kind takes besides its name, Secrets the secrets it takes, and
+	// Inputs is what a service of this kind takes besides its name, Secrets the secrets it takes, and
 	// Outputs what it produces.
 	Inputs  []*InputDefinition
 	Secrets []*SecretDefinition
 	Outputs []*OutputDefinition
 
-	// Set when the kind takes variables: name and value pairs, of any number, that whoever sets up a unit adds to it, whose names
+	// Set when the kind takes variables: name and value pairs, of any number, that whoever sets up a service adds to it, whose names
 	// the provider does not declare. They arrive in the `Variables` of the calls.
 	Variables *VariadicVariables
 
@@ -68,13 +68,13 @@ type UnitOptions struct {
 	Permissions []*PermissionDefinition
 	Roles       []*RoleDefinition
 
-	Provision   func(context.Context, *UnitProvisionRequest) (*UnitProvisionResponse, error)
-	Deprovision func(context.Context, *UnitDeprovisionRequest) (*UnitDeprovisionResponse, error)
-	List        func(context.Context, *UnitListRequest) (*UnitListResponse, error)
+	Provision   func(context.Context, *ServiceProvisionRequest) (*ServiceProvisionResponse, error)
+	Deprovision func(context.Context, *ServiceDeprovisionRequest) (*ServiceDeprovisionResponse, error)
+	List        func(context.Context, *ServiceListRequest) (*ServiceListResponse, error)
 
-	GrantAccess  func(context.Context, *UnitGrantAccessRequest) (*UnitGrantAccessResponse, error)
-	RevokeAccess func(context.Context, *UnitRevokeAccessRequest) (*UnitRevokeAccessResponse, error)
-	GetAccess    func(context.Context, *UnitGetAccessRequest) (*UnitGetAccessResponse, error)
+	GrantAccess  func(context.Context, *ServiceGrantAccessRequest) (*ServiceGrantAccessResponse, error)
+	RevokeAccess func(context.Context, *ServiceRevokeAccessRequest) (*ServiceRevokeAccessResponse, error)
+	GetAccess    func(context.Context, *ServiceGetAccessRequest) (*ServiceGetAccessResponse, error)
 }
 
 // ApplicationOptions describe a kind of application the provider runs, with its handlers.
@@ -94,15 +94,15 @@ type ApplicationOptions struct {
 	Deploy  func(context.Context, *ApplicationDeployRequest) (*ApplicationDeployResponse, error)
 }
 
-// Provider is what a provider author builds. Declare its units and applications,
+// Provider is what a provider author builds. Declare its services and applications,
 // then call Serve.
 type Provider struct {
 	options      Options
-	units        map[string]UnitOptions
+	services     map[string]ServiceOptions
 	applications map[string]ApplicationOptions
 
 	// Declaration order, so the description lists kinds the way the provider declared them.
-	unitOrder        []string
+	serviceOrder     []string
 	applicationOrder []string
 }
 
@@ -110,19 +110,19 @@ type Provider struct {
 func New(options Options) *Provider {
 	return &Provider{
 		options:      options,
-		units:        map[string]UnitOptions{},
+		services:     map[string]ServiceOptions{},
 		applications: map[string]ApplicationOptions{},
 	}
 }
 
-// Unit declares a kind of unit the provider manages. The kind is unique within the
+// Service declares a kind of service the provider manages. The kind is unique within the
 // provider, such as "repository".
-func (p *Provider) Unit(kind string, options UnitOptions) *Provider {
-	if _, declared := p.units[kind]; !declared {
-		p.unitOrder = append(p.unitOrder, kind)
+func (p *Provider) Service(kind string, options ServiceOptions) *Provider {
+	if _, declared := p.services[kind]; !declared {
+		p.serviceOrder = append(p.serviceOrder, kind)
 	}
 
-	p.units[kind] = options
+	p.services[kind] = options
 
 	return p
 }
@@ -147,8 +147,8 @@ func (p *Provider) describe(ctx context.Context, credential *Credential) *provid
 		Grants:      o.Grants,
 	}
 
-	for _, name := range p.unitOrder {
-		definition.Units = append(definition.Units, unitDefinition(name, p.units[name]))
+	for _, name := range p.serviceOrder {
+		definition.Services = append(definition.Services, serviceDefinition(name, p.services[name]))
 	}
 
 	for _, name := range p.applicationOrder {
@@ -174,8 +174,8 @@ func (p *Provider) describe(ctx context.Context, credential *Credential) *provid
 	return response
 }
 
-func unitDefinition(kind string, options UnitOptions) *providerv1.UnitDefinition {
-	return &providerv1.UnitDefinition{
+func serviceDefinition(kind string, options ServiceOptions) *providerv1.ServiceDefinition {
+	return &providerv1.ServiceDefinition{
 		Kind:        kind,
 		Title:       options.Title,
 		Description: options.Description,
@@ -188,10 +188,10 @@ func unitDefinition(kind string, options UnitOptions) *providerv1.UnitDefinition
 	}
 }
 
-func (p *Provider) unit(kind string) (UnitOptions, error) {
-	found, ok := p.units[kind]
+func (p *Provider) service(kind string) (ServiceOptions, error) {
+	found, ok := p.services[kind]
 	if !ok {
-		return found, status.Error(codes.NotFound, fmt.Sprintf("this provider has no unit %q", kind))
+		return found, status.Error(codes.NotFound, fmt.Sprintf("this provider has no service %q", kind))
 	}
 
 	return found, nil

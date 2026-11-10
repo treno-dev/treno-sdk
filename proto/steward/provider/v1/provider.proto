@@ -5,7 +5,7 @@ package steward.provider.v1;
 import "google/protobuf/struct.proto";
 
 // The provider contract. Every provider serves ProviderService: it describes itself and, when it declares grants,
-// gives access as a whole. A provider that has units also serves UnitService, and one that
+// gives access as a whole. A provider that has services also serves ServiceService, and one that
 // runs applications serves ApplicationService. A provider
 // offers a call by implementing it. A call it does not offer fails with UNIMPLEMENTED, and Steward
 // treats that as not offered. Within v1 the contract is additive only.
@@ -47,32 +47,32 @@ message Organization {
 }
 
 // Something in the tool that access can be granted to or that can be provisioned.
-message Unit {
-  // A kind declared in ProviderDefinition.units.
+message Service {
+  // A kind declared in ProviderDefinition.services.
   string kind = 1;
 
-  // The unit's name in the tool, such as a repository's full name. Steward stores it with the
-  // kind and sends it on every later call, which is how a unit is identified.
+  // The service's name in the tool, such as a repository's full name. Steward stores it with the
+  // kind and sends it on every later call, which is how a service is identified.
   string name = 2;
 
-  // Values for the inputs declared in UnitDefinition.inputs, keyed by input name.
+  // Values for the inputs declared in ServiceDefinition.inputs, keyed by input name.
   google.protobuf.Struct inputs = 3;
 
-  // Values for the secrets declared in UnitDefinition.secrets, keyed by secret name. Resolved
+  // Values for the secrets declared in ServiceDefinition.secrets, keyed by secret name. Resolved
   // by the runner for this call only.
   map<string, string> secrets = 4;
 
-  // Values the unit produced, as declared in UnitDefinition.outputs, keyed by output name.
-  // Set by the provider when it lists a unit; ignored on calls. Provision returns its outputs
+  // Values the service produced, as declared in ServiceDefinition.outputs, keyed by output name.
+  // Set by the provider when it lists a service; ignored on calls. Provision returns its outputs
   // separately. Values of outputs declared sensitive stay with the runner and are not passed on to
   // Steward.
   google.protobuf.Struct outputs = 5;
 
-  // Its variables, when the kind takes them (UnitDefinition.variables).
+  // Its variables, when the kind takes them (ServiceDefinition.variables).
   repeated Variable variables = 6;
 }
 
-// Says that a kind takes variables: name and value pairs, of any number, that whoever sets up a unit
+// Says that a kind takes variables: name and value pairs, of any number, that whoever sets up a service
 // adds to it, such as the variables of a Terraform workspace. Unlike an input, the names are not
 // declared, and Steward keeps the variables apart from the inputs, since they are handled in ways that
 // inputs are not.
@@ -81,7 +81,7 @@ message VariadicVariables {
   string description = 1;
 }
 
-// Something deployed and run in the tool, as opposed to a unit, which is provisioned.
+// Something deployed and run in the tool, as opposed to a service, which is provisioned.
 message Application {
   // A kind declared in ProviderDefinition.applications.
   string kind = 1;
@@ -224,20 +224,20 @@ message ProviderDefinition {
   string title = 1;
   string description = 2;
 
-  // A provider has no settings or secrets of its own. They belong to what it offers: each unit and application declares its own
+  // A provider has no settings or secrets of its own. They belong to what it offers: each service and application declares its own
   // inputs and secrets.
   reserved 3, 8;
   reserved "inputs", "secrets";
 
-  // The unit kinds this provider manages. Kinds are unique within the provider.
-  repeated UnitDefinition units = 4;
+  // The service kinds this provider manages. Kinds are unique within the provider.
+  repeated ServiceDefinition services = 4;
 
   // What can be granted on the provider as a whole is declared as grants. Roles and permissions are not part of the provider.
   reserved 5, 6, 12;
   reserved "permissions", "roles", "grant_inputs";
 
   // The application kinds this provider can run, such as a Laravel app on a host. Applications are a
-  // second kind of thing next to units: they are deployed from a source and have variables that
+  // second kind of thing next to services: they are deployed from a source and have variables that
   // people edit over time. Kinds are unique within the provider. Empty when the provider runs no
   // applications.
   repeated ApplicationDefinition applications = 7;
@@ -259,8 +259,8 @@ message ProviderDefinition {
   repeated GrantDefinition grants = 13;
 }
 
-// One setting a provider, a unit or an application takes, declared the way a variable is: a name
-// and a type, with the value passed separately, keyed by `name`, in Unit.inputs or
+// One setting a provider, a service or an application takes, declared the way a variable is: a name
+// and a type, with the value passed separately, keyed by `name`, in Service.inputs or
 // Application.inputs.
 message InputDefinition {
   string name = 1;
@@ -288,7 +288,7 @@ message InputDefinition {
   optional double max = 9;
 }
 
-// One secret a provider, a unit or an application takes, such as an API token or a private
+// One secret a provider, a service or an application takes, such as an API token or a private
 // key. Secrets are separate from inputs: they are stored, sent and shown differently. The value is
 // passed in the `secrets` map, keyed by `name`, for one call only, and is never shown back once set.
 message SecretDefinition {
@@ -297,7 +297,7 @@ message SecretDefinition {
   bool required = 3;
 }
 
-// One value a unit produces, declared like an input: a name and a type. Same types as an input.
+// One value a service produces, declared like an input: a name and a type. Same types as an input.
 message OutputDefinition {
   string name = 1;
   string label = 2;
@@ -305,21 +305,21 @@ message OutputDefinition {
   string type = 4;
 
   // The value is a secret, such as a generated password. The provider still returns it in
-  // Unit.outputs, but the runner writes it to the customer's own secret store and reports only
+  // Service.outputs, but the runner writes it to the customer's own secret store and reports only
   // a reference to Steward, which never sees or stores the value.
   bool sensitive = 5;
 }
 
-message UnitDefinition {
+message ServiceDefinition {
   // Unique within the provider, such as "repository".
   string kind = 1;
   string title = 2;
   string description = 3;
 
-  // What is required to create a unit of this kind. Provision takes values for these.
+  // What is required to create a service of this kind. Provision takes values for these.
   repeated InputDefinition inputs = 4;
 
-  // The secrets a unit of this kind takes, separate from its inputs.
+  // The secrets a service of this kind takes, separate from its inputs.
   repeated SecretDefinition secrets = 8;
 
   // What can be granted on this type. Declaring permissions or roles is what says the type supports
@@ -328,17 +328,17 @@ message UnitDefinition {
   repeated PermissionDefinition permissions = 5;
   repeated RoleDefinition roles = 6;
 
-  // What a unit of this kind produces, such as a URL or an ARN, known once it exists. The
-  // values come back in Unit.outputs.
+  // What a service of this kind produces, such as a URL or an ARN, known once it exists. The
+  // values come back in Service.outputs.
   repeated OutputDefinition outputs = 7;
 
-  // Set when the kind takes variables, which the people who set up a unit add to it by name.
+  // Set when the kind takes variables, which the people who set up a service add to it by name.
   // Provision and the other calls receive them in `variables`.
   VariadicVariables variables = 9;
 }
 
-// An application is deployable and has open-ended variables, which a unit has neither of. A
-// unit has fixed inputs and outputs that the provider declares; an application also has a source
+// An application is deployable and has open-ended variables, which a service has neither of. A
+// service has fixed inputs and outputs that the provider declares; an application also has a source
 // and variables whose names are chosen by the people who run it. Every declared application kind
 // can be deployed and has variables.
 message ApplicationDefinition {
@@ -392,7 +392,7 @@ message RoleDefinition {
 }
 
 // Access to the provider as a whole, such as a role in an AWS account or membership of a GitHub organization. Steward grants it before
-// it grants access to the provider's units, and decides when to remove it.
+// it grants access to the provider's services, and decides when to remove it.
 //
 // Idempotent: granting what is already granted succeeds.
 message ProviderServiceGrantAccessRequest {
@@ -468,22 +468,22 @@ message ProviderServiceGetAccessResponse {
 }
 
 // ---------------------------------------------------------------------------------------------
-// UnitService messages
+// ServiceService messages
 // ---------------------------------------------------------------------------------------------
 
-// Access to one unit, such as a role on a repository. Steward grants it after the identity has
+// Access to one service, such as a role on a repository. Steward grants it after the identity has
 // access to the provider.
 //
 // Idempotent: granting what is already granted succeeds.
-message UnitServiceGrantAccessRequest {
+message ServiceServiceGrantAccessRequest {
   Credential credential = 1;
-  Unit unit = 2;
+  Service service = 2;
   Identity identity = 3;
   Role role = 4;
   repeated Permission permissions = 5;
 }
 
-message UnitServiceGrantAccessResponse {
+message ServiceServiceGrantAccessResponse {
   // The grant's own identity in the tool, such as an assignment or invitation id. Empty when the
   // tool has none. Steward records it and sends it back on revoke.
   string id = 1;
@@ -500,9 +500,9 @@ message UnitServiceGrantAccessResponse {
 
 // Idempotent: revoking what is already absent succeeds. Steward works out overlap between roles
 // before it sends a revoke, so the role here is safe to remove in full.
-message UnitServiceRevokeAccessRequest {
+message ServiceServiceRevokeAccessRequest {
   Credential credential = 1;
-  Unit unit = 2;
+  Service service = 2;
   Identity identity = 3;
   Role role = 4;
   repeated Permission permissions = 6;
@@ -511,17 +511,17 @@ message UnitServiceRevokeAccessRequest {
   string id = 5;
 }
 
-message UnitServiceRevokeAccessResponse {}
+message ServiceServiceRevokeAccessResponse {}
 
-// Asks what an identity holds on a unit now.
-message UnitServiceGetAccessRequest {
+// Asks what an identity holds on a service now.
+message ServiceServiceGetAccessRequest {
   Credential credential = 1;
-  Unit unit = 2;
+  Service service = 2;
   Identity identity = 3;
 }
 
-message UnitServiceGetAccessResponse {
-  // The roles and permissions the identity holds on the unit. Empty when it has none.
+message ServiceServiceGetAccessResponse {
+  // The roles and permissions the identity holds on the service. Empty when it has none.
   repeated Role roles = 1;
   repeated Permission permissions = 3;
 
@@ -531,10 +531,10 @@ message UnitServiceGetAccessResponse {
 
 // Idempotent: provisioning something that already exists with the same kind and name succeeds, and
 // still returns its outputs. Steward works out what changed by comparing the state it stores.
-message UnitServiceProvisionRequest {
+message ServiceServiceProvisionRequest {
   Credential credential = 1;
 
-  // The kind to create, as declared in ProviderDefinition.units.
+  // The kind to create, as declared in ProviderDefinition.services.
   string kind = 2;
 
   // What to call it in the tool. Steward stores the name with the kind.
@@ -551,29 +551,29 @@ message UnitServiceProvisionRequest {
   repeated Variable variables = 6;
 }
 
-message UnitServiceProvisionResponse {
-  // What the unit produced, as declared in UnitDefinition.outputs, keyed by output name,
+message ServiceServiceProvisionResponse {
+  // What the service produced, as declared in ServiceDefinition.outputs, keyed by output name,
   // such as a URL or an id the tool assigned. Values of outputs declared sensitive stay with the
   // runner and are not passed on to Steward.
   google.protobuf.Struct outputs = 1;
 }
 
 // Idempotent: removing something that is already gone succeeds.
-message UnitServiceDeprovisionRequest {
+message ServiceServiceDeprovisionRequest {
   Credential credential = 1;
-  Unit unit = 2;
+  Service service = 2;
 }
 
-message UnitServiceDeprovisionResponse {}
+message ServiceServiceDeprovisionResponse {}
 
-message UnitServiceListRequest {
+message ServiceServiceListRequest {
   Credential credential = 1;
   string kind = 2;
   string page_token = 3;
 }
 
-message UnitServiceListResponse {
-  repeated Unit units = 1;
+message ServiceServiceListResponse {
+  repeated Service services = 1;
 
   // Empty on the last page.
   string next_page_token = 2;
@@ -632,7 +632,7 @@ message ApplicationServiceDeployResponse {
 // Mandatory for every provider. Describe is always served. GrantAccess, RevokeAccess and
 // GetAccess apply only to a provider that declares grants, and answer UNIMPLEMENTED otherwise.
 service ProviderService {
-  // Describes the provider: the units and applications it manages, and the grants it gives.
+  // Describes the provider: the services and applications it manages, and the grants it gives.
   rpc Describe(DescribeRequest) returns (DescribeResponse);
 
   // Access to the provider as a whole: giving identities a grant, taking it away, and checking
@@ -642,15 +642,15 @@ service ProviderService {
   rpc GetAccess(ProviderServiceGetAccessRequest) returns (ProviderServiceGetAccessResponse);
 }
 
-// For providers that manage units. A call a unit kind does not offer answers UNIMPLEMENTED.
+// For providers that manage services. A call a service kind does not offer answers UNIMPLEMENTED.
 // GrantAccess, RevokeAccess and GetAccess are offered by kinds that declare roles or permissions.
-service UnitService {
-  rpc GrantAccess(UnitServiceGrantAccessRequest) returns (UnitServiceGrantAccessResponse);
-  rpc RevokeAccess(UnitServiceRevokeAccessRequest) returns (UnitServiceRevokeAccessResponse);
-  rpc GetAccess(UnitServiceGetAccessRequest) returns (UnitServiceGetAccessResponse);
-  rpc Provision(UnitServiceProvisionRequest) returns (UnitServiceProvisionResponse);
-  rpc Deprovision(UnitServiceDeprovisionRequest) returns (UnitServiceDeprovisionResponse);
-  rpc List(UnitServiceListRequest) returns (UnitServiceListResponse);
+service ServiceService {
+  rpc GrantAccess(ServiceServiceGrantAccessRequest) returns (ServiceServiceGrantAccessResponse);
+  rpc RevokeAccess(ServiceServiceRevokeAccessRequest) returns (ServiceServiceRevokeAccessResponse);
+  rpc GetAccess(ServiceServiceGetAccessRequest) returns (ServiceServiceGetAccessResponse);
+  rpc Provision(ServiceServiceProvisionRequest) returns (ServiceServiceProvisionResponse);
+  rpc Deprovision(ServiceServiceDeprovisionRequest) returns (ServiceServiceDeprovisionResponse);
+  rpc List(ServiceServiceListRequest) returns (ServiceServiceListResponse);
 }
 
 // For providers that run applications (ProviderDefinition.applications): deployable things with a source

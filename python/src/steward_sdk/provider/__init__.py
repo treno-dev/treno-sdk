@@ -5,10 +5,10 @@ see ../proto) and the functions a provider writes.
 
 
     provider = create_provider(name="github", version="0.1.0", inputs=[...], validate=validate)
-    provider.unit(kind="repository", inputs=[...], provision=provision, deprovision=deprovision)
+    provider.service(kind="repository", inputs=[...], provision=provision, deprovision=deprovision)
     provider.serve()
 
-A provider declares itself and each of its unit or application kinds once, with the handlers
+A provider declares itself and each of its service or application kinds once, with the handlers
 attached. The SDK routes every call to the right handler by kind, builds the description Steward asks
 for, serves the gRPC services, prints the handshake line, answers the health check, and answers any
 call without a handler with UNIMPLEMENTED.
@@ -34,18 +34,18 @@ from steward_sdk.provider._provider import (
     ProviderRevokeAccessResponse,
     ProviderValidateRequest,
     ProviderValidateResponse,
-    UnitDeprovisionRequest,
-    UnitDeprovisionResponse,
-    UnitGetAccessRequest,
-    UnitGetAccessResponse,
-    UnitGrantAccessRequest,
-    UnitGrantAccessResponse,
-    UnitListRequest,
-    UnitListResponse,
-    UnitProvisionRequest,
-    UnitProvisionResponse,
-    UnitRevokeAccessRequest,
-    UnitRevokeAccessResponse,
+    ServiceDeprovisionRequest,
+    ServiceDeprovisionResponse,
+    ServiceGetAccessRequest,
+    ServiceGetAccessResponse,
+    ServiceGrantAccessRequest,
+    ServiceGrantAccessResponse,
+    ServiceListRequest,
+    ServiceListResponse,
+    ServiceProvisionRequest,
+    ServiceProvisionResponse,
+    ServiceRevokeAccessRequest,
+    ServiceRevokeAccessResponse,
     StatusCode,
     create_provider,
     plain,
@@ -68,18 +68,18 @@ __all__ = [
     "ProviderRevokeAccessResponse",
     "ProviderValidateRequest",
     "ProviderValidateResponse",
-    "UnitDeprovisionRequest",
-    "UnitDeprovisionResponse",
-    "UnitGetAccessRequest",
-    "UnitGetAccessResponse",
-    "UnitGrantAccessRequest",
-    "UnitGrantAccessResponse",
-    "UnitListRequest",
-    "UnitListResponse",
-    "UnitProvisionRequest",
-    "UnitProvisionResponse",
-    "UnitRevokeAccessRequest",
-    "UnitRevokeAccessResponse",
+    "ServiceDeprovisionRequest",
+    "ServiceDeprovisionResponse",
+    "ServiceGetAccessRequest",
+    "ServiceGetAccessResponse",
+    "ServiceGrantAccessRequest",
+    "ServiceGrantAccessResponse",
+    "ServiceListRequest",
+    "ServiceListResponse",
+    "ServiceProvisionRequest",
+    "ServiceProvisionResponse",
+    "ServiceRevokeAccessRequest",
+    "ServiceRevokeAccessResponse",
     "StatusCode",
     "create_provider",
     "plain",

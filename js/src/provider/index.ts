@@ -4,10 +4,10 @@
 //   import { createProvider } from '@treno-dev/steward-sdk/provider';
 //
 //   const provider = createProvider({ name: 'github', version: '0.1.0', inputs: [...], validate });
-//   provider.unit({ kind: 'repository', inputs: [...], provision, deprovision, list });
+//   provider.service({ kind: 'repository', inputs: [...], provision, deprovision, list });
 //   provider.serve();
 //
-// A provider declares itself and each of its unit or application kinds once, with the handlers
+// A provider declares itself and each of its service or application kinds once, with the handlers
 // attached. The SDK routes every call to the right handler by kind, builds the description Steward
 // asks for, serves the gRPC services, prints the handshake line, answers the health check, fills in
 // whatever a handler leaves out of its response, and answers any call without a handler with
@@ -32,7 +32,7 @@ import type {
   OutputDefinition,
   PermissionDefinition,
   ProviderDefinition,
-  UnitDefinition,
+  ServiceDefinition,
   RoleDefinition,
   SecretDefinition,
 } from '../gen/steward/provider/v1/provider.js';
@@ -74,18 +74,18 @@ export type ProviderRevokeAccessRequest = Complete<contract.ProviderServiceRevok
 export type ProviderRevokeAccessResponse = DeepPartial<contract.ProviderServiceRevokeAccessResponse>;
 export type ProviderGetAccessRequest = Complete<contract.ProviderServiceGetAccessRequest>;
 export type ProviderGetAccessResponse = DeepPartial<contract.ProviderServiceGetAccessResponse>;
-export type UnitProvisionRequest = Complete<contract.UnitServiceProvisionRequest>;
-export type UnitProvisionResponse = DeepPartial<contract.UnitServiceProvisionResponse>;
-export type UnitDeprovisionRequest = Complete<contract.UnitServiceDeprovisionRequest>;
-export type UnitDeprovisionResponse = DeepPartial<contract.UnitServiceDeprovisionResponse>;
-export type UnitListRequest = Complete<contract.UnitServiceListRequest>;
-export type UnitListResponse = DeepPartial<contract.UnitServiceListResponse>;
-export type UnitGrantAccessRequest = Complete<contract.UnitServiceGrantAccessRequest>;
-export type UnitGrantAccessResponse = DeepPartial<contract.UnitServiceGrantAccessResponse>;
-export type UnitRevokeAccessRequest = Complete<contract.UnitServiceRevokeAccessRequest>;
-export type UnitRevokeAccessResponse = DeepPartial<contract.UnitServiceRevokeAccessResponse>;
-export type UnitGetAccessRequest = Complete<contract.UnitServiceGetAccessRequest>;
-export type UnitGetAccessResponse = DeepPartial<contract.UnitServiceGetAccessResponse>;
+export type ServiceProvisionRequest = Complete<contract.ServiceServiceProvisionRequest>;
+export type ServiceProvisionResponse = DeepPartial<contract.ServiceServiceProvisionResponse>;
+export type ServiceDeprovisionRequest = Complete<contract.ServiceServiceDeprovisionRequest>;
+export type ServiceDeprovisionResponse = DeepPartial<contract.ServiceServiceDeprovisionResponse>;
+export type ServiceListRequest = Complete<contract.ServiceServiceListRequest>;
+export type ServiceListResponse = DeepPartial<contract.ServiceServiceListResponse>;
+export type ServiceGrantAccessRequest = Complete<contract.ServiceServiceGrantAccessRequest>;
+export type ServiceGrantAccessResponse = DeepPartial<contract.ServiceServiceGrantAccessResponse>;
+export type ServiceRevokeAccessRequest = Complete<contract.ServiceServiceRevokeAccessRequest>;
+export type ServiceRevokeAccessResponse = DeepPartial<contract.ServiceServiceRevokeAccessResponse>;
+export type ServiceGetAccessRequest = Complete<contract.ServiceServiceGetAccessRequest>;
+export type ServiceGetAccessResponse = DeepPartial<contract.ServiceServiceGetAccessResponse>;
 export type ApplicationCreateRequest = Complete<contract.ApplicationServiceCreateRequest>;
 export type ApplicationCreateResponse = DeepPartial<contract.ApplicationServiceCreateResponse>;
 export type ApplicationDestroyRequest = Complete<contract.ApplicationServiceDestroyRequest>;
@@ -124,11 +124,11 @@ export type ProviderOptions = Describe &
     version: string;
   } & Omit<Handlers<typeof contract.ProviderServiceService>, 'describe'>;
 
-export type UnitOptions = Describe &
+export type ServiceOptions = Describe &
   Access & {
     kind: string;
     outputs?: DeepPartial<OutputDefinition>[];
-  } & Handlers<typeof contract.UnitServiceService>;
+  } & Handlers<typeof contract.ServiceServiceService>;
 
 export type ApplicationOptions = Describe & {
   kind: string;
@@ -139,11 +139,11 @@ export type ApplicationOptions = Describe & {
 // A request carries the kind or the thing it is about.
 type AnyRequest = {
   kind?: string;
-  unit?: { kind: string };
+  service?: { kind: string };
   application?: { kind: string };
 };
 
-type Target = 'provider' | 'unit' | 'application';
+type Target = 'provider' | 'service' | 'application';
 
 const ACCESS_CALLS = ['grantAccess', 'revokeAccess', 'getAccess'] as const;
 const PROVISIONING_CALLS = ['provision', 'deprovision'] as const;
@@ -152,7 +152,7 @@ function fail(code: grpc.status, message: string): never {
   throw { code, message };
 }
 
-function unitDefinition(options: UnitOptions): DeepPartial<UnitDefinition> {
+function serviceDefinition(options: ServiceOptions): DeepPartial<ServiceDefinition> {
   const { kind, title, description, inputs, secrets, outputs, permissions, roles } = options;
 
   return { kind, title, description, inputs, secrets, outputs, permissions, roles };
@@ -165,14 +165,14 @@ function applicationDefinition(options: ApplicationOptions): DeepPartial<Applica
 }
 
 export class Provider {
-  readonly units = new Map<string, UnitOptions>();
+  readonly services = new Map<string, ServiceOptions>();
   readonly applications = new Map<string, ApplicationOptions>();
 
   constructor(readonly options: ProviderOptions) {}
 
-  /** Declares a kind of unit the provider manages, with its handlers. */
-  unit(options: UnitOptions): this {
-    this.units.set(options.kind, options);
+  /** Declares a kind of service the provider manages, with its handlers. */
+  service(options: ServiceOptions): this {
+    this.services.set(options.kind, options);
 
     return this;
   }
@@ -196,7 +196,7 @@ export class Provider {
   }
 
   // Routes a call to the handler of the same name on whatever the request is about: the
-  // provider itself, or one of its kinds of unit or application.
+  // provider itself, or one of its kinds of service or application.
   route(call: string, target: Target, kindOf: (request: AnyRequest) => string = () => '') {
     return (request: AnyRequest) => {
       const options = target === 'provider' ? this.options : this.kind(target, kindOf(request));
@@ -218,19 +218,19 @@ export class Provider {
       secrets,
       permissions,
       roles,
-      units: [...this.units.values()].map(unitDefinition),
+      services: [...this.services.values()].map(serviceDefinition),
       applications: [...this.applications.values()].map(applicationDefinition),
     };
   }
 
-  private kind(target: 'unit' | 'application', kind: string): object {
-    const kinds = target === 'unit' ? this.units : this.applications;
+  private kind(target: 'service' | 'application', kind: string): object {
+    const kinds = target === 'service' ? this.services : this.applications;
 
     return kinds.get(kind) ?? fail(grpc.status.NOT_FOUND, `this provider has no ${target} "${kind}"`);
   }
 }
 
-/** Creates a provider. Declare its units, then call `serve()`. */
+/** Creates a provider. Declare its services, then call `serve()`. */
 export function createProvider(options: ProviderOptions): Provider {
   return new Provider(options);
 }
@@ -242,7 +242,7 @@ type Routed = Record<string, (request: AnyRequest) => unknown>;
 type MessageType = { fromPartial(object: unknown): unknown };
 
 // A call's response type is named after the call, optionally prefixed with its service, which is
-// the naming the contract's lint enforces: DescribeResponse, UnitServiceProvisionResponse.
+// the naming the contract's lint enforces: DescribeResponse, ServiceServiceProvisionResponse.
 function responseType(path: string): MessageType {
   const [, service, method] = /\.([A-Za-z]+)\/([A-Za-z]+)$/.exec(path) ?? [];
   const messages = contract as unknown as Record<string, MessageType | undefined>;
@@ -270,7 +270,7 @@ function toStatus(error: unknown): grpc.ServiceError {
 // empty object.
 const MESSAGES: Record<string, MessageType> = {
   credential: contract.Credential,
-  unit: contract.Unit,
+  service: contract.Service,
   application: contract.Application,
   identity: contract.Identity,
   role: contract.Role,
@@ -395,7 +395,7 @@ function serve(provider: Provider): void {
   }
 
   const server = new grpc.Server();
-  const anyUnit = provider.units.size > 0;
+  const anyService = provider.services.size > 0;
   const anyApplication = provider.applications.size > 0;
 
   server.addService(contract.ProviderServiceService, implement(contract.ProviderServiceService, {
@@ -405,14 +405,14 @@ function serve(provider: Provider): void {
     ...routes(provider, ACCESS_CALLS, 'provider'),
   }));
 
-  if (anyUnit) {
-    const unitKind = (request: AnyRequest) => request.unit?.kind ?? request.kind ?? '';
+  if (anyService) {
+    const serviceKind = (request: AnyRequest) => request.service?.kind ?? request.kind ?? '';
 
     server.addService(
-      contract.UnitServiceService as unknown as grpc.ServiceDefinition,
+      contract.ServiceServiceService as unknown as grpc.ServiceDefinition,
       implement(
-        contract.UnitServiceService,
-        routes(provider, [...ACCESS_CALLS, ...PROVISIONING_CALLS, 'list'], 'unit', unitKind),
+        contract.ServiceServiceService,
+        routes(provider, [...ACCESS_CALLS, ...PROVISIONING_CALLS, 'list'], 'service', serviceKind),
       ),
     );
   }

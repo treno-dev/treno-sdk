@@ -152,43 +152,43 @@ func (x *Organization) GetName() string {
 }
 
 // Something in the tool that access can be granted to or that can be provisioned.
-type Unit struct {
+type Service struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// A kind declared in ProviderDefinition.units.
+	// A kind declared in ProviderDefinition.services.
 	Kind string `protobuf:"bytes,1,opt,name=kind,proto3" json:"kind,omitempty"`
-	// The unit's name in the tool, such as a repository's full name. Steward stores it with the
-	// kind and sends it on every later call, which is how a unit is identified.
+	// The service's name in the tool, such as a repository's full name. Steward stores it with the
+	// kind and sends it on every later call, which is how a service is identified.
 	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	// Values for the inputs declared in UnitDefinition.inputs, keyed by input name.
+	// Values for the inputs declared in ServiceDefinition.inputs, keyed by input name.
 	Inputs *structpb.Struct `protobuf:"bytes,3,opt,name=inputs,proto3" json:"inputs,omitempty"`
-	// Values for the secrets declared in UnitDefinition.secrets, keyed by secret name. Resolved
+	// Values for the secrets declared in ServiceDefinition.secrets, keyed by secret name. Resolved
 	// by the runner for this call only.
 	Secrets map[string]string `protobuf:"bytes,4,rep,name=secrets,proto3" json:"secrets,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	// Values the unit produced, as declared in UnitDefinition.outputs, keyed by output name.
-	// Set by the provider when it lists a unit; ignored on calls. Provision returns its outputs
+	// Values the service produced, as declared in ServiceDefinition.outputs, keyed by output name.
+	// Set by the provider when it lists a service; ignored on calls. Provision returns its outputs
 	// separately. Values of outputs declared sensitive stay with the runner and are not passed on to
 	// Steward.
 	Outputs *structpb.Struct `protobuf:"bytes,5,opt,name=outputs,proto3" json:"outputs,omitempty"`
-	// Its variables, when the kind takes them (UnitDefinition.variables).
+	// Its variables, when the kind takes them (ServiceDefinition.variables).
 	Variables     []*Variable `protobuf:"bytes,6,rep,name=variables,proto3" json:"variables,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Unit) Reset() {
-	*x = Unit{}
+func (x *Service) Reset() {
+	*x = Service{}
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Unit) String() string {
+func (x *Service) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Unit) ProtoMessage() {}
+func (*Service) ProtoMessage() {}
 
-func (x *Unit) ProtoReflect() protoreflect.Message {
+func (x *Service) ProtoReflect() protoreflect.Message {
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -200,54 +200,54 @@ func (x *Unit) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Unit.ProtoReflect.Descriptor instead.
-func (*Unit) Descriptor() ([]byte, []int) {
+// Deprecated: Use Service.ProtoReflect.Descriptor instead.
+func (*Service) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *Unit) GetKind() string {
+func (x *Service) GetKind() string {
 	if x != nil {
 		return x.Kind
 	}
 	return ""
 }
 
-func (x *Unit) GetName() string {
+func (x *Service) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-func (x *Unit) GetInputs() *structpb.Struct {
+func (x *Service) GetInputs() *structpb.Struct {
 	if x != nil {
 		return x.Inputs
 	}
 	return nil
 }
 
-func (x *Unit) GetSecrets() map[string]string {
+func (x *Service) GetSecrets() map[string]string {
 	if x != nil {
 		return x.Secrets
 	}
 	return nil
 }
 
-func (x *Unit) GetOutputs() *structpb.Struct {
+func (x *Service) GetOutputs() *structpb.Struct {
 	if x != nil {
 		return x.Outputs
 	}
 	return nil
 }
 
-func (x *Unit) GetVariables() []*Variable {
+func (x *Service) GetVariables() []*Variable {
 	if x != nil {
 		return x.Variables
 	}
 	return nil
 }
 
-// Says that a kind takes variables: name and value pairs, of any number, that whoever sets up a unit
+// Says that a kind takes variables: name and value pairs, of any number, that whoever sets up a service
 // adds to it, such as the variables of a Terraform workspace. Unlike an input, the names are not
 // declared, and Steward keeps the variables apart from the inputs, since they are handled in ways that
 // inputs are not.
@@ -296,7 +296,7 @@ func (x *VariadicVariables) GetDescription() string {
 	return ""
 }
 
-// Something deployed and run in the tool, as opposed to a unit, which is provisioned.
+// Something deployed and run in the tool, as opposed to a service, which is provisioned.
 type Application struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// A kind declared in ProviderDefinition.applications.
@@ -927,10 +927,10 @@ type ProviderDefinition struct {
 	state       protoimpl.MessageState `protogen:"open.v1"`
 	Title       string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
 	Description string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	// The unit kinds this provider manages. Kinds are unique within the provider.
-	Units []*UnitDefinition `protobuf:"bytes,4,rep,name=units,proto3" json:"units,omitempty"`
+	// The service kinds this provider manages. Kinds are unique within the provider.
+	Services []*ServiceDefinition `protobuf:"bytes,4,rep,name=services,proto3" json:"services,omitempty"`
 	// The application kinds this provider can run, such as a Laravel app on a host. Applications are a
-	// second kind of thing next to units: they are deployed from a source and have variables that
+	// second kind of thing next to services: they are deployed from a source and have variables that
 	// people edit over time. Kinds are unique within the provider. Empty when the provider runs no
 	// applications.
 	Applications []*ApplicationDefinition `protobuf:"bytes,7,rep,name=applications,proto3" json:"applications,omitempty"`
@@ -985,9 +985,9 @@ func (x *ProviderDefinition) GetDescription() string {
 	return ""
 }
 
-func (x *ProviderDefinition) GetUnits() []*UnitDefinition {
+func (x *ProviderDefinition) GetServices() []*ServiceDefinition {
 	if x != nil {
-		return x.Units
+		return x.Services
 	}
 	return nil
 }
@@ -1006,8 +1006,8 @@ func (x *ProviderDefinition) GetGrants() []*GrantDefinition {
 	return nil
 }
 
-// One setting a provider, a unit or an application takes, declared the way a variable is: a name
-// and a type, with the value passed separately, keyed by `name`, in Unit.inputs or
+// One setting a provider, a service or an application takes, declared the way a variable is: a name
+// and a type, with the value passed separately, keyed by `name`, in Service.inputs or
 // Application.inputs.
 type InputDefinition struct {
 	state       protoimpl.MessageState `protogen:"open.v1"`
@@ -1126,7 +1126,7 @@ func (x *InputDefinition) GetMax() float64 {
 	return 0
 }
 
-// One secret a provider, a unit or an application takes, such as an API token or a private
+// One secret a provider, a service or an application takes, such as an API token or a private
 // key. Secrets are separate from inputs: they are stored, sent and shown differently. The value is
 // passed in the `secrets` map, keyed by `name`, for one call only, and is never shown back once set.
 type SecretDefinition struct {
@@ -1189,7 +1189,7 @@ func (x *SecretDefinition) GetRequired() bool {
 	return false
 }
 
-// One value a unit produces, declared like an input: a name and a type. Same types as an input.
+// One value a service produces, declared like an input: a name and a type. Same types as an input.
 type OutputDefinition struct {
 	state       protoimpl.MessageState `protogen:"open.v1"`
 	Name        string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
@@ -1197,7 +1197,7 @@ type OutputDefinition struct {
 	Description string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	Type        string                 `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
 	// The value is a secret, such as a generated password. The provider still returns it in
-	// Unit.outputs, but the runner writes it to the customer's own secret store and reports only
+	// Service.outputs, but the runner writes it to the customer's own secret store and reports only
 	// a reference to Steward, which never sees or stores the value.
 	Sensitive     bool `protobuf:"varint,5,opt,name=sensitive,proto3" json:"sensitive,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -1269,45 +1269,45 @@ func (x *OutputDefinition) GetSensitive() bool {
 	return false
 }
 
-type UnitDefinition struct {
+type ServiceDefinition struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Unique within the provider, such as "repository".
 	Kind        string `protobuf:"bytes,1,opt,name=kind,proto3" json:"kind,omitempty"`
 	Title       string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
 	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	// What is required to create a unit of this kind. Provision takes values for these.
+	// What is required to create a service of this kind. Provision takes values for these.
 	Inputs []*InputDefinition `protobuf:"bytes,4,rep,name=inputs,proto3" json:"inputs,omitempty"`
-	// The secrets a unit of this kind takes, separate from its inputs.
+	// The secrets a service of this kind takes, separate from its inputs.
 	Secrets []*SecretDefinition `protobuf:"bytes,8,rep,name=secrets,proto3" json:"secrets,omitempty"`
 	// What can be granted on this type. Declaring permissions or roles is what says the type supports
 	// access. A tool may expose permissions, roles, or both, as separate lists. Steward lets
 	// organizations build their own roles from the permissions.
 	Permissions []*PermissionDefinition `protobuf:"bytes,5,rep,name=permissions,proto3" json:"permissions,omitempty"`
 	Roles       []*RoleDefinition       `protobuf:"bytes,6,rep,name=roles,proto3" json:"roles,omitempty"`
-	// What a unit of this kind produces, such as a URL or an ARN, known once it exists. The
-	// values come back in Unit.outputs.
+	// What a service of this kind produces, such as a URL or an ARN, known once it exists. The
+	// values come back in Service.outputs.
 	Outputs []*OutputDefinition `protobuf:"bytes,7,rep,name=outputs,proto3" json:"outputs,omitempty"`
-	// Set when the kind takes variables, which the people who set up a unit add to it by name.
+	// Set when the kind takes variables, which the people who set up a service add to it by name.
 	// Provision and the other calls receive them in `variables`.
 	Variables     *VariadicVariables `protobuf:"bytes,9,opt,name=variables,proto3" json:"variables,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UnitDefinition) Reset() {
-	*x = UnitDefinition{}
+func (x *ServiceDefinition) Reset() {
+	*x = ServiceDefinition{}
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UnitDefinition) String() string {
+func (x *ServiceDefinition) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UnitDefinition) ProtoMessage() {}
+func (*ServiceDefinition) ProtoMessage() {}
 
-func (x *UnitDefinition) ProtoReflect() protoreflect.Message {
+func (x *ServiceDefinition) ProtoReflect() protoreflect.Message {
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1319,76 +1319,76 @@ func (x *UnitDefinition) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UnitDefinition.ProtoReflect.Descriptor instead.
-func (*UnitDefinition) Descriptor() ([]byte, []int) {
+// Deprecated: Use ServiceDefinition.ProtoReflect.Descriptor instead.
+func (*ServiceDefinition) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{17}
 }
 
-func (x *UnitDefinition) GetKind() string {
+func (x *ServiceDefinition) GetKind() string {
 	if x != nil {
 		return x.Kind
 	}
 	return ""
 }
 
-func (x *UnitDefinition) GetTitle() string {
+func (x *ServiceDefinition) GetTitle() string {
 	if x != nil {
 		return x.Title
 	}
 	return ""
 }
 
-func (x *UnitDefinition) GetDescription() string {
+func (x *ServiceDefinition) GetDescription() string {
 	if x != nil {
 		return x.Description
 	}
 	return ""
 }
 
-func (x *UnitDefinition) GetInputs() []*InputDefinition {
+func (x *ServiceDefinition) GetInputs() []*InputDefinition {
 	if x != nil {
 		return x.Inputs
 	}
 	return nil
 }
 
-func (x *UnitDefinition) GetSecrets() []*SecretDefinition {
+func (x *ServiceDefinition) GetSecrets() []*SecretDefinition {
 	if x != nil {
 		return x.Secrets
 	}
 	return nil
 }
 
-func (x *UnitDefinition) GetPermissions() []*PermissionDefinition {
+func (x *ServiceDefinition) GetPermissions() []*PermissionDefinition {
 	if x != nil {
 		return x.Permissions
 	}
 	return nil
 }
 
-func (x *UnitDefinition) GetRoles() []*RoleDefinition {
+func (x *ServiceDefinition) GetRoles() []*RoleDefinition {
 	if x != nil {
 		return x.Roles
 	}
 	return nil
 }
 
-func (x *UnitDefinition) GetOutputs() []*OutputDefinition {
+func (x *ServiceDefinition) GetOutputs() []*OutputDefinition {
 	if x != nil {
 		return x.Outputs
 	}
 	return nil
 }
 
-func (x *UnitDefinition) GetVariables() *VariadicVariables {
+func (x *ServiceDefinition) GetVariables() *VariadicVariables {
 	if x != nil {
 		return x.Variables
 	}
 	return nil
 }
 
-// An application is deployable and has open-ended variables, which a unit has neither of. A
-// unit has fixed inputs and outputs that the provider declares; an application also has a source
+// An application is deployable and has open-ended variables, which a service has neither of. A
+// service has fixed inputs and outputs that the provider declares; an application also has a source
 // and variables whose names are chosen by the people who run it. Every declared application kind
 // can be deployed and has variables.
 type ApplicationDefinition struct {
@@ -1694,7 +1694,7 @@ func (x *RoleDefinition) GetDescription() string {
 }
 
 // Access to the provider as a whole, such as a role in an AWS account or membership of a GitHub organization. Steward grants it before
-// it grants access to the provider's units, and decides when to remove it.
+// it grants access to the provider's services, and decides when to remove it.
 //
 // Idempotent: granting what is already granted succeeds.
 type ProviderServiceGrantAccessRequest struct {
@@ -2071,14 +2071,14 @@ func (x *ProviderServiceGetAccessResponse) GetIdentity() *Identity {
 	return nil
 }
 
-// Access to one unit, such as a role on a repository. Steward grants it after the identity has
+// Access to one service, such as a role on a repository. Steward grants it after the identity has
 // access to the provider.
 //
 // Idempotent: granting what is already granted succeeds.
-type UnitServiceGrantAccessRequest struct {
+type ServiceServiceGrantAccessRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Credential    *Credential            `protobuf:"bytes,1,opt,name=credential,proto3" json:"credential,omitempty"`
-	Unit          *Unit                  `protobuf:"bytes,2,opt,name=unit,proto3" json:"unit,omitempty"`
+	Service       *Service               `protobuf:"bytes,2,opt,name=service,proto3" json:"service,omitempty"`
 	Identity      *Identity              `protobuf:"bytes,3,opt,name=identity,proto3" json:"identity,omitempty"`
 	Role          *Role                  `protobuf:"bytes,4,opt,name=role,proto3" json:"role,omitempty"`
 	Permissions   []*Permission          `protobuf:"bytes,5,rep,name=permissions,proto3" json:"permissions,omitempty"`
@@ -2086,20 +2086,20 @@ type UnitServiceGrantAccessRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UnitServiceGrantAccessRequest) Reset() {
-	*x = UnitServiceGrantAccessRequest{}
+func (x *ServiceServiceGrantAccessRequest) Reset() {
+	*x = ServiceServiceGrantAccessRequest{}
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UnitServiceGrantAccessRequest) String() string {
+func (x *ServiceServiceGrantAccessRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UnitServiceGrantAccessRequest) ProtoMessage() {}
+func (*ServiceServiceGrantAccessRequest) ProtoMessage() {}
 
-func (x *UnitServiceGrantAccessRequest) ProtoReflect() protoreflect.Message {
+func (x *ServiceServiceGrantAccessRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2111,47 +2111,47 @@ func (x *UnitServiceGrantAccessRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UnitServiceGrantAccessRequest.ProtoReflect.Descriptor instead.
-func (*UnitServiceGrantAccessRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ServiceServiceGrantAccessRequest.ProtoReflect.Descriptor instead.
+func (*ServiceServiceGrantAccessRequest) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{28}
 }
 
-func (x *UnitServiceGrantAccessRequest) GetCredential() *Credential {
+func (x *ServiceServiceGrantAccessRequest) GetCredential() *Credential {
 	if x != nil {
 		return x.Credential
 	}
 	return nil
 }
 
-func (x *UnitServiceGrantAccessRequest) GetUnit() *Unit {
+func (x *ServiceServiceGrantAccessRequest) GetService() *Service {
 	if x != nil {
-		return x.Unit
+		return x.Service
 	}
 	return nil
 }
 
-func (x *UnitServiceGrantAccessRequest) GetIdentity() *Identity {
+func (x *ServiceServiceGrantAccessRequest) GetIdentity() *Identity {
 	if x != nil {
 		return x.Identity
 	}
 	return nil
 }
 
-func (x *UnitServiceGrantAccessRequest) GetRole() *Role {
+func (x *ServiceServiceGrantAccessRequest) GetRole() *Role {
 	if x != nil {
 		return x.Role
 	}
 	return nil
 }
 
-func (x *UnitServiceGrantAccessRequest) GetPermissions() []*Permission {
+func (x *ServiceServiceGrantAccessRequest) GetPermissions() []*Permission {
 	if x != nil {
 		return x.Permissions
 	}
 	return nil
 }
 
-type UnitServiceGrantAccessResponse struct {
+type ServiceServiceGrantAccessResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The grant's own identity in the tool, such as an assignment or invitation id. Empty when the
 	// tool has none. Steward records it and sends it back on revoke.
@@ -2167,20 +2167,20 @@ type UnitServiceGrantAccessResponse struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UnitServiceGrantAccessResponse) Reset() {
-	*x = UnitServiceGrantAccessResponse{}
+func (x *ServiceServiceGrantAccessResponse) Reset() {
+	*x = ServiceServiceGrantAccessResponse{}
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UnitServiceGrantAccessResponse) String() string {
+func (x *ServiceServiceGrantAccessResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UnitServiceGrantAccessResponse) ProtoMessage() {}
+func (*ServiceServiceGrantAccessResponse) ProtoMessage() {}
 
-func (x *UnitServiceGrantAccessResponse) ProtoReflect() protoreflect.Message {
+func (x *ServiceServiceGrantAccessResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2192,33 +2192,33 @@ func (x *UnitServiceGrantAccessResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UnitServiceGrantAccessResponse.ProtoReflect.Descriptor instead.
-func (*UnitServiceGrantAccessResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ServiceServiceGrantAccessResponse.ProtoReflect.Descriptor instead.
+func (*ServiceServiceGrantAccessResponse) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{29}
 }
 
-func (x *UnitServiceGrantAccessResponse) GetId() string {
+func (x *ServiceServiceGrantAccessResponse) GetId() string {
 	if x != nil {
 		return x.Id
 	}
 	return ""
 }
 
-func (x *UnitServiceGrantAccessResponse) GetRole() *Role {
+func (x *ServiceServiceGrantAccessResponse) GetRole() *Role {
 	if x != nil {
 		return x.Role
 	}
 	return nil
 }
 
-func (x *UnitServiceGrantAccessResponse) GetPermissions() []*Permission {
+func (x *ServiceServiceGrantAccessResponse) GetPermissions() []*Permission {
 	if x != nil {
 		return x.Permissions
 	}
 	return nil
 }
 
-func (x *UnitServiceGrantAccessResponse) GetPending() bool {
+func (x *ServiceServiceGrantAccessResponse) GetPending() bool {
 	if x != nil {
 		return x.Pending
 	}
@@ -2227,10 +2227,10 @@ func (x *UnitServiceGrantAccessResponse) GetPending() bool {
 
 // Idempotent: revoking what is already absent succeeds. Steward works out overlap between roles
 // before it sends a revoke, so the role here is safe to remove in full.
-type UnitServiceRevokeAccessRequest struct {
+type ServiceServiceRevokeAccessRequest struct {
 	state       protoimpl.MessageState `protogen:"open.v1"`
 	Credential  *Credential            `protobuf:"bytes,1,opt,name=credential,proto3" json:"credential,omitempty"`
-	Unit        *Unit                  `protobuf:"bytes,2,opt,name=unit,proto3" json:"unit,omitempty"`
+	Service     *Service               `protobuf:"bytes,2,opt,name=service,proto3" json:"service,omitempty"`
 	Identity    *Identity              `protobuf:"bytes,3,opt,name=identity,proto3" json:"identity,omitempty"`
 	Role        *Role                  `protobuf:"bytes,4,opt,name=role,proto3" json:"role,omitempty"`
 	Permissions []*Permission          `protobuf:"bytes,6,rep,name=permissions,proto3" json:"permissions,omitempty"`
@@ -2240,20 +2240,20 @@ type UnitServiceRevokeAccessRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UnitServiceRevokeAccessRequest) Reset() {
-	*x = UnitServiceRevokeAccessRequest{}
+func (x *ServiceServiceRevokeAccessRequest) Reset() {
+	*x = ServiceServiceRevokeAccessRequest{}
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UnitServiceRevokeAccessRequest) String() string {
+func (x *ServiceServiceRevokeAccessRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UnitServiceRevokeAccessRequest) ProtoMessage() {}
+func (*ServiceServiceRevokeAccessRequest) ProtoMessage() {}
 
-func (x *UnitServiceRevokeAccessRequest) ProtoReflect() protoreflect.Message {
+func (x *ServiceServiceRevokeAccessRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2265,73 +2265,73 @@ func (x *UnitServiceRevokeAccessRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UnitServiceRevokeAccessRequest.ProtoReflect.Descriptor instead.
-func (*UnitServiceRevokeAccessRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ServiceServiceRevokeAccessRequest.ProtoReflect.Descriptor instead.
+func (*ServiceServiceRevokeAccessRequest) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{30}
 }
 
-func (x *UnitServiceRevokeAccessRequest) GetCredential() *Credential {
+func (x *ServiceServiceRevokeAccessRequest) GetCredential() *Credential {
 	if x != nil {
 		return x.Credential
 	}
 	return nil
 }
 
-func (x *UnitServiceRevokeAccessRequest) GetUnit() *Unit {
+func (x *ServiceServiceRevokeAccessRequest) GetService() *Service {
 	if x != nil {
-		return x.Unit
+		return x.Service
 	}
 	return nil
 }
 
-func (x *UnitServiceRevokeAccessRequest) GetIdentity() *Identity {
+func (x *ServiceServiceRevokeAccessRequest) GetIdentity() *Identity {
 	if x != nil {
 		return x.Identity
 	}
 	return nil
 }
 
-func (x *UnitServiceRevokeAccessRequest) GetRole() *Role {
+func (x *ServiceServiceRevokeAccessRequest) GetRole() *Role {
 	if x != nil {
 		return x.Role
 	}
 	return nil
 }
 
-func (x *UnitServiceRevokeAccessRequest) GetPermissions() []*Permission {
+func (x *ServiceServiceRevokeAccessRequest) GetPermissions() []*Permission {
 	if x != nil {
 		return x.Permissions
 	}
 	return nil
 }
 
-func (x *UnitServiceRevokeAccessRequest) GetId() string {
+func (x *ServiceServiceRevokeAccessRequest) GetId() string {
 	if x != nil {
 		return x.Id
 	}
 	return ""
 }
 
-type UnitServiceRevokeAccessResponse struct {
+type ServiceServiceRevokeAccessResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UnitServiceRevokeAccessResponse) Reset() {
-	*x = UnitServiceRevokeAccessResponse{}
+func (x *ServiceServiceRevokeAccessResponse) Reset() {
+	*x = ServiceServiceRevokeAccessResponse{}
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UnitServiceRevokeAccessResponse) String() string {
+func (x *ServiceServiceRevokeAccessResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UnitServiceRevokeAccessResponse) ProtoMessage() {}
+func (*ServiceServiceRevokeAccessResponse) ProtoMessage() {}
 
-func (x *UnitServiceRevokeAccessResponse) ProtoReflect() protoreflect.Message {
+func (x *ServiceServiceRevokeAccessResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2343,35 +2343,35 @@ func (x *UnitServiceRevokeAccessResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UnitServiceRevokeAccessResponse.ProtoReflect.Descriptor instead.
-func (*UnitServiceRevokeAccessResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ServiceServiceRevokeAccessResponse.ProtoReflect.Descriptor instead.
+func (*ServiceServiceRevokeAccessResponse) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{31}
 }
 
-// Asks what an identity holds on a unit now.
-type UnitServiceGetAccessRequest struct {
+// Asks what an identity holds on a service now.
+type ServiceServiceGetAccessRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Credential    *Credential            `protobuf:"bytes,1,opt,name=credential,proto3" json:"credential,omitempty"`
-	Unit          *Unit                  `protobuf:"bytes,2,opt,name=unit,proto3" json:"unit,omitempty"`
+	Service       *Service               `protobuf:"bytes,2,opt,name=service,proto3" json:"service,omitempty"`
 	Identity      *Identity              `protobuf:"bytes,3,opt,name=identity,proto3" json:"identity,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UnitServiceGetAccessRequest) Reset() {
-	*x = UnitServiceGetAccessRequest{}
+func (x *ServiceServiceGetAccessRequest) Reset() {
+	*x = ServiceServiceGetAccessRequest{}
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UnitServiceGetAccessRequest) String() string {
+func (x *ServiceServiceGetAccessRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UnitServiceGetAccessRequest) ProtoMessage() {}
+func (*ServiceServiceGetAccessRequest) ProtoMessage() {}
 
-func (x *UnitServiceGetAccessRequest) ProtoReflect() protoreflect.Message {
+func (x *ServiceServiceGetAccessRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2383,35 +2383,35 @@ func (x *UnitServiceGetAccessRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UnitServiceGetAccessRequest.ProtoReflect.Descriptor instead.
-func (*UnitServiceGetAccessRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ServiceServiceGetAccessRequest.ProtoReflect.Descriptor instead.
+func (*ServiceServiceGetAccessRequest) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{32}
 }
 
-func (x *UnitServiceGetAccessRequest) GetCredential() *Credential {
+func (x *ServiceServiceGetAccessRequest) GetCredential() *Credential {
 	if x != nil {
 		return x.Credential
 	}
 	return nil
 }
 
-func (x *UnitServiceGetAccessRequest) GetUnit() *Unit {
+func (x *ServiceServiceGetAccessRequest) GetService() *Service {
 	if x != nil {
-		return x.Unit
+		return x.Service
 	}
 	return nil
 }
 
-func (x *UnitServiceGetAccessRequest) GetIdentity() *Identity {
+func (x *ServiceServiceGetAccessRequest) GetIdentity() *Identity {
 	if x != nil {
 		return x.Identity
 	}
 	return nil
 }
 
-type UnitServiceGetAccessResponse struct {
+type ServiceServiceGetAccessResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The roles and permissions the identity holds on the unit. Empty when it has none.
+	// The roles and permissions the identity holds on the service. Empty when it has none.
 	Roles       []*Role       `protobuf:"bytes,1,rep,name=roles,proto3" json:"roles,omitempty"`
 	Permissions []*Permission `protobuf:"bytes,3,rep,name=permissions,proto3" json:"permissions,omitempty"`
 	// True when an invitation or similar is outstanding and the access is not yet in effect.
@@ -2420,20 +2420,20 @@ type UnitServiceGetAccessResponse struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UnitServiceGetAccessResponse) Reset() {
-	*x = UnitServiceGetAccessResponse{}
+func (x *ServiceServiceGetAccessResponse) Reset() {
+	*x = ServiceServiceGetAccessResponse{}
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UnitServiceGetAccessResponse) String() string {
+func (x *ServiceServiceGetAccessResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UnitServiceGetAccessResponse) ProtoMessage() {}
+func (*ServiceServiceGetAccessResponse) ProtoMessage() {}
 
-func (x *UnitServiceGetAccessResponse) ProtoReflect() protoreflect.Message {
+func (x *ServiceServiceGetAccessResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2445,26 +2445,26 @@ func (x *UnitServiceGetAccessResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UnitServiceGetAccessResponse.ProtoReflect.Descriptor instead.
-func (*UnitServiceGetAccessResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ServiceServiceGetAccessResponse.ProtoReflect.Descriptor instead.
+func (*ServiceServiceGetAccessResponse) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{33}
 }
 
-func (x *UnitServiceGetAccessResponse) GetRoles() []*Role {
+func (x *ServiceServiceGetAccessResponse) GetRoles() []*Role {
 	if x != nil {
 		return x.Roles
 	}
 	return nil
 }
 
-func (x *UnitServiceGetAccessResponse) GetPermissions() []*Permission {
+func (x *ServiceServiceGetAccessResponse) GetPermissions() []*Permission {
 	if x != nil {
 		return x.Permissions
 	}
 	return nil
 }
 
-func (x *UnitServiceGetAccessResponse) GetPending() bool {
+func (x *ServiceServiceGetAccessResponse) GetPending() bool {
 	if x != nil {
 		return x.Pending
 	}
@@ -2473,10 +2473,10 @@ func (x *UnitServiceGetAccessResponse) GetPending() bool {
 
 // Idempotent: provisioning something that already exists with the same kind and name succeeds, and
 // still returns its outputs. Steward works out what changed by comparing the state it stores.
-type UnitServiceProvisionRequest struct {
+type ServiceServiceProvisionRequest struct {
 	state      protoimpl.MessageState `protogen:"open.v1"`
 	Credential *Credential            `protobuf:"bytes,1,opt,name=credential,proto3" json:"credential,omitempty"`
-	// The kind to create, as declared in ProviderDefinition.units.
+	// The kind to create, as declared in ProviderDefinition.services.
 	Kind string `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
 	// What to call it in the tool. Steward stores the name with the kind.
 	Name string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
@@ -2491,20 +2491,20 @@ type UnitServiceProvisionRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UnitServiceProvisionRequest) Reset() {
-	*x = UnitServiceProvisionRequest{}
+func (x *ServiceServiceProvisionRequest) Reset() {
+	*x = ServiceServiceProvisionRequest{}
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UnitServiceProvisionRequest) String() string {
+func (x *ServiceServiceProvisionRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UnitServiceProvisionRequest) ProtoMessage() {}
+func (*ServiceServiceProvisionRequest) ProtoMessage() {}
 
-func (x *UnitServiceProvisionRequest) ProtoReflect() protoreflect.Message {
+func (x *ServiceServiceProvisionRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2516,56 +2516,56 @@ func (x *UnitServiceProvisionRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UnitServiceProvisionRequest.ProtoReflect.Descriptor instead.
-func (*UnitServiceProvisionRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ServiceServiceProvisionRequest.ProtoReflect.Descriptor instead.
+func (*ServiceServiceProvisionRequest) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{34}
 }
 
-func (x *UnitServiceProvisionRequest) GetCredential() *Credential {
+func (x *ServiceServiceProvisionRequest) GetCredential() *Credential {
 	if x != nil {
 		return x.Credential
 	}
 	return nil
 }
 
-func (x *UnitServiceProvisionRequest) GetKind() string {
+func (x *ServiceServiceProvisionRequest) GetKind() string {
 	if x != nil {
 		return x.Kind
 	}
 	return ""
 }
 
-func (x *UnitServiceProvisionRequest) GetName() string {
+func (x *ServiceServiceProvisionRequest) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-func (x *UnitServiceProvisionRequest) GetInputs() *structpb.Struct {
+func (x *ServiceServiceProvisionRequest) GetInputs() *structpb.Struct {
 	if x != nil {
 		return x.Inputs
 	}
 	return nil
 }
 
-func (x *UnitServiceProvisionRequest) GetSecrets() map[string]string {
+func (x *ServiceServiceProvisionRequest) GetSecrets() map[string]string {
 	if x != nil {
 		return x.Secrets
 	}
 	return nil
 }
 
-func (x *UnitServiceProvisionRequest) GetVariables() []*Variable {
+func (x *ServiceServiceProvisionRequest) GetVariables() []*Variable {
 	if x != nil {
 		return x.Variables
 	}
 	return nil
 }
 
-type UnitServiceProvisionResponse struct {
+type ServiceServiceProvisionResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// What the unit produced, as declared in UnitDefinition.outputs, keyed by output name,
+	// What the service produced, as declared in ServiceDefinition.outputs, keyed by output name,
 	// such as a URL or an id the tool assigned. Values of outputs declared sensitive stay with the
 	// runner and are not passed on to Steward.
 	Outputs       *structpb.Struct `protobuf:"bytes,1,opt,name=outputs,proto3" json:"outputs,omitempty"`
@@ -2573,20 +2573,20 @@ type UnitServiceProvisionResponse struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UnitServiceProvisionResponse) Reset() {
-	*x = UnitServiceProvisionResponse{}
+func (x *ServiceServiceProvisionResponse) Reset() {
+	*x = ServiceServiceProvisionResponse{}
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UnitServiceProvisionResponse) String() string {
+func (x *ServiceServiceProvisionResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UnitServiceProvisionResponse) ProtoMessage() {}
+func (*ServiceServiceProvisionResponse) ProtoMessage() {}
 
-func (x *UnitServiceProvisionResponse) ProtoReflect() protoreflect.Message {
+func (x *ServiceServiceProvisionResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2598,12 +2598,12 @@ func (x *UnitServiceProvisionResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UnitServiceProvisionResponse.ProtoReflect.Descriptor instead.
-func (*UnitServiceProvisionResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ServiceServiceProvisionResponse.ProtoReflect.Descriptor instead.
+func (*ServiceServiceProvisionResponse) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{35}
 }
 
-func (x *UnitServiceProvisionResponse) GetOutputs() *structpb.Struct {
+func (x *ServiceServiceProvisionResponse) GetOutputs() *structpb.Struct {
 	if x != nil {
 		return x.Outputs
 	}
@@ -2611,28 +2611,28 @@ func (x *UnitServiceProvisionResponse) GetOutputs() *structpb.Struct {
 }
 
 // Idempotent: removing something that is already gone succeeds.
-type UnitServiceDeprovisionRequest struct {
+type ServiceServiceDeprovisionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Credential    *Credential            `protobuf:"bytes,1,opt,name=credential,proto3" json:"credential,omitempty"`
-	Unit          *Unit                  `protobuf:"bytes,2,opt,name=unit,proto3" json:"unit,omitempty"`
+	Service       *Service               `protobuf:"bytes,2,opt,name=service,proto3" json:"service,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UnitServiceDeprovisionRequest) Reset() {
-	*x = UnitServiceDeprovisionRequest{}
+func (x *ServiceServiceDeprovisionRequest) Reset() {
+	*x = ServiceServiceDeprovisionRequest{}
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UnitServiceDeprovisionRequest) String() string {
+func (x *ServiceServiceDeprovisionRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UnitServiceDeprovisionRequest) ProtoMessage() {}
+func (*ServiceServiceDeprovisionRequest) ProtoMessage() {}
 
-func (x *UnitServiceDeprovisionRequest) ProtoReflect() protoreflect.Message {
+func (x *ServiceServiceDeprovisionRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2644,45 +2644,45 @@ func (x *UnitServiceDeprovisionRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UnitServiceDeprovisionRequest.ProtoReflect.Descriptor instead.
-func (*UnitServiceDeprovisionRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ServiceServiceDeprovisionRequest.ProtoReflect.Descriptor instead.
+func (*ServiceServiceDeprovisionRequest) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{36}
 }
 
-func (x *UnitServiceDeprovisionRequest) GetCredential() *Credential {
+func (x *ServiceServiceDeprovisionRequest) GetCredential() *Credential {
 	if x != nil {
 		return x.Credential
 	}
 	return nil
 }
 
-func (x *UnitServiceDeprovisionRequest) GetUnit() *Unit {
+func (x *ServiceServiceDeprovisionRequest) GetService() *Service {
 	if x != nil {
-		return x.Unit
+		return x.Service
 	}
 	return nil
 }
 
-type UnitServiceDeprovisionResponse struct {
+type ServiceServiceDeprovisionResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UnitServiceDeprovisionResponse) Reset() {
-	*x = UnitServiceDeprovisionResponse{}
+func (x *ServiceServiceDeprovisionResponse) Reset() {
+	*x = ServiceServiceDeprovisionResponse{}
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UnitServiceDeprovisionResponse) String() string {
+func (x *ServiceServiceDeprovisionResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UnitServiceDeprovisionResponse) ProtoMessage() {}
+func (*ServiceServiceDeprovisionResponse) ProtoMessage() {}
 
-func (x *UnitServiceDeprovisionResponse) ProtoReflect() protoreflect.Message {
+func (x *ServiceServiceDeprovisionResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2694,12 +2694,12 @@ func (x *UnitServiceDeprovisionResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UnitServiceDeprovisionResponse.ProtoReflect.Descriptor instead.
-func (*UnitServiceDeprovisionResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ServiceServiceDeprovisionResponse.ProtoReflect.Descriptor instead.
+func (*ServiceServiceDeprovisionResponse) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{37}
 }
 
-type UnitServiceListRequest struct {
+type ServiceServiceListRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Credential    *Credential            `protobuf:"bytes,1,opt,name=credential,proto3" json:"credential,omitempty"`
 	Kind          string                 `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
@@ -2708,20 +2708,20 @@ type UnitServiceListRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UnitServiceListRequest) Reset() {
-	*x = UnitServiceListRequest{}
+func (x *ServiceServiceListRequest) Reset() {
+	*x = ServiceServiceListRequest{}
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UnitServiceListRequest) String() string {
+func (x *ServiceServiceListRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UnitServiceListRequest) ProtoMessage() {}
+func (*ServiceServiceListRequest) ProtoMessage() {}
 
-func (x *UnitServiceListRequest) ProtoReflect() protoreflect.Message {
+func (x *ServiceServiceListRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2733,55 +2733,55 @@ func (x *UnitServiceListRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UnitServiceListRequest.ProtoReflect.Descriptor instead.
-func (*UnitServiceListRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ServiceServiceListRequest.ProtoReflect.Descriptor instead.
+func (*ServiceServiceListRequest) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{38}
 }
 
-func (x *UnitServiceListRequest) GetCredential() *Credential {
+func (x *ServiceServiceListRequest) GetCredential() *Credential {
 	if x != nil {
 		return x.Credential
 	}
 	return nil
 }
 
-func (x *UnitServiceListRequest) GetKind() string {
+func (x *ServiceServiceListRequest) GetKind() string {
 	if x != nil {
 		return x.Kind
 	}
 	return ""
 }
 
-func (x *UnitServiceListRequest) GetPageToken() string {
+func (x *ServiceServiceListRequest) GetPageToken() string {
 	if x != nil {
 		return x.PageToken
 	}
 	return ""
 }
 
-type UnitServiceListResponse struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	Units []*Unit                `protobuf:"bytes,1,rep,name=units,proto3" json:"units,omitempty"`
+type ServiceServiceListResponse struct {
+	state    protoimpl.MessageState `protogen:"open.v1"`
+	Services []*Service             `protobuf:"bytes,1,rep,name=services,proto3" json:"services,omitempty"`
 	// Empty on the last page.
 	NextPageToken string `protobuf:"bytes,2,opt,name=next_page_token,json=nextPageToken,proto3" json:"next_page_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *UnitServiceListResponse) Reset() {
-	*x = UnitServiceListResponse{}
+func (x *ServiceServiceListResponse) Reset() {
+	*x = ServiceServiceListResponse{}
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *UnitServiceListResponse) String() string {
+func (x *ServiceServiceListResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*UnitServiceListResponse) ProtoMessage() {}
+func (*ServiceServiceListResponse) ProtoMessage() {}
 
-func (x *UnitServiceListResponse) ProtoReflect() protoreflect.Message {
+func (x *ServiceServiceListResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_steward_provider_v1_provider_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -2793,19 +2793,19 @@ func (x *UnitServiceListResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use UnitServiceListResponse.ProtoReflect.Descriptor instead.
-func (*UnitServiceListResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ServiceServiceListResponse.ProtoReflect.Descriptor instead.
+func (*ServiceServiceListResponse) Descriptor() ([]byte, []int) {
 	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{39}
 }
 
-func (x *UnitServiceListResponse) GetUnits() []*Unit {
+func (x *ServiceServiceListResponse) GetServices() []*Service {
 	if x != nil {
-		return x.Units
+		return x.Services
 	}
 	return nil
 }
 
-func (x *UnitServiceListResponse) GetNextPageToken() string {
+func (x *ServiceServiceListResponse) GetNextPageToken() string {
 	if x != nil {
 		return x.NextPageToken
 	}
@@ -3156,12 +3156,12 @@ const file_steward_provider_v1_provider_proto_rawDesc = "" +
 	"\x0fidentity_issuer\x18\a \x01(\tR\x0eidentityIssuerJ\x04\b\x01\x10\x02J\x04\b\x02\x10\x03J\x04\b\x06\x10\aR\x06inputsR\asecretsR\x0eidentity_token\"6\n" +
 	"\fOrganization\x12\x12\n" +
 	"\x04ulid\x18\x01 \x01(\tR\x04ulid\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\"\xcd\x02\n" +
-	"\x04Unit\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\"\xd3\x02\n" +
+	"\aService\x12\x12\n" +
 	"\x04kind\x18\x01 \x01(\tR\x04kind\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12/\n" +
-	"\x06inputs\x18\x03 \x01(\v2\x17.google.protobuf.StructR\x06inputs\x12@\n" +
-	"\asecrets\x18\x04 \x03(\v2&.steward.provider.v1.Unit.SecretsEntryR\asecrets\x121\n" +
+	"\x06inputs\x18\x03 \x01(\v2\x17.google.protobuf.StructR\x06inputs\x12C\n" +
+	"\asecrets\x18\x04 \x03(\v2).steward.provider.v1.Service.SecretsEntryR\asecrets\x121\n" +
 	"\aoutputs\x18\x05 \x01(\v2\x17.google.protobuf.StructR\aoutputs\x12;\n" +
 	"\tvariables\x18\x06 \x03(\v2\x1d.steward.provider.v1.VariableR\tvariables\x1a:\n" +
 	"\fSecretsEntry\x12\x10\n" +
@@ -3223,11 +3223,11 @@ const file_steward_provider_v1_provider_proto_rawDesc = "" +
 	"\tSetupLink\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x10\n" +
-	"\x03url\x18\x03 \x01(\tR\x03url\"\xa8\x03\n" +
+	"\x03url\x18\x03 \x01(\tR\x03url\"\xb1\x03\n" +
 	"\x12ProviderDefinition\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\x129\n" +
-	"\x05units\x18\x04 \x03(\v2#.steward.provider.v1.UnitDefinitionR\x05units\x12N\n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12B\n" +
+	"\bservices\x18\x04 \x03(\v2&.steward.provider.v1.ServiceDefinitionR\bservices\x12N\n" +
 	"\fapplications\x18\a \x03(\v2*.steward.provider.v1.ApplicationDefinitionR\fapplications\x12<\n" +
 	"\x06grants\x18\r \x03(\v2$.steward.provider.v1.GrantDefinitionR\x06grantsJ\x04\b\x03\x10\x04J\x04\b\b\x10\tJ\x04\b\x05\x10\x06J\x04\b\x06\x10\aJ\x04\b\f\x10\rJ\x04\b\t\x10\n" +
 	"J\x04\b\n" +
@@ -3253,8 +3253,8 @@ const file_steward_provider_v1_provider_proto_rawDesc = "" +
 	"\x05label\x18\x02 \x01(\tR\x05label\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x12\n" +
 	"\x04type\x18\x04 \x01(\tR\x04type\x12\x1c\n" +
-	"\tsensitive\x18\x05 \x01(\bR\tsensitive\"\xea\x03\n" +
-	"\x0eUnitDefinition\x12\x12\n" +
+	"\tsensitive\x18\x05 \x01(\bR\tsensitive\"\xed\x03\n" +
+	"\x11ServiceDefinition\x12\x12\n" +
 	"\x04kind\x18\x01 \x01(\tR\x04kind\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12<\n" +
@@ -3318,69 +3318,69 @@ const file_steward_provider_v1_provider_proto_rawDesc = "" +
 	" ProviderServiceGetAccessResponse\x12\x18\n" +
 	"\agranted\x18\x05 \x01(\bR\agranted\x12\x18\n" +
 	"\apending\x18\x02 \x01(\bR\apending\x129\n" +
-	"\bidentity\x18\x03 \x01(\v2\x1d.steward.provider.v1.IdentityR\bidentityJ\x04\b\x01\x10\x02J\x04\b\x04\x10\x05R\x05rolesR\vpermissions\"\xbc\x02\n" +
-	"\x1dUnitServiceGrantAccessRequest\x12?\n" +
+	"\bidentity\x18\x03 \x01(\v2\x1d.steward.provider.v1.IdentityR\bidentityJ\x04\b\x01\x10\x02J\x04\b\x04\x10\x05R\x05rolesR\vpermissions\"\xc8\x02\n" +
+	" ServiceServiceGrantAccessRequest\x12?\n" +
 	"\n" +
 	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
-	"credential\x12-\n" +
-	"\x04unit\x18\x02 \x01(\v2\x19.steward.provider.v1.UnitR\x04unit\x129\n" +
+	"credential\x126\n" +
+	"\aservice\x18\x02 \x01(\v2\x1c.steward.provider.v1.ServiceR\aservice\x129\n" +
 	"\bidentity\x18\x03 \x01(\v2\x1d.steward.provider.v1.IdentityR\bidentity\x12-\n" +
 	"\x04role\x18\x04 \x01(\v2\x19.steward.provider.v1.RoleR\x04role\x12A\n" +
-	"\vpermissions\x18\x05 \x03(\v2\x1f.steward.provider.v1.PermissionR\vpermissions\"\xbc\x01\n" +
-	"\x1eUnitServiceGrantAccessResponse\x12\x0e\n" +
+	"\vpermissions\x18\x05 \x03(\v2\x1f.steward.provider.v1.PermissionR\vpermissions\"\xbf\x01\n" +
+	"!ServiceServiceGrantAccessResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12-\n" +
 	"\x04role\x18\x02 \x01(\v2\x19.steward.provider.v1.RoleR\x04role\x12A\n" +
 	"\vpermissions\x18\x04 \x03(\v2\x1f.steward.provider.v1.PermissionR\vpermissions\x12\x18\n" +
-	"\apending\x18\x03 \x01(\bR\apending\"\xcd\x02\n" +
-	"\x1eUnitServiceRevokeAccessRequest\x12?\n" +
+	"\apending\x18\x03 \x01(\bR\apending\"\xd9\x02\n" +
+	"!ServiceServiceRevokeAccessRequest\x12?\n" +
 	"\n" +
 	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
-	"credential\x12-\n" +
-	"\x04unit\x18\x02 \x01(\v2\x19.steward.provider.v1.UnitR\x04unit\x129\n" +
+	"credential\x126\n" +
+	"\aservice\x18\x02 \x01(\v2\x1c.steward.provider.v1.ServiceR\aservice\x129\n" +
 	"\bidentity\x18\x03 \x01(\v2\x1d.steward.provider.v1.IdentityR\bidentity\x12-\n" +
 	"\x04role\x18\x04 \x01(\v2\x19.steward.provider.v1.RoleR\x04role\x12A\n" +
 	"\vpermissions\x18\x06 \x03(\v2\x1f.steward.provider.v1.PermissionR\vpermissions\x12\x0e\n" +
-	"\x02id\x18\x05 \x01(\tR\x02id\"!\n" +
-	"\x1fUnitServiceRevokeAccessResponse\"\xc8\x01\n" +
-	"\x1bUnitServiceGetAccessRequest\x12?\n" +
+	"\x02id\x18\x05 \x01(\tR\x02id\"$\n" +
+	"\"ServiceServiceRevokeAccessResponse\"\xd4\x01\n" +
+	"\x1eServiceServiceGetAccessRequest\x12?\n" +
 	"\n" +
 	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
-	"credential\x12-\n" +
-	"\x04unit\x18\x02 \x01(\v2\x19.steward.provider.v1.UnitR\x04unit\x129\n" +
-	"\bidentity\x18\x03 \x01(\v2\x1d.steward.provider.v1.IdentityR\bidentity\"\xac\x01\n" +
-	"\x1cUnitServiceGetAccessResponse\x12/\n" +
+	"credential\x126\n" +
+	"\aservice\x18\x02 \x01(\v2\x1c.steward.provider.v1.ServiceR\aservice\x129\n" +
+	"\bidentity\x18\x03 \x01(\v2\x1d.steward.provider.v1.IdentityR\bidentity\"\xaf\x01\n" +
+	"\x1fServiceServiceGetAccessResponse\x12/\n" +
 	"\x05roles\x18\x01 \x03(\v2\x19.steward.provider.v1.RoleR\x05roles\x12A\n" +
 	"\vpermissions\x18\x03 \x03(\v2\x1f.steward.provider.v1.PermissionR\vpermissions\x12\x18\n" +
-	"\apending\x18\x02 \x01(\bR\apending\"\x89\x03\n" +
-	"\x1bUnitServiceProvisionRequest\x12?\n" +
+	"\apending\x18\x02 \x01(\bR\apending\"\x8f\x03\n" +
+	"\x1eServiceServiceProvisionRequest\x12?\n" +
 	"\n" +
 	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
 	"credential\x12\x12\n" +
 	"\x04kind\x18\x02 \x01(\tR\x04kind\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12/\n" +
-	"\x06inputs\x18\x04 \x01(\v2\x17.google.protobuf.StructR\x06inputs\x12W\n" +
-	"\asecrets\x18\x05 \x03(\v2=.steward.provider.v1.UnitServiceProvisionRequest.SecretsEntryR\asecrets\x12;\n" +
+	"\x06inputs\x18\x04 \x01(\v2\x17.google.protobuf.StructR\x06inputs\x12Z\n" +
+	"\asecrets\x18\x05 \x03(\v2@.steward.provider.v1.ServiceServiceProvisionRequest.SecretsEntryR\asecrets\x12;\n" +
 	"\tvariables\x18\x06 \x03(\v2\x1d.steward.provider.v1.VariableR\tvariables\x1a:\n" +
 	"\fSecretsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"Q\n" +
-	"\x1cUnitServiceProvisionResponse\x121\n" +
-	"\aoutputs\x18\x01 \x01(\v2\x17.google.protobuf.StructR\aoutputs\"\x8f\x01\n" +
-	"\x1dUnitServiceDeprovisionRequest\x12?\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"T\n" +
+	"\x1fServiceServiceProvisionResponse\x121\n" +
+	"\aoutputs\x18\x01 \x01(\v2\x17.google.protobuf.StructR\aoutputs\"\x9b\x01\n" +
+	" ServiceServiceDeprovisionRequest\x12?\n" +
 	"\n" +
 	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
-	"credential\x12-\n" +
-	"\x04unit\x18\x02 \x01(\v2\x19.steward.provider.v1.UnitR\x04unit\" \n" +
-	"\x1eUnitServiceDeprovisionResponse\"\x8c\x01\n" +
-	"\x16UnitServiceListRequest\x12?\n" +
+	"credential\x126\n" +
+	"\aservice\x18\x02 \x01(\v2\x1c.steward.provider.v1.ServiceR\aservice\"#\n" +
+	"!ServiceServiceDeprovisionResponse\"\x8f\x01\n" +
+	"\x19ServiceServiceListRequest\x12?\n" +
 	"\n" +
 	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
 	"credential\x12\x12\n" +
 	"\x04kind\x18\x02 \x01(\tR\x04kind\x12\x1d\n" +
 	"\n" +
-	"page_token\x18\x03 \x01(\tR\tpageToken\"r\n" +
-	"\x17UnitServiceListResponse\x12/\n" +
-	"\x05units\x18\x01 \x03(\v2\x19.steward.provider.v1.UnitR\x05units\x12&\n" +
+	"page_token\x18\x03 \x01(\tR\tpageToken\"~\n" +
+	"\x1aServiceServiceListResponse\x128\n" +
+	"\bservices\x18\x01 \x03(\v2\x1c.steward.provider.v1.ServiceR\bservices\x12&\n" +
 	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"\xbd\x03\n" +
 	"\x1fApplicationServiceCreateRequest\x12?\n" +
 	"\n" +
@@ -3414,14 +3414,14 @@ const file_steward_provider_v1_provider_proto_rawDesc = "" +
 	"\bDescribe\x12$.steward.provider.v1.DescribeRequest\x1a%.steward.provider.v1.DescribeResponse\x12~\n" +
 	"\vGrantAccess\x126.steward.provider.v1.ProviderServiceGrantAccessRequest\x1a7.steward.provider.v1.ProviderServiceGrantAccessResponse\x12\x81\x01\n" +
 	"\fRevokeAccess\x127.steward.provider.v1.ProviderServiceRevokeAccessRequest\x1a8.steward.provider.v1.ProviderServiceRevokeAccessResponse\x12x\n" +
-	"\tGetAccess\x124.steward.provider.v1.ProviderServiceGetAccessRequest\x1a5.steward.provider.v1.ProviderServiceGetAccessResponse2\xbf\x05\n" +
-	"\vUnitService\x12v\n" +
-	"\vGrantAccess\x122.steward.provider.v1.UnitServiceGrantAccessRequest\x1a3.steward.provider.v1.UnitServiceGrantAccessResponse\x12y\n" +
-	"\fRevokeAccess\x123.steward.provider.v1.UnitServiceRevokeAccessRequest\x1a4.steward.provider.v1.UnitServiceRevokeAccessResponse\x12p\n" +
-	"\tGetAccess\x120.steward.provider.v1.UnitServiceGetAccessRequest\x1a1.steward.provider.v1.UnitServiceGetAccessResponse\x12p\n" +
-	"\tProvision\x120.steward.provider.v1.UnitServiceProvisionRequest\x1a1.steward.provider.v1.UnitServiceProvisionResponse\x12v\n" +
-	"\vDeprovision\x122.steward.provider.v1.UnitServiceDeprovisionRequest\x1a3.steward.provider.v1.UnitServiceDeprovisionResponse\x12a\n" +
-	"\x04List\x12+.steward.provider.v1.UnitServiceListRequest\x1a,.steward.provider.v1.UnitServiceListResponse2\xfc\x02\n" +
+	"\tGetAccess\x124.steward.provider.v1.ProviderServiceGetAccessRequest\x1a5.steward.provider.v1.ProviderServiceGetAccessResponse2\xe6\x05\n" +
+	"\x0eServiceService\x12|\n" +
+	"\vGrantAccess\x125.steward.provider.v1.ServiceServiceGrantAccessRequest\x1a6.steward.provider.v1.ServiceServiceGrantAccessResponse\x12\x7f\n" +
+	"\fRevokeAccess\x126.steward.provider.v1.ServiceServiceRevokeAccessRequest\x1a7.steward.provider.v1.ServiceServiceRevokeAccessResponse\x12v\n" +
+	"\tGetAccess\x123.steward.provider.v1.ServiceServiceGetAccessRequest\x1a4.steward.provider.v1.ServiceServiceGetAccessResponse\x12v\n" +
+	"\tProvision\x123.steward.provider.v1.ServiceServiceProvisionRequest\x1a4.steward.provider.v1.ServiceServiceProvisionResponse\x12|\n" +
+	"\vDeprovision\x125.steward.provider.v1.ServiceServiceDeprovisionRequest\x1a6.steward.provider.v1.ServiceServiceDeprovisionResponse\x12g\n" +
+	"\x04List\x12..steward.provider.v1.ServiceServiceListRequest\x1a/.steward.provider.v1.ServiceServiceListResponse2\xfc\x02\n" +
 	"\x12ApplicationService\x12u\n" +
 	"\x06Create\x124.steward.provider.v1.ApplicationServiceCreateRequest\x1a5.steward.provider.v1.ApplicationServiceCreateResponse\x12x\n" +
 	"\aDestroy\x125.steward.provider.v1.ApplicationServiceDestroyRequest\x1a6.steward.provider.v1.ApplicationServiceDestroyResponse\x12u\n" +
@@ -3444,7 +3444,7 @@ var file_steward_provider_v1_provider_proto_msgTypes = make([]protoimpl.MessageI
 var file_steward_provider_v1_provider_proto_goTypes = []any{
 	(*Credential)(nil),                          // 0: steward.provider.v1.Credential
 	(*Organization)(nil),                        // 1: steward.provider.v1.Organization
-	(*Unit)(nil),                                // 2: steward.provider.v1.Unit
+	(*Service)(nil),                             // 2: steward.provider.v1.Service
 	(*VariadicVariables)(nil),                   // 3: steward.provider.v1.VariadicVariables
 	(*Application)(nil),                         // 4: steward.provider.v1.Application
 	(*ApplicationSource)(nil),                   // 5: steward.provider.v1.ApplicationSource
@@ -3459,7 +3459,7 @@ var file_steward_provider_v1_provider_proto_goTypes = []any{
 	(*InputDefinition)(nil),                     // 14: steward.provider.v1.InputDefinition
 	(*SecretDefinition)(nil),                    // 15: steward.provider.v1.SecretDefinition
 	(*OutputDefinition)(nil),                    // 16: steward.provider.v1.OutputDefinition
-	(*UnitDefinition)(nil),                      // 17: steward.provider.v1.UnitDefinition
+	(*ServiceDefinition)(nil),                   // 17: steward.provider.v1.ServiceDefinition
 	(*ApplicationDefinition)(nil),               // 18: steward.provider.v1.ApplicationDefinition
 	(*GrantDefinition)(nil),                     // 19: steward.provider.v1.GrantDefinition
 	(*PermissionDefinition)(nil),                // 20: steward.provider.v1.PermissionDefinition
@@ -3470,37 +3470,37 @@ var file_steward_provider_v1_provider_proto_goTypes = []any{
 	(*ProviderServiceRevokeAccessResponse)(nil), // 25: steward.provider.v1.ProviderServiceRevokeAccessResponse
 	(*ProviderServiceGetAccessRequest)(nil),     // 26: steward.provider.v1.ProviderServiceGetAccessRequest
 	(*ProviderServiceGetAccessResponse)(nil),    // 27: steward.provider.v1.ProviderServiceGetAccessResponse
-	(*UnitServiceGrantAccessRequest)(nil),       // 28: steward.provider.v1.UnitServiceGrantAccessRequest
-	(*UnitServiceGrantAccessResponse)(nil),      // 29: steward.provider.v1.UnitServiceGrantAccessResponse
-	(*UnitServiceRevokeAccessRequest)(nil),      // 30: steward.provider.v1.UnitServiceRevokeAccessRequest
-	(*UnitServiceRevokeAccessResponse)(nil),     // 31: steward.provider.v1.UnitServiceRevokeAccessResponse
-	(*UnitServiceGetAccessRequest)(nil),         // 32: steward.provider.v1.UnitServiceGetAccessRequest
-	(*UnitServiceGetAccessResponse)(nil),        // 33: steward.provider.v1.UnitServiceGetAccessResponse
-	(*UnitServiceProvisionRequest)(nil),         // 34: steward.provider.v1.UnitServiceProvisionRequest
-	(*UnitServiceProvisionResponse)(nil),        // 35: steward.provider.v1.UnitServiceProvisionResponse
-	(*UnitServiceDeprovisionRequest)(nil),       // 36: steward.provider.v1.UnitServiceDeprovisionRequest
-	(*UnitServiceDeprovisionResponse)(nil),      // 37: steward.provider.v1.UnitServiceDeprovisionResponse
-	(*UnitServiceListRequest)(nil),              // 38: steward.provider.v1.UnitServiceListRequest
-	(*UnitServiceListResponse)(nil),             // 39: steward.provider.v1.UnitServiceListResponse
+	(*ServiceServiceGrantAccessRequest)(nil),    // 28: steward.provider.v1.ServiceServiceGrantAccessRequest
+	(*ServiceServiceGrantAccessResponse)(nil),   // 29: steward.provider.v1.ServiceServiceGrantAccessResponse
+	(*ServiceServiceRevokeAccessRequest)(nil),   // 30: steward.provider.v1.ServiceServiceRevokeAccessRequest
+	(*ServiceServiceRevokeAccessResponse)(nil),  // 31: steward.provider.v1.ServiceServiceRevokeAccessResponse
+	(*ServiceServiceGetAccessRequest)(nil),      // 32: steward.provider.v1.ServiceServiceGetAccessRequest
+	(*ServiceServiceGetAccessResponse)(nil),     // 33: steward.provider.v1.ServiceServiceGetAccessResponse
+	(*ServiceServiceProvisionRequest)(nil),      // 34: steward.provider.v1.ServiceServiceProvisionRequest
+	(*ServiceServiceProvisionResponse)(nil),     // 35: steward.provider.v1.ServiceServiceProvisionResponse
+	(*ServiceServiceDeprovisionRequest)(nil),    // 36: steward.provider.v1.ServiceServiceDeprovisionRequest
+	(*ServiceServiceDeprovisionResponse)(nil),   // 37: steward.provider.v1.ServiceServiceDeprovisionResponse
+	(*ServiceServiceListRequest)(nil),           // 38: steward.provider.v1.ServiceServiceListRequest
+	(*ServiceServiceListResponse)(nil),          // 39: steward.provider.v1.ServiceServiceListResponse
 	(*ApplicationServiceCreateRequest)(nil),     // 40: steward.provider.v1.ApplicationServiceCreateRequest
 	(*ApplicationServiceCreateResponse)(nil),    // 41: steward.provider.v1.ApplicationServiceCreateResponse
 	(*ApplicationServiceDestroyRequest)(nil),    // 42: steward.provider.v1.ApplicationServiceDestroyRequest
 	(*ApplicationServiceDestroyResponse)(nil),   // 43: steward.provider.v1.ApplicationServiceDestroyResponse
 	(*ApplicationServiceDeployRequest)(nil),     // 44: steward.provider.v1.ApplicationServiceDeployRequest
 	(*ApplicationServiceDeployResponse)(nil),    // 45: steward.provider.v1.ApplicationServiceDeployResponse
-	nil,                                         // 46: steward.provider.v1.Unit.SecretsEntry
+	nil,                                         // 46: steward.provider.v1.Service.SecretsEntry
 	nil,                                         // 47: steward.provider.v1.Application.SecretsEntry
-	nil,                                         // 48: steward.provider.v1.UnitServiceProvisionRequest.SecretsEntry
+	nil,                                         // 48: steward.provider.v1.ServiceServiceProvisionRequest.SecretsEntry
 	nil,                                         // 49: steward.provider.v1.ApplicationServiceCreateRequest.SecretsEntry
 	(*structpb.Struct)(nil),                     // 50: google.protobuf.Struct
 	(*structpb.Value)(nil),                      // 51: google.protobuf.Value
 }
 var file_steward_provider_v1_provider_proto_depIdxs = []int32{
 	1,  // 0: steward.provider.v1.Credential.organization:type_name -> steward.provider.v1.Organization
-	50, // 1: steward.provider.v1.Unit.inputs:type_name -> google.protobuf.Struct
-	46, // 2: steward.provider.v1.Unit.secrets:type_name -> steward.provider.v1.Unit.SecretsEntry
-	50, // 3: steward.provider.v1.Unit.outputs:type_name -> google.protobuf.Struct
-	6,  // 4: steward.provider.v1.Unit.variables:type_name -> steward.provider.v1.Variable
+	50, // 1: steward.provider.v1.Service.inputs:type_name -> google.protobuf.Struct
+	46, // 2: steward.provider.v1.Service.secrets:type_name -> steward.provider.v1.Service.SecretsEntry
+	50, // 3: steward.provider.v1.Service.outputs:type_name -> google.protobuf.Struct
+	6,  // 4: steward.provider.v1.Service.variables:type_name -> steward.provider.v1.Variable
 	50, // 5: steward.provider.v1.Application.inputs:type_name -> google.protobuf.Struct
 	47, // 6: steward.provider.v1.Application.secrets:type_name -> steward.provider.v1.Application.SecretsEntry
 	50, // 7: steward.provider.v1.Application.outputs:type_name -> google.protobuf.Struct
@@ -3511,16 +3511,16 @@ var file_steward_provider_v1_provider_proto_depIdxs = []int32{
 	0,  // 12: steward.provider.v1.DescribeRequest.credential:type_name -> steward.provider.v1.Credential
 	13, // 13: steward.provider.v1.DescribeResponse.definition:type_name -> steward.provider.v1.ProviderDefinition
 	12, // 14: steward.provider.v1.DescribeResponse.setup_links:type_name -> steward.provider.v1.SetupLink
-	17, // 15: steward.provider.v1.ProviderDefinition.units:type_name -> steward.provider.v1.UnitDefinition
+	17, // 15: steward.provider.v1.ProviderDefinition.services:type_name -> steward.provider.v1.ServiceDefinition
 	18, // 16: steward.provider.v1.ProviderDefinition.applications:type_name -> steward.provider.v1.ApplicationDefinition
 	19, // 17: steward.provider.v1.ProviderDefinition.grants:type_name -> steward.provider.v1.GrantDefinition
 	51, // 18: steward.provider.v1.InputDefinition.default:type_name -> google.protobuf.Value
-	14, // 19: steward.provider.v1.UnitDefinition.inputs:type_name -> steward.provider.v1.InputDefinition
-	15, // 20: steward.provider.v1.UnitDefinition.secrets:type_name -> steward.provider.v1.SecretDefinition
-	20, // 21: steward.provider.v1.UnitDefinition.permissions:type_name -> steward.provider.v1.PermissionDefinition
-	21, // 22: steward.provider.v1.UnitDefinition.roles:type_name -> steward.provider.v1.RoleDefinition
-	16, // 23: steward.provider.v1.UnitDefinition.outputs:type_name -> steward.provider.v1.OutputDefinition
-	3,  // 24: steward.provider.v1.UnitDefinition.variables:type_name -> steward.provider.v1.VariadicVariables
+	14, // 19: steward.provider.v1.ServiceDefinition.inputs:type_name -> steward.provider.v1.InputDefinition
+	15, // 20: steward.provider.v1.ServiceDefinition.secrets:type_name -> steward.provider.v1.SecretDefinition
+	20, // 21: steward.provider.v1.ServiceDefinition.permissions:type_name -> steward.provider.v1.PermissionDefinition
+	21, // 22: steward.provider.v1.ServiceDefinition.roles:type_name -> steward.provider.v1.RoleDefinition
+	16, // 23: steward.provider.v1.ServiceDefinition.outputs:type_name -> steward.provider.v1.OutputDefinition
+	3,  // 24: steward.provider.v1.ServiceDefinition.variables:type_name -> steward.provider.v1.VariadicVariables
 	14, // 25: steward.provider.v1.ApplicationDefinition.inputs:type_name -> steward.provider.v1.InputDefinition
 	15, // 26: steward.provider.v1.ApplicationDefinition.secrets:type_name -> steward.provider.v1.SecretDefinition
 	16, // 27: steward.provider.v1.ApplicationDefinition.outputs:type_name -> steward.provider.v1.OutputDefinition
@@ -3535,32 +3535,32 @@ var file_steward_provider_v1_provider_proto_depIdxs = []int32{
 	7,  // 36: steward.provider.v1.ProviderServiceGetAccessRequest.identity:type_name -> steward.provider.v1.Identity
 	50, // 37: steward.provider.v1.ProviderServiceGetAccessRequest.inputs:type_name -> google.protobuf.Struct
 	7,  // 38: steward.provider.v1.ProviderServiceGetAccessResponse.identity:type_name -> steward.provider.v1.Identity
-	0,  // 39: steward.provider.v1.UnitServiceGrantAccessRequest.credential:type_name -> steward.provider.v1.Credential
-	2,  // 40: steward.provider.v1.UnitServiceGrantAccessRequest.unit:type_name -> steward.provider.v1.Unit
-	7,  // 41: steward.provider.v1.UnitServiceGrantAccessRequest.identity:type_name -> steward.provider.v1.Identity
-	8,  // 42: steward.provider.v1.UnitServiceGrantAccessRequest.role:type_name -> steward.provider.v1.Role
-	9,  // 43: steward.provider.v1.UnitServiceGrantAccessRequest.permissions:type_name -> steward.provider.v1.Permission
-	8,  // 44: steward.provider.v1.UnitServiceGrantAccessResponse.role:type_name -> steward.provider.v1.Role
-	9,  // 45: steward.provider.v1.UnitServiceGrantAccessResponse.permissions:type_name -> steward.provider.v1.Permission
-	0,  // 46: steward.provider.v1.UnitServiceRevokeAccessRequest.credential:type_name -> steward.provider.v1.Credential
-	2,  // 47: steward.provider.v1.UnitServiceRevokeAccessRequest.unit:type_name -> steward.provider.v1.Unit
-	7,  // 48: steward.provider.v1.UnitServiceRevokeAccessRequest.identity:type_name -> steward.provider.v1.Identity
-	8,  // 49: steward.provider.v1.UnitServiceRevokeAccessRequest.role:type_name -> steward.provider.v1.Role
-	9,  // 50: steward.provider.v1.UnitServiceRevokeAccessRequest.permissions:type_name -> steward.provider.v1.Permission
-	0,  // 51: steward.provider.v1.UnitServiceGetAccessRequest.credential:type_name -> steward.provider.v1.Credential
-	2,  // 52: steward.provider.v1.UnitServiceGetAccessRequest.unit:type_name -> steward.provider.v1.Unit
-	7,  // 53: steward.provider.v1.UnitServiceGetAccessRequest.identity:type_name -> steward.provider.v1.Identity
-	8,  // 54: steward.provider.v1.UnitServiceGetAccessResponse.roles:type_name -> steward.provider.v1.Role
-	9,  // 55: steward.provider.v1.UnitServiceGetAccessResponse.permissions:type_name -> steward.provider.v1.Permission
-	0,  // 56: steward.provider.v1.UnitServiceProvisionRequest.credential:type_name -> steward.provider.v1.Credential
-	50, // 57: steward.provider.v1.UnitServiceProvisionRequest.inputs:type_name -> google.protobuf.Struct
-	48, // 58: steward.provider.v1.UnitServiceProvisionRequest.secrets:type_name -> steward.provider.v1.UnitServiceProvisionRequest.SecretsEntry
-	6,  // 59: steward.provider.v1.UnitServiceProvisionRequest.variables:type_name -> steward.provider.v1.Variable
-	50, // 60: steward.provider.v1.UnitServiceProvisionResponse.outputs:type_name -> google.protobuf.Struct
-	0,  // 61: steward.provider.v1.UnitServiceDeprovisionRequest.credential:type_name -> steward.provider.v1.Credential
-	2,  // 62: steward.provider.v1.UnitServiceDeprovisionRequest.unit:type_name -> steward.provider.v1.Unit
-	0,  // 63: steward.provider.v1.UnitServiceListRequest.credential:type_name -> steward.provider.v1.Credential
-	2,  // 64: steward.provider.v1.UnitServiceListResponse.units:type_name -> steward.provider.v1.Unit
+	0,  // 39: steward.provider.v1.ServiceServiceGrantAccessRequest.credential:type_name -> steward.provider.v1.Credential
+	2,  // 40: steward.provider.v1.ServiceServiceGrantAccessRequest.service:type_name -> steward.provider.v1.Service
+	7,  // 41: steward.provider.v1.ServiceServiceGrantAccessRequest.identity:type_name -> steward.provider.v1.Identity
+	8,  // 42: steward.provider.v1.ServiceServiceGrantAccessRequest.role:type_name -> steward.provider.v1.Role
+	9,  // 43: steward.provider.v1.ServiceServiceGrantAccessRequest.permissions:type_name -> steward.provider.v1.Permission
+	8,  // 44: steward.provider.v1.ServiceServiceGrantAccessResponse.role:type_name -> steward.provider.v1.Role
+	9,  // 45: steward.provider.v1.ServiceServiceGrantAccessResponse.permissions:type_name -> steward.provider.v1.Permission
+	0,  // 46: steward.provider.v1.ServiceServiceRevokeAccessRequest.credential:type_name -> steward.provider.v1.Credential
+	2,  // 47: steward.provider.v1.ServiceServiceRevokeAccessRequest.service:type_name -> steward.provider.v1.Service
+	7,  // 48: steward.provider.v1.ServiceServiceRevokeAccessRequest.identity:type_name -> steward.provider.v1.Identity
+	8,  // 49: steward.provider.v1.ServiceServiceRevokeAccessRequest.role:type_name -> steward.provider.v1.Role
+	9,  // 50: steward.provider.v1.ServiceServiceRevokeAccessRequest.permissions:type_name -> steward.provider.v1.Permission
+	0,  // 51: steward.provider.v1.ServiceServiceGetAccessRequest.credential:type_name -> steward.provider.v1.Credential
+	2,  // 52: steward.provider.v1.ServiceServiceGetAccessRequest.service:type_name -> steward.provider.v1.Service
+	7,  // 53: steward.provider.v1.ServiceServiceGetAccessRequest.identity:type_name -> steward.provider.v1.Identity
+	8,  // 54: steward.provider.v1.ServiceServiceGetAccessResponse.roles:type_name -> steward.provider.v1.Role
+	9,  // 55: steward.provider.v1.ServiceServiceGetAccessResponse.permissions:type_name -> steward.provider.v1.Permission
+	0,  // 56: steward.provider.v1.ServiceServiceProvisionRequest.credential:type_name -> steward.provider.v1.Credential
+	50, // 57: steward.provider.v1.ServiceServiceProvisionRequest.inputs:type_name -> google.protobuf.Struct
+	48, // 58: steward.provider.v1.ServiceServiceProvisionRequest.secrets:type_name -> steward.provider.v1.ServiceServiceProvisionRequest.SecretsEntry
+	6,  // 59: steward.provider.v1.ServiceServiceProvisionRequest.variables:type_name -> steward.provider.v1.Variable
+	50, // 60: steward.provider.v1.ServiceServiceProvisionResponse.outputs:type_name -> google.protobuf.Struct
+	0,  // 61: steward.provider.v1.ServiceServiceDeprovisionRequest.credential:type_name -> steward.provider.v1.Credential
+	2,  // 62: steward.provider.v1.ServiceServiceDeprovisionRequest.service:type_name -> steward.provider.v1.Service
+	0,  // 63: steward.provider.v1.ServiceServiceListRequest.credential:type_name -> steward.provider.v1.Credential
+	2,  // 64: steward.provider.v1.ServiceServiceListResponse.services:type_name -> steward.provider.v1.Service
 	0,  // 65: steward.provider.v1.ApplicationServiceCreateRequest.credential:type_name -> steward.provider.v1.Credential
 	50, // 66: steward.provider.v1.ApplicationServiceCreateRequest.inputs:type_name -> google.protobuf.Struct
 	49, // 67: steward.provider.v1.ApplicationServiceCreateRequest.secrets:type_name -> steward.provider.v1.ApplicationServiceCreateRequest.SecretsEntry
@@ -3577,12 +3577,12 @@ var file_steward_provider_v1_provider_proto_depIdxs = []int32{
 	22, // 78: steward.provider.v1.ProviderService.GrantAccess:input_type -> steward.provider.v1.ProviderServiceGrantAccessRequest
 	24, // 79: steward.provider.v1.ProviderService.RevokeAccess:input_type -> steward.provider.v1.ProviderServiceRevokeAccessRequest
 	26, // 80: steward.provider.v1.ProviderService.GetAccess:input_type -> steward.provider.v1.ProviderServiceGetAccessRequest
-	28, // 81: steward.provider.v1.UnitService.GrantAccess:input_type -> steward.provider.v1.UnitServiceGrantAccessRequest
-	30, // 82: steward.provider.v1.UnitService.RevokeAccess:input_type -> steward.provider.v1.UnitServiceRevokeAccessRequest
-	32, // 83: steward.provider.v1.UnitService.GetAccess:input_type -> steward.provider.v1.UnitServiceGetAccessRequest
-	34, // 84: steward.provider.v1.UnitService.Provision:input_type -> steward.provider.v1.UnitServiceProvisionRequest
-	36, // 85: steward.provider.v1.UnitService.Deprovision:input_type -> steward.provider.v1.UnitServiceDeprovisionRequest
-	38, // 86: steward.provider.v1.UnitService.List:input_type -> steward.provider.v1.UnitServiceListRequest
+	28, // 81: steward.provider.v1.ServiceService.GrantAccess:input_type -> steward.provider.v1.ServiceServiceGrantAccessRequest
+	30, // 82: steward.provider.v1.ServiceService.RevokeAccess:input_type -> steward.provider.v1.ServiceServiceRevokeAccessRequest
+	32, // 83: steward.provider.v1.ServiceService.GetAccess:input_type -> steward.provider.v1.ServiceServiceGetAccessRequest
+	34, // 84: steward.provider.v1.ServiceService.Provision:input_type -> steward.provider.v1.ServiceServiceProvisionRequest
+	36, // 85: steward.provider.v1.ServiceService.Deprovision:input_type -> steward.provider.v1.ServiceServiceDeprovisionRequest
+	38, // 86: steward.provider.v1.ServiceService.List:input_type -> steward.provider.v1.ServiceServiceListRequest
 	40, // 87: steward.provider.v1.ApplicationService.Create:input_type -> steward.provider.v1.ApplicationServiceCreateRequest
 	42, // 88: steward.provider.v1.ApplicationService.Destroy:input_type -> steward.provider.v1.ApplicationServiceDestroyRequest
 	44, // 89: steward.provider.v1.ApplicationService.Deploy:input_type -> steward.provider.v1.ApplicationServiceDeployRequest
@@ -3590,12 +3590,12 @@ var file_steward_provider_v1_provider_proto_depIdxs = []int32{
 	23, // 91: steward.provider.v1.ProviderService.GrantAccess:output_type -> steward.provider.v1.ProviderServiceGrantAccessResponse
 	25, // 92: steward.provider.v1.ProviderService.RevokeAccess:output_type -> steward.provider.v1.ProviderServiceRevokeAccessResponse
 	27, // 93: steward.provider.v1.ProviderService.GetAccess:output_type -> steward.provider.v1.ProviderServiceGetAccessResponse
-	29, // 94: steward.provider.v1.UnitService.GrantAccess:output_type -> steward.provider.v1.UnitServiceGrantAccessResponse
-	31, // 95: steward.provider.v1.UnitService.RevokeAccess:output_type -> steward.provider.v1.UnitServiceRevokeAccessResponse
-	33, // 96: steward.provider.v1.UnitService.GetAccess:output_type -> steward.provider.v1.UnitServiceGetAccessResponse
-	35, // 97: steward.provider.v1.UnitService.Provision:output_type -> steward.provider.v1.UnitServiceProvisionResponse
-	37, // 98: steward.provider.v1.UnitService.Deprovision:output_type -> steward.provider.v1.UnitServiceDeprovisionResponse
-	39, // 99: steward.provider.v1.UnitService.List:output_type -> steward.provider.v1.UnitServiceListResponse
+	29, // 94: steward.provider.v1.ServiceService.GrantAccess:output_type -> steward.provider.v1.ServiceServiceGrantAccessResponse
+	31, // 95: steward.provider.v1.ServiceService.RevokeAccess:output_type -> steward.provider.v1.ServiceServiceRevokeAccessResponse
+	33, // 96: steward.provider.v1.ServiceService.GetAccess:output_type -> steward.provider.v1.ServiceServiceGetAccessResponse
+	35, // 97: steward.provider.v1.ServiceService.Provision:output_type -> steward.provider.v1.ServiceServiceProvisionResponse
+	37, // 98: steward.provider.v1.ServiceService.Deprovision:output_type -> steward.provider.v1.ServiceServiceDeprovisionResponse
+	39, // 99: steward.provider.v1.ServiceService.List:output_type -> steward.provider.v1.ServiceServiceListResponse
 	41, // 100: steward.provider.v1.ApplicationService.Create:output_type -> steward.provider.v1.ApplicationServiceCreateResponse
 	43, // 101: steward.provider.v1.ApplicationService.Destroy:output_type -> steward.provider.v1.ApplicationServiceDestroyResponse
 	45, // 102: steward.provider.v1.ApplicationService.Deploy:output_type -> steward.provider.v1.ApplicationServiceDeployResponse

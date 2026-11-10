@@ -1,7 +1,7 @@
 // This is the file you edit. It declares what your provider offers and implements the calls Steward
 // makes. The gRPC plumbing, the handshake and the health check live in the Steward SDK.
 //
-// Declare the provider and each kind of unit once, with its handlers attached: Steward's forms
+// Declare the provider and each kind of service once, with its handlers attached: Steward's forms
 // follow from what you write here, and every call is routed to the right handler by kind. If your
 // provider needs more than one tool, take the secrets for each as inputs.
 
@@ -36,17 +36,17 @@ const provider = createProvider({
   },
 });
 
-// A kind of unit this provider manages. Handlers receive the request as a plain object and return
+// A kind of service this provider manages. Handlers receive the request as a plain object and return
 // the response as one, leaving out any field they have nothing to say about.
-provider.unit({
+provider.service({
   kind: 'item',
   title: 'Item',
-  description: 'An example unit.',
-  // What a unit of this kind takes besides its name, which Steward stores with the kind.
+  description: 'An example service.',
+  // What a service of this kind takes besides its name, which Steward stores with the kind.
   inputs: [{ name: 'description', label: 'Description', description: 'What the item is for.', type: 'string' }],
   outputs: [{ name: 'url', label: 'URL', description: 'Where the item can be opened.', type: 'string' }],
 
-  // Create a unit called `name`. Idempotent: if it already exists, succeed anyway. Return what
+  // Create a service called `name`. Idempotent: if it already exists, succeed anyway. Return what
   // it produced, as declared in `outputs`.
   async provision({ credential, name, inputs }) {
     const url = `${credential.inputs.base_url}/items/${name}`;
@@ -54,8 +54,8 @@ provider.unit({
     return { outputs: { url } };
   },
 
-  // Remove a unit. Idempotent: succeed if it is already gone.
-  async deprovision({ unit }) {
+  // Remove a service. Idempotent: succeed if it is already gone.
+  async deprovision({ service }) {
     return {};
   },
 
@@ -71,22 +71,22 @@ provider.unit({
     { name: 'editor', title: 'Editor' },
   ],
 
-  // Give an identity a role on the unit. Idempotent. `role` is always set. For a role Steward
+  // Give an identity a role on the service. Idempotent. `role` is always set. For a role Steward
   // composed, `permissions` lists its pieces. Return what the tool applied, an `id` for the grant if
   // the tool has one, and `pending: true` if the person has to act first, such as accepting an
   // invitation. `identity` has `externalId`, `name` and `attrs` (an email, say).
-  async grantAccess({ credential, unit, identity, role, permissions }) {
+  async grantAccess({ credential, service, identity, role, permissions }) {
     return { role, permissions };
   },
 
   // Take a role away. Idempotent: succeed if the identity does not have it.
-  async revokeAccess({ credential, unit, identity, role, permissions }) {
+  async revokeAccess({ credential, service, identity, role, permissions }) {
     return {};
   },
 
-  // Report the roles and permissions the identity holds on the unit now, and whether a grant is
+  // Report the roles and permissions the identity holds on the service now, and whether a grant is
   // still pending.
-  async getAccess({ credential, unit, identity }) {
+  async getAccess({ credential, service, identity }) {
     return { roles: [], permissions: [], pending: false };
   },
 });
