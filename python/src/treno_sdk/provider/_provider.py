@@ -17,15 +17,15 @@ from google.protobuf.message import Message
 from grpc import StatusCode
 from grpc_health.v1 import health, health_pb2, health_pb2_grpc
 
-from steward_sdk._gen.steward.provider.v1 import provider_pb2 as contract
+from treno_sdk._gen.treno.provider.v1 import provider_pb2 as contract
 
-# The version of the Steward provider contract this provider speaks.
+# The version of the Treno provider contract this provider speaks.
 APP_PROTOCOL_VERSION = 1
 
 # A runner sets this cookie in the environment of every provider it starts, as hashicorp/go-plugin does.
 # A provider that does not find it was started by hand. Kept in step with go/provider/handshake.go.
-MAGIC_COOKIE_KEY = "STEWARD_PROVIDER"
-MAGIC_COOKIE_VALUE = "b6d7a1f2-steward-provider"
+MAGIC_COOKIE_KEY = "TRENO_PROVIDER"
+MAGIC_COOKIE_VALUE = "b6d7a1f2-treno-provider"
 
 # The request of each handler, named for what it handles (the entity, then the call), for annotating
 # your own handlers. They are the generated messages: fields are snake_case, a message that was not
@@ -199,11 +199,11 @@ class Provider:
         """Starts serving the provider. The runner stops it when it is done.
 
         A provider is started by a runner, which sets the environment this checks. Started by hand, it says
-        so and exits, so try it with `steward provider validate` instead.
+        so and exits, so try it with `treno provider validate` instead.
         """
         if os.environ.get(MAGIC_COOKIE_KEY) != MAGIC_COOKIE_VALUE:
-            print("This program is a Steward provider. It is started by a runner, not run directly.", file=sys.stderr)
-            print("To try it, use `steward provider validate` or `steward provider run`.", file=sys.stderr)
+            print("This program is a Treno provider. It is started by a runner, not run directly.", file=sys.stderr)
+            print("To try it, use `treno provider validate` or `treno provider run`.", file=sys.stderr)
             sys.exit(1)
 
         asyncio.run(_serve(self))

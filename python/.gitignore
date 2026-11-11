@@ -2,4 +2,4 @@ __pycache__/
 *.egg-info/
 .venv/
 dist/
-src/steward_sdk/_gen/
+src/treno_sdk/_gen/

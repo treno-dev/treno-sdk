@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	providerv1 "github.com/treno-dev/steward-sdk/go/gen/steward/provider/v1"
+	providerv1 "github.com/treno-dev/treno-sdk/go/gen/treno/provider/v1"
 )
 
 // Serve starts serving the provider and blocks until the runner stops it. It is hashicorp/go-plugin that
@@ -19,7 +19,7 @@ import (
 // handshake line, answers the health check for the service that go-plugin names, and shuts down when asked.
 //
 // A provider must be started by a runner, which sets what Handshake describes in its environment. Started
-// by hand, it says so and exits, so run it with `steward provider validate` instead.
+// by hand, it says so and exits, so run it with `treno provider validate` instead.
 func (p *Provider) Serve() {
 	goplugin.Serve(&goplugin.ServeConfig{
 		HandshakeConfig: Handshake,

@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.6.2
 // - protoc             (unknown)
-// source: steward/provider/v1/provider.proto
+// source: treno/provider/v1/provider.proto
 
 package providerv1
 
@@ -19,10 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ProviderService_Describe_FullMethodName     = "/steward.provider.v1.ProviderService/Describe"
-	ProviderService_GrantAccess_FullMethodName  = "/steward.provider.v1.ProviderService/GrantAccess"
-	ProviderService_RevokeAccess_FullMethodName = "/steward.provider.v1.ProviderService/RevokeAccess"
-	ProviderService_GetAccess_FullMethodName    = "/steward.provider.v1.ProviderService/GetAccess"
+	ProviderService_Describe_FullMethodName     = "/treno.provider.v1.ProviderService/Describe"
+	ProviderService_GrantAccess_FullMethodName  = "/treno.provider.v1.ProviderService/GrantAccess"
+	ProviderService_RevokeAccess_FullMethodName = "/treno.provider.v1.ProviderService/RevokeAccess"
+	ProviderService_GetAccess_FullMethodName    = "/treno.provider.v1.ProviderService/GetAccess"
 )
 
 // ProviderServiceClient is the client API for ProviderService service.
@@ -222,7 +222,7 @@ func _ProviderService_GetAccess_Handler(srv interface{}, ctx context.Context, de
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ProviderService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "steward.provider.v1.ProviderService",
+	ServiceName: "treno.provider.v1.ProviderService",
 	HandlerType: (*ProviderServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -243,16 +243,16 @@ var ProviderService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "steward/provider/v1/provider.proto",
+	Metadata: "treno/provider/v1/provider.proto",
 }
 
 const (
-	ServiceService_GrantAccess_FullMethodName  = "/steward.provider.v1.ServiceService/GrantAccess"
-	ServiceService_RevokeAccess_FullMethodName = "/steward.provider.v1.ServiceService/RevokeAccess"
-	ServiceService_GetAccess_FullMethodName    = "/steward.provider.v1.ServiceService/GetAccess"
-	ServiceService_Provision_FullMethodName    = "/steward.provider.v1.ServiceService/Provision"
-	ServiceService_Deprovision_FullMethodName  = "/steward.provider.v1.ServiceService/Deprovision"
-	ServiceService_List_FullMethodName         = "/steward.provider.v1.ServiceService/List"
+	ServiceService_GrantAccess_FullMethodName  = "/treno.provider.v1.ServiceService/GrantAccess"
+	ServiceService_RevokeAccess_FullMethodName = "/treno.provider.v1.ServiceService/RevokeAccess"
+	ServiceService_GetAccess_FullMethodName    = "/treno.provider.v1.ServiceService/GetAccess"
+	ServiceService_Provision_FullMethodName    = "/treno.provider.v1.ServiceService/Provision"
+	ServiceService_Deprovision_FullMethodName  = "/treno.provider.v1.ServiceService/Deprovision"
+	ServiceService_List_FullMethodName         = "/treno.provider.v1.ServiceService/List"
 )
 
 // ServiceServiceClient is the client API for ServiceService service.
@@ -512,7 +512,7 @@ func _ServiceService_List_Handler(srv interface{}, ctx context.Context, dec func
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ServiceService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "steward.provider.v1.ServiceService",
+	ServiceName: "treno.provider.v1.ServiceService",
 	HandlerType: (*ServiceServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -541,13 +541,13 @@ var ServiceService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "steward/provider/v1/provider.proto",
+	Metadata: "treno/provider/v1/provider.proto",
 }
 
 const (
-	ApplicationService_Create_FullMethodName  = "/steward.provider.v1.ApplicationService/Create"
-	ApplicationService_Destroy_FullMethodName = "/steward.provider.v1.ApplicationService/Destroy"
-	ApplicationService_Deploy_FullMethodName  = "/steward.provider.v1.ApplicationService/Deploy"
+	ApplicationService_Create_FullMethodName  = "/treno.provider.v1.ApplicationService/Create"
+	ApplicationService_Destroy_FullMethodName = "/treno.provider.v1.ApplicationService/Destroy"
+	ApplicationService_Deploy_FullMethodName  = "/treno.provider.v1.ApplicationService/Deploy"
 )
 
 // ApplicationServiceClient is the client API for ApplicationService service.
@@ -708,7 +708,7 @@ func _ApplicationService_Deploy_Handler(srv interface{}, ctx context.Context, de
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ApplicationService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "steward.provider.v1.ApplicationService",
+	ServiceName: "treno.provider.v1.ApplicationService",
 	HandlerType: (*ApplicationServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -725,5 +725,5 @@ var ApplicationService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "steward/provider/v1/provider.proto",
+	Metadata: "treno/provider/v1/provider.proto",
 }

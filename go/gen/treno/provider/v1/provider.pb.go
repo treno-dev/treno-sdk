@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.12
 // 	protoc        (unknown)
-// source: steward/provider/v1/provider.proto
+// source: treno/provider/v1/provider.proto
 
 package providerv1
 
@@ -32,7 +32,7 @@ type Credential struct {
 	Name string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
 	// The organization the credential belongs to.
 	Organization *Organization `protobuf:"bytes,5,opt,name=organization,proto3" json:"organization,omitempty"`
-	// The address of Steward as an issuer of identity tokens: the `iss` of the token, which a cloud is
+	// The address of Treno as an issuer of identity tokens: the `iss` of the token, which a cloud is
 	// told to trust. A provider that sets up trust in it, such as with a link to a guide, uses this
 	// address. It is set in Describe, for the credential the provider is described for.
 	IdentityIssuer string `protobuf:"bytes,7,opt,name=identity_issuer,json=identityIssuer,proto3" json:"identity_issuer,omitempty"`
@@ -42,7 +42,7 @@ type Credential struct {
 
 func (x *Credential) Reset() {
 	*x = Credential{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[0]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -54,7 +54,7 @@ func (x *Credential) String() string {
 func (*Credential) ProtoMessage() {}
 
 func (x *Credential) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[0]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -67,7 +67,7 @@ func (x *Credential) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Credential.ProtoReflect.Descriptor instead.
 func (*Credential) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{0}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Credential) GetUlid() string {
@@ -98,7 +98,7 @@ func (x *Credential) GetIdentityIssuer() string {
 	return ""
 }
 
-// An organization of Steward, as a provider is told of it.
+// An organization of Treno, as a provider is told of it.
 type Organization struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Ulid          string                 `protobuf:"bytes,1,opt,name=ulid,proto3" json:"ulid,omitempty"`
@@ -109,7 +109,7 @@ type Organization struct {
 
 func (x *Organization) Reset() {
 	*x = Organization{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[1]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -121,7 +121,7 @@ func (x *Organization) String() string {
 func (*Organization) ProtoMessage() {}
 
 func (x *Organization) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[1]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -134,7 +134,7 @@ func (x *Organization) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Organization.ProtoReflect.Descriptor instead.
 func (*Organization) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{1}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *Organization) GetUlid() string {
@@ -156,7 +156,7 @@ type Service struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// A kind declared in ProviderDefinition.services.
 	Kind string `protobuf:"bytes,1,opt,name=kind,proto3" json:"kind,omitempty"`
-	// The service's name in the tool, such as a repository's full name. Steward stores it with the
+	// The service's name in the tool, such as a repository's full name. Treno stores it with the
 	// kind and sends it on every later call, which is how a service is identified.
 	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	// Values for the inputs declared in ServiceDefinition.inputs, keyed by input name.
@@ -167,7 +167,7 @@ type Service struct {
 	// Values the service produced, as declared in ServiceDefinition.outputs, keyed by output name.
 	// Set by the provider when it lists a service; ignored on calls. Provision returns its outputs
 	// separately. Values of outputs declared sensitive stay with the runner and are not passed on to
-	// Steward.
+	// Treno.
 	Outputs *structpb.Struct `protobuf:"bytes,5,opt,name=outputs,proto3" json:"outputs,omitempty"`
 	// Its variables, when the kind takes them (ServiceDefinition.variables).
 	Variables     []*Variable `protobuf:"bytes,6,rep,name=variables,proto3" json:"variables,omitempty"`
@@ -177,7 +177,7 @@ type Service struct {
 
 func (x *Service) Reset() {
 	*x = Service{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[2]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -189,7 +189,7 @@ func (x *Service) String() string {
 func (*Service) ProtoMessage() {}
 
 func (x *Service) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[2]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -202,7 +202,7 @@ func (x *Service) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Service.ProtoReflect.Descriptor instead.
 func (*Service) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{2}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *Service) GetKind() string {
@@ -249,7 +249,7 @@ func (x *Service) GetVariables() []*Variable {
 
 // Says that a kind takes variables: name and value pairs, of any number, that whoever sets up a service
 // adds to it, such as the variables of a Terraform workspace. Unlike an input, the names are not
-// declared, and Steward keeps the variables apart from the inputs, since they are handled in ways that
+// declared, and Treno keeps the variables apart from the inputs, since they are handled in ways that
 // inputs are not.
 type VariadicVariables struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -261,7 +261,7 @@ type VariadicVariables struct {
 
 func (x *VariadicVariables) Reset() {
 	*x = VariadicVariables{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[3]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -273,7 +273,7 @@ func (x *VariadicVariables) String() string {
 func (*VariadicVariables) ProtoMessage() {}
 
 func (x *VariadicVariables) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[3]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -286,7 +286,7 @@ func (x *VariadicVariables) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VariadicVariables.ProtoReflect.Descriptor instead.
 func (*VariadicVariables) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{3}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *VariadicVariables) GetDescription() string {
@@ -319,7 +319,7 @@ type Application struct {
 
 func (x *Application) Reset() {
 	*x = Application{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[4]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -331,7 +331,7 @@ func (x *Application) String() string {
 func (*Application) ProtoMessage() {}
 
 func (x *Application) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[4]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -344,7 +344,7 @@ func (x *Application) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Application.ProtoReflect.Descriptor instead.
 func (*Application) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{4}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *Application) GetKind() string {
@@ -396,7 +396,7 @@ func (x *Application) GetVariables() []*Variable {
 	return nil
 }
 
-// Where an application is deployed from. The source types are a fixed set that Steward defines, each
+// Where an application is deployed from. The source types are a fixed set that Treno defines, each
 // with its own configuration, so every provider sees the same shapes:
 //
 //	github    { owner, name, branch? }    a GitHub repository
@@ -418,7 +418,7 @@ type ApplicationSource struct {
 
 func (x *ApplicationSource) Reset() {
 	*x = ApplicationSource{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[5]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -430,7 +430,7 @@ func (x *ApplicationSource) String() string {
 func (*ApplicationSource) ProtoMessage() {}
 
 func (x *ApplicationSource) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[5]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -443,7 +443,7 @@ func (x *ApplicationSource) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplicationSource.ProtoReflect.Descriptor instead.
 func (*ApplicationSource) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{5}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ApplicationSource) GetType() string {
@@ -487,7 +487,7 @@ type Variable struct {
 
 func (x *Variable) Reset() {
 	*x = Variable{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[6]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -499,7 +499,7 @@ func (x *Variable) String() string {
 func (*Variable) ProtoMessage() {}
 
 func (x *Variable) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[6]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -512,7 +512,7 @@ func (x *Variable) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Variable.ProtoReflect.Descriptor instead.
 func (*Variable) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{6}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *Variable) GetName() string {
@@ -552,13 +552,13 @@ func (x *Variable) GetLocked() bool {
 
 // Who a user is in the tool, such as a GitHub login or an AWS principal.
 //
-// Every field is optional, so an identity can be as complete as Steward knows it. A call that needs
+// Every field is optional, so an identity can be as complete as Treno knows it. A call that needs
 // more than it was given, such as an entitlement with neither an external_id nor an attr the tool can
 // invite by, fails with INVALID_ARGUMENT.
 type Identity struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Steward's own opaque identifier for the identity. A provider does not interpret it; it is there
-	// to correlate a call with what Steward recorded.
+	// Treno's own opaque identifier for the identity. A provider does not interpret it; it is there
+	// to correlate a call with what Treno recorded.
 	Ulid *string `protobuf:"bytes,1,opt,name=ulid,proto3,oneof" json:"ulid,omitempty"`
 	// The identity in the tool, such as a GitHub login.
 	ExternalId *string `protobuf:"bytes,2,opt,name=external_id,json=externalId,proto3,oneof" json:"external_id,omitempty"`
@@ -572,7 +572,7 @@ type Identity struct {
 
 func (x *Identity) Reset() {
 	*x = Identity{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[7]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -584,7 +584,7 @@ func (x *Identity) String() string {
 func (*Identity) ProtoMessage() {}
 
 func (x *Identity) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[7]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -597,7 +597,7 @@ func (x *Identity) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Identity.ProtoReflect.Descriptor instead.
 func (*Identity) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{7}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *Identity) GetUlid() string {
@@ -628,7 +628,7 @@ func (x *Identity) GetAttrs() *structpb.Struct {
 	return nil
 }
 
-// A role: one the tool defines itself, or one Steward composed from the permissions the provider
+// A role: one the tool defines itself, or one Treno composed from the permissions the provider
 // declares. A call that carries a role always names it. The permissions of a composed role travel
 // beside it, in `permissions`.
 type Role struct {
@@ -640,7 +640,7 @@ type Role struct {
 
 func (x *Role) Reset() {
 	*x = Role{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[8]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -652,7 +652,7 @@ func (x *Role) String() string {
 func (*Role) ProtoMessage() {}
 
 func (x *Role) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[8]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -665,7 +665,7 @@ func (x *Role) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Role.ProtoReflect.Descriptor instead.
 func (*Role) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{8}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *Role) GetName() string {
@@ -678,7 +678,7 @@ func (x *Role) GetName() string {
 // One permission, in whatever form the tool uses. The name is the permission itself, such as
 // "s3:GetObject", "DescribeStacks" or "pull_requests". The level qualifies it for tools whose
 // permissions come in degrees, such as "read" or "write", and is unset for those whose do not.
-// Steward does not interpret either; the provider does.
+// Treno does not interpret either; the provider does.
 type Permission struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	Name  string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
@@ -692,7 +692,7 @@ type Permission struct {
 
 func (x *Permission) Reset() {
 	*x = Permission{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[9]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -704,7 +704,7 @@ func (x *Permission) String() string {
 func (*Permission) ProtoMessage() {}
 
 func (x *Permission) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[9]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -717,7 +717,7 @@ func (x *Permission) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Permission.ProtoReflect.Descriptor instead.
 func (*Permission) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{9}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *Permission) GetName() string {
@@ -743,7 +743,7 @@ func (x *Permission) GetDescription() string {
 
 type DescribeRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// The credential the provider is being added for, when there is one. Steward sets it when a runner
+	// The credential the provider is being added for, when there is one. Treno sets it when a runner
 	// installs a credential, so that the provider can say what the person does in the tool before the
 	// settings. Tools that only read the description, such as the generator of docs, leave it empty.
 	Credential    *Credential `protobuf:"bytes,1,opt,name=credential,proto3" json:"credential,omitempty"`
@@ -753,7 +753,7 @@ type DescribeRequest struct {
 
 func (x *DescribeRequest) Reset() {
 	*x = DescribeRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[10]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -765,7 +765,7 @@ func (x *DescribeRequest) String() string {
 func (*DescribeRequest) ProtoMessage() {}
 
 func (x *DescribeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[10]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -778,7 +778,7 @@ func (x *DescribeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DescribeRequest.ProtoReflect.Descriptor instead.
 func (*DescribeRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{10}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *DescribeRequest) GetCredential() *Credential {
@@ -805,7 +805,7 @@ type DescribeResponse struct {
 
 func (x *DescribeResponse) Reset() {
 	*x = DescribeResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[11]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -817,7 +817,7 @@ func (x *DescribeResponse) String() string {
 func (*DescribeResponse) ProtoMessage() {}
 
 func (x *DescribeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[11]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -830,7 +830,7 @@ func (x *DescribeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DescribeResponse.ProtoReflect.Descriptor instead.
 func (*DescribeResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{11}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *DescribeResponse) GetName() string {
@@ -874,7 +874,7 @@ type SetupLink struct {
 
 func (x *SetupLink) Reset() {
 	*x = SetupLink{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[12]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -886,7 +886,7 @@ func (x *SetupLink) String() string {
 func (*SetupLink) ProtoMessage() {}
 
 func (x *SetupLink) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[12]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -899,7 +899,7 @@ func (x *SetupLink) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetupLink.ProtoReflect.Descriptor instead.
 func (*SetupLink) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{12}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *SetupLink) GetTitle() string {
@@ -943,7 +943,7 @@ type ProviderDefinition struct {
 
 func (x *ProviderDefinition) Reset() {
 	*x = ProviderDefinition{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[13]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -955,7 +955,7 @@ func (x *ProviderDefinition) String() string {
 func (*ProviderDefinition) ProtoMessage() {}
 
 func (x *ProviderDefinition) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[13]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -968,7 +968,7 @@ func (x *ProviderDefinition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProviderDefinition.ProtoReflect.Descriptor instead.
 func (*ProviderDefinition) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{13}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ProviderDefinition) GetTitle() string {
@@ -1015,16 +1015,16 @@ type InputDefinition struct {
 	Label       string                 `protobuf:"bytes,2,opt,name=label,proto3" json:"label,omitempty"`
 	Description string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
 	// One of "string", "number", "boolean", "select", "list" (of strings), "map" (string keys and
-	// values) or a type of Steward's own, named `steward::<name>`: "steward::source", where something is
+	// values) or a type of Treno's own, named `treno::<name>`: "treno::source", where something is
 	// fetched from as `{ type, config }`, whose `options` are the source types it accepts, and
-	// "map(string)", names and values asked for as a list of rows, and "steward::json", any JSON value,
+	// "map(string)", names and values asked for as a list of rows, and "treno::json", any JSON value,
 	// asked for in a dialog that checks it. The SDKs export these
-	// as constants, and `steward provider validate` rejects any other.
+	// as constants, and `treno provider validate` rejects any other.
 	Type     string `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
 	Required bool   `protobuf:"varint,5,opt,name=required,proto3" json:"required,omitempty"`
 	// Used when no value is given.
 	Default *structpb.Value `protobuf:"bytes,6,opt,name=default,proto3" json:"default,omitempty"`
-	// The choices for a "select", and the source types a "steward::source" accepts.
+	// The choices for a "select", and the source types a "treno::source" accepts.
 	Options []string `protobuf:"bytes,7,rep,name=options,proto3" json:"options,omitempty"`
 	// For a "number": the least and the greatest value it can have. Left out, there is no limit on that side.
 	Min           *float64 `protobuf:"fixed64,8,opt,name=min,proto3,oneof" json:"min,omitempty"`
@@ -1035,7 +1035,7 @@ type InputDefinition struct {
 
 func (x *InputDefinition) Reset() {
 	*x = InputDefinition{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[14]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1047,7 +1047,7 @@ func (x *InputDefinition) String() string {
 func (*InputDefinition) ProtoMessage() {}
 
 func (x *InputDefinition) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[14]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1060,7 +1060,7 @@ func (x *InputDefinition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InputDefinition.ProtoReflect.Descriptor instead.
 func (*InputDefinition) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{14}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *InputDefinition) GetName() string {
@@ -1140,7 +1140,7 @@ type SecretDefinition struct {
 
 func (x *SecretDefinition) Reset() {
 	*x = SecretDefinition{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[15]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1152,7 +1152,7 @@ func (x *SecretDefinition) String() string {
 func (*SecretDefinition) ProtoMessage() {}
 
 func (x *SecretDefinition) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[15]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1165,7 +1165,7 @@ func (x *SecretDefinition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SecretDefinition.ProtoReflect.Descriptor instead.
 func (*SecretDefinition) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{15}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *SecretDefinition) GetName() string {
@@ -1198,7 +1198,7 @@ type OutputDefinition struct {
 	Type        string                 `protobuf:"bytes,4,opt,name=type,proto3" json:"type,omitempty"`
 	// The value is a secret, such as a generated password. The provider still returns it in
 	// Service.outputs, but the runner writes it to the customer's own secret store and reports only
-	// a reference to Steward, which never sees or stores the value.
+	// a reference to Treno, which never sees or stores the value.
 	Sensitive     bool `protobuf:"varint,5,opt,name=sensitive,proto3" json:"sensitive,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1206,7 +1206,7 @@ type OutputDefinition struct {
 
 func (x *OutputDefinition) Reset() {
 	*x = OutputDefinition{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[16]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1218,7 +1218,7 @@ func (x *OutputDefinition) String() string {
 func (*OutputDefinition) ProtoMessage() {}
 
 func (x *OutputDefinition) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[16]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1231,7 +1231,7 @@ func (x *OutputDefinition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OutputDefinition.ProtoReflect.Descriptor instead.
 func (*OutputDefinition) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{16}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *OutputDefinition) GetName() string {
@@ -1280,7 +1280,7 @@ type ServiceDefinition struct {
 	// The secrets a service of this kind takes, separate from its inputs.
 	Secrets []*SecretDefinition `protobuf:"bytes,8,rep,name=secrets,proto3" json:"secrets,omitempty"`
 	// What can be granted on this type. Declaring permissions or roles is what says the type supports
-	// access. A tool may expose permissions, roles, or both, as separate lists. Steward lets
+	// access. A tool may expose permissions, roles, or both, as separate lists. Treno lets
 	// organizations build their own roles from the permissions.
 	Permissions []*PermissionDefinition `protobuf:"bytes,5,rep,name=permissions,proto3" json:"permissions,omitempty"`
 	Roles       []*RoleDefinition       `protobuf:"bytes,6,rep,name=roles,proto3" json:"roles,omitempty"`
@@ -1296,7 +1296,7 @@ type ServiceDefinition struct {
 
 func (x *ServiceDefinition) Reset() {
 	*x = ServiceDefinition{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[17]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1308,7 +1308,7 @@ func (x *ServiceDefinition) String() string {
 func (*ServiceDefinition) ProtoMessage() {}
 
 func (x *ServiceDefinition) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[17]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1321,7 +1321,7 @@ func (x *ServiceDefinition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServiceDefinition.ProtoReflect.Descriptor instead.
 func (*ServiceDefinition) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{17}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *ServiceDefinition) GetKind() string {
@@ -1412,7 +1412,7 @@ type ApplicationDefinition struct {
 
 func (x *ApplicationDefinition) Reset() {
 	*x = ApplicationDefinition{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[18]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1424,7 +1424,7 @@ func (x *ApplicationDefinition) String() string {
 func (*ApplicationDefinition) ProtoMessage() {}
 
 func (x *ApplicationDefinition) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[18]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1437,7 +1437,7 @@ func (x *ApplicationDefinition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplicationDefinition.ProtoReflect.Descriptor instead.
 func (*ApplicationDefinition) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{18}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *ApplicationDefinition) GetKind() string {
@@ -1506,7 +1506,7 @@ type EntitlementDefinition struct {
 
 func (x *EntitlementDefinition) Reset() {
 	*x = EntitlementDefinition{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[19]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1518,7 +1518,7 @@ func (x *EntitlementDefinition) String() string {
 func (*EntitlementDefinition) ProtoMessage() {}
 
 func (x *EntitlementDefinition) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[19]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1531,7 +1531,7 @@ func (x *EntitlementDefinition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EntitlementDefinition.ProtoReflect.Descriptor instead.
 func (*EntitlementDefinition) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{19}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *EntitlementDefinition) GetName() string {
@@ -1576,7 +1576,7 @@ type PermissionDefinition struct {
 
 func (x *PermissionDefinition) Reset() {
 	*x = PermissionDefinition{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[20]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1588,7 +1588,7 @@ func (x *PermissionDefinition) String() string {
 func (*PermissionDefinition) ProtoMessage() {}
 
 func (x *PermissionDefinition) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[20]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1601,7 +1601,7 @@ func (x *PermissionDefinition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PermissionDefinition.ProtoReflect.Descriptor instead.
 func (*PermissionDefinition) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{20}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *PermissionDefinition) GetName() string {
@@ -1644,7 +1644,7 @@ type RoleDefinition struct {
 
 func (x *RoleDefinition) Reset() {
 	*x = RoleDefinition{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[21]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1656,7 +1656,7 @@ func (x *RoleDefinition) String() string {
 func (*RoleDefinition) ProtoMessage() {}
 
 func (x *RoleDefinition) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[21]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1669,7 +1669,7 @@ func (x *RoleDefinition) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleDefinition.ProtoReflect.Descriptor instead.
 func (*RoleDefinition) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{21}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *RoleDefinition) GetName() string {
@@ -1693,7 +1693,7 @@ func (x *RoleDefinition) GetDescription() string {
 	return ""
 }
 
-// Access to the provider as a whole, such as a role in an AWS account or membership of a GitHub organization. Steward grants it before
+// Access to the provider as a whole, such as a role in an AWS account or membership of a GitHub organization. Treno grants it before
 // it grants access to the provider's services, and decides when to remove it.
 //
 // Idempotent: granting what is already granted succeeds.
@@ -1711,7 +1711,7 @@ type ProviderServiceGrantAccessRequest struct {
 
 func (x *ProviderServiceGrantAccessRequest) Reset() {
 	*x = ProviderServiceGrantAccessRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[22]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1723,7 +1723,7 @@ func (x *ProviderServiceGrantAccessRequest) String() string {
 func (*ProviderServiceGrantAccessRequest) ProtoMessage() {}
 
 func (x *ProviderServiceGrantAccessRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[22]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1736,7 +1736,7 @@ func (x *ProviderServiceGrantAccessRequest) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use ProviderServiceGrantAccessRequest.ProtoReflect.Descriptor instead.
 func (*ProviderServiceGrantAccessRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{22}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *ProviderServiceGrantAccessRequest) GetCredential() *Credential {
@@ -1770,7 +1770,7 @@ func (x *ProviderServiceGrantAccessRequest) GetInputs() *structpb.Struct {
 type ProviderServiceGrantAccessResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The entitlement's own identity in the tool, such as a membership or invitation id. Empty when the
-	// tool has none. Steward records it and sends it back on revoke.
+	// tool has none. Treno records it and sends it back on revoke.
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// True when the entitlement needs the identity to act before it takes effect, such as accepting an
 	// invitation. The access is not in effect yet.
@@ -1781,7 +1781,7 @@ type ProviderServiceGrantAccessResponse struct {
 
 func (x *ProviderServiceGrantAccessResponse) Reset() {
 	*x = ProviderServiceGrantAccessResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[23]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1793,7 +1793,7 @@ func (x *ProviderServiceGrantAccessResponse) String() string {
 func (*ProviderServiceGrantAccessResponse) ProtoMessage() {}
 
 func (x *ProviderServiceGrantAccessResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[23]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1806,7 +1806,7 @@ func (x *ProviderServiceGrantAccessResponse) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use ProviderServiceGrantAccessResponse.ProtoReflect.Descriptor instead.
 func (*ProviderServiceGrantAccessResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{23}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *ProviderServiceGrantAccessResponse) GetId() string {
@@ -1838,7 +1838,7 @@ type ProviderServiceRevokeAccessRequest struct {
 
 func (x *ProviderServiceRevokeAccessRequest) Reset() {
 	*x = ProviderServiceRevokeAccessRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[24]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1850,7 +1850,7 @@ func (x *ProviderServiceRevokeAccessRequest) String() string {
 func (*ProviderServiceRevokeAccessRequest) ProtoMessage() {}
 
 func (x *ProviderServiceRevokeAccessRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[24]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1863,7 +1863,7 @@ func (x *ProviderServiceRevokeAccessRequest) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use ProviderServiceRevokeAccessRequest.ProtoReflect.Descriptor instead.
 func (*ProviderServiceRevokeAccessRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{24}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *ProviderServiceRevokeAccessRequest) GetCredential() *Credential {
@@ -1909,7 +1909,7 @@ type ProviderServiceRevokeAccessResponse struct {
 
 func (x *ProviderServiceRevokeAccessResponse) Reset() {
 	*x = ProviderServiceRevokeAccessResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[25]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1921,7 +1921,7 @@ func (x *ProviderServiceRevokeAccessResponse) String() string {
 func (*ProviderServiceRevokeAccessResponse) ProtoMessage() {}
 
 func (x *ProviderServiceRevokeAccessResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[25]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1934,7 +1934,7 @@ func (x *ProviderServiceRevokeAccessResponse) ProtoReflect() protoreflect.Messag
 
 // Deprecated: Use ProviderServiceRevokeAccessResponse.ProtoReflect.Descriptor instead.
 func (*ProviderServiceRevokeAccessResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{25}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{25}
 }
 
 // Asks whether an identity holds an entitlement now, for example to skip an invitation to someone who
@@ -1951,7 +1951,7 @@ type ProviderServiceGetAccessRequest struct {
 
 func (x *ProviderServiceGetAccessRequest) Reset() {
 	*x = ProviderServiceGetAccessRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[26]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1963,7 +1963,7 @@ func (x *ProviderServiceGetAccessRequest) String() string {
 func (*ProviderServiceGetAccessRequest) ProtoMessage() {}
 
 func (x *ProviderServiceGetAccessRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[26]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1976,7 +1976,7 @@ func (x *ProviderServiceGetAccessRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProviderServiceGetAccessRequest.ProtoReflect.Descriptor instead.
 func (*ProviderServiceGetAccessRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{26}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *ProviderServiceGetAccessRequest) GetCredential() *Credential {
@@ -2022,7 +2022,7 @@ type ProviderServiceGetAccessResponse struct {
 
 func (x *ProviderServiceGetAccessResponse) Reset() {
 	*x = ProviderServiceGetAccessResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[27]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2034,7 +2034,7 @@ func (x *ProviderServiceGetAccessResponse) String() string {
 func (*ProviderServiceGetAccessResponse) ProtoMessage() {}
 
 func (x *ProviderServiceGetAccessResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[27]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2047,7 +2047,7 @@ func (x *ProviderServiceGetAccessResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProviderServiceGetAccessResponse.ProtoReflect.Descriptor instead.
 func (*ProviderServiceGetAccessResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{27}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *ProviderServiceGetAccessResponse) GetGranted() bool {
@@ -2071,7 +2071,7 @@ func (x *ProviderServiceGetAccessResponse) GetIdentity() *Identity {
 	return nil
 }
 
-// Access to one service, such as a role on a repository. Steward grants it after the identity has
+// Access to one service, such as a role on a repository. Treno grants it after the identity has
 // access to the provider.
 //
 // Idempotent: granting what is already granted succeeds.
@@ -2088,7 +2088,7 @@ type ServiceServiceGrantAccessRequest struct {
 
 func (x *ServiceServiceGrantAccessRequest) Reset() {
 	*x = ServiceServiceGrantAccessRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[28]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2100,7 +2100,7 @@ func (x *ServiceServiceGrantAccessRequest) String() string {
 func (*ServiceServiceGrantAccessRequest) ProtoMessage() {}
 
 func (x *ServiceServiceGrantAccessRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[28]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2113,7 +2113,7 @@ func (x *ServiceServiceGrantAccessRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServiceServiceGrantAccessRequest.ProtoReflect.Descriptor instead.
 func (*ServiceServiceGrantAccessRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{28}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *ServiceServiceGrantAccessRequest) GetCredential() *Credential {
@@ -2154,7 +2154,7 @@ func (x *ServiceServiceGrantAccessRequest) GetPermissions() []*Permission {
 type ServiceServiceGrantAccessResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The entitlement's own identity in the tool, such as an assignment or invitation id. Empty when the
-	// tool has none. Steward records it and sends it back on revoke.
+	// tool has none. Treno records it and sends it back on revoke.
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	// What the tool actually applied. It can differ from what was requested: a composed role may land
 	// as a native role, or as only the permissions the tool supports.
@@ -2169,7 +2169,7 @@ type ServiceServiceGrantAccessResponse struct {
 
 func (x *ServiceServiceGrantAccessResponse) Reset() {
 	*x = ServiceServiceGrantAccessResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[29]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2181,7 +2181,7 @@ func (x *ServiceServiceGrantAccessResponse) String() string {
 func (*ServiceServiceGrantAccessResponse) ProtoMessage() {}
 
 func (x *ServiceServiceGrantAccessResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[29]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2194,7 +2194,7 @@ func (x *ServiceServiceGrantAccessResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use ServiceServiceGrantAccessResponse.ProtoReflect.Descriptor instead.
 func (*ServiceServiceGrantAccessResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{29}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *ServiceServiceGrantAccessResponse) GetId() string {
@@ -2225,7 +2225,7 @@ func (x *ServiceServiceGrantAccessResponse) GetPending() bool {
 	return false
 }
 
-// Idempotent: revoking what is already absent succeeds. Steward works out overlap between roles
+// Idempotent: revoking what is already absent succeeds. Treno works out overlap between roles
 // before it sends a revoke, so the role here is safe to remove in full.
 type ServiceServiceRevokeAccessRequest struct {
 	state       protoimpl.MessageState `protogen:"open.v1"`
@@ -2242,7 +2242,7 @@ type ServiceServiceRevokeAccessRequest struct {
 
 func (x *ServiceServiceRevokeAccessRequest) Reset() {
 	*x = ServiceServiceRevokeAccessRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[30]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2254,7 +2254,7 @@ func (x *ServiceServiceRevokeAccessRequest) String() string {
 func (*ServiceServiceRevokeAccessRequest) ProtoMessage() {}
 
 func (x *ServiceServiceRevokeAccessRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[30]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2267,7 +2267,7 @@ func (x *ServiceServiceRevokeAccessRequest) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use ServiceServiceRevokeAccessRequest.ProtoReflect.Descriptor instead.
 func (*ServiceServiceRevokeAccessRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{30}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *ServiceServiceRevokeAccessRequest) GetCredential() *Credential {
@@ -2320,7 +2320,7 @@ type ServiceServiceRevokeAccessResponse struct {
 
 func (x *ServiceServiceRevokeAccessResponse) Reset() {
 	*x = ServiceServiceRevokeAccessResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[31]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2332,7 +2332,7 @@ func (x *ServiceServiceRevokeAccessResponse) String() string {
 func (*ServiceServiceRevokeAccessResponse) ProtoMessage() {}
 
 func (x *ServiceServiceRevokeAccessResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[31]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2345,7 +2345,7 @@ func (x *ServiceServiceRevokeAccessResponse) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use ServiceServiceRevokeAccessResponse.ProtoReflect.Descriptor instead.
 func (*ServiceServiceRevokeAccessResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{31}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{31}
 }
 
 // Asks what an identity holds on a service now.
@@ -2360,7 +2360,7 @@ type ServiceServiceGetAccessRequest struct {
 
 func (x *ServiceServiceGetAccessRequest) Reset() {
 	*x = ServiceServiceGetAccessRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[32]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2372,7 +2372,7 @@ func (x *ServiceServiceGetAccessRequest) String() string {
 func (*ServiceServiceGetAccessRequest) ProtoMessage() {}
 
 func (x *ServiceServiceGetAccessRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[32]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2385,7 +2385,7 @@ func (x *ServiceServiceGetAccessRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServiceServiceGetAccessRequest.ProtoReflect.Descriptor instead.
 func (*ServiceServiceGetAccessRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{32}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *ServiceServiceGetAccessRequest) GetCredential() *Credential {
@@ -2422,7 +2422,7 @@ type ServiceServiceGetAccessResponse struct {
 
 func (x *ServiceServiceGetAccessResponse) Reset() {
 	*x = ServiceServiceGetAccessResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[33]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2434,7 +2434,7 @@ func (x *ServiceServiceGetAccessResponse) String() string {
 func (*ServiceServiceGetAccessResponse) ProtoMessage() {}
 
 func (x *ServiceServiceGetAccessResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[33]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2447,7 +2447,7 @@ func (x *ServiceServiceGetAccessResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServiceServiceGetAccessResponse.ProtoReflect.Descriptor instead.
 func (*ServiceServiceGetAccessResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{33}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *ServiceServiceGetAccessResponse) GetRoles() []*Role {
@@ -2472,13 +2472,13 @@ func (x *ServiceServiceGetAccessResponse) GetPending() bool {
 }
 
 // Idempotent: provisioning something that already exists with the same kind and name succeeds, and
-// still returns its outputs. Steward works out what changed by comparing the state it stores.
+// still returns its outputs. Treno works out what changed by comparing the state it stores.
 type ServiceServiceProvisionRequest struct {
 	state      protoimpl.MessageState `protogen:"open.v1"`
 	Credential *Credential            `protobuf:"bytes,1,opt,name=credential,proto3" json:"credential,omitempty"`
 	// The kind to create, as declared in ProviderDefinition.services.
 	Kind string `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
-	// What to call it in the tool. Steward stores the name with the kind.
+	// What to call it in the tool. Treno stores the name with the kind.
 	Name string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
 	// Its inputs, validated against the kind's definition.
 	Inputs *structpb.Struct `protobuf:"bytes,4,opt,name=inputs,proto3" json:"inputs,omitempty"`
@@ -2493,7 +2493,7 @@ type ServiceServiceProvisionRequest struct {
 
 func (x *ServiceServiceProvisionRequest) Reset() {
 	*x = ServiceServiceProvisionRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[34]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2505,7 +2505,7 @@ func (x *ServiceServiceProvisionRequest) String() string {
 func (*ServiceServiceProvisionRequest) ProtoMessage() {}
 
 func (x *ServiceServiceProvisionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[34]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2518,7 +2518,7 @@ func (x *ServiceServiceProvisionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServiceServiceProvisionRequest.ProtoReflect.Descriptor instead.
 func (*ServiceServiceProvisionRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{34}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *ServiceServiceProvisionRequest) GetCredential() *Credential {
@@ -2567,7 +2567,7 @@ type ServiceServiceProvisionResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// What the service produced, as declared in ServiceDefinition.outputs, keyed by output name,
 	// such as a URL or an id the tool assigned. Values of outputs declared sensitive stay with the
-	// runner and are not passed on to Steward.
+	// runner and are not passed on to Treno.
 	Outputs       *structpb.Struct `protobuf:"bytes,1,opt,name=outputs,proto3" json:"outputs,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -2575,7 +2575,7 @@ type ServiceServiceProvisionResponse struct {
 
 func (x *ServiceServiceProvisionResponse) Reset() {
 	*x = ServiceServiceProvisionResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[35]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2587,7 +2587,7 @@ func (x *ServiceServiceProvisionResponse) String() string {
 func (*ServiceServiceProvisionResponse) ProtoMessage() {}
 
 func (x *ServiceServiceProvisionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[35]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2600,7 +2600,7 @@ func (x *ServiceServiceProvisionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServiceServiceProvisionResponse.ProtoReflect.Descriptor instead.
 func (*ServiceServiceProvisionResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{35}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *ServiceServiceProvisionResponse) GetOutputs() *structpb.Struct {
@@ -2621,7 +2621,7 @@ type ServiceServiceDeprovisionRequest struct {
 
 func (x *ServiceServiceDeprovisionRequest) Reset() {
 	*x = ServiceServiceDeprovisionRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[36]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2633,7 +2633,7 @@ func (x *ServiceServiceDeprovisionRequest) String() string {
 func (*ServiceServiceDeprovisionRequest) ProtoMessage() {}
 
 func (x *ServiceServiceDeprovisionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[36]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2646,7 +2646,7 @@ func (x *ServiceServiceDeprovisionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServiceServiceDeprovisionRequest.ProtoReflect.Descriptor instead.
 func (*ServiceServiceDeprovisionRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{36}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *ServiceServiceDeprovisionRequest) GetCredential() *Credential {
@@ -2671,7 +2671,7 @@ type ServiceServiceDeprovisionResponse struct {
 
 func (x *ServiceServiceDeprovisionResponse) Reset() {
 	*x = ServiceServiceDeprovisionResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[37]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2683,7 +2683,7 @@ func (x *ServiceServiceDeprovisionResponse) String() string {
 func (*ServiceServiceDeprovisionResponse) ProtoMessage() {}
 
 func (x *ServiceServiceDeprovisionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[37]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2696,7 +2696,7 @@ func (x *ServiceServiceDeprovisionResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use ServiceServiceDeprovisionResponse.ProtoReflect.Descriptor instead.
 func (*ServiceServiceDeprovisionResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{37}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{37}
 }
 
 type ServiceServiceListRequest struct {
@@ -2710,7 +2710,7 @@ type ServiceServiceListRequest struct {
 
 func (x *ServiceServiceListRequest) Reset() {
 	*x = ServiceServiceListRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[38]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2722,7 +2722,7 @@ func (x *ServiceServiceListRequest) String() string {
 func (*ServiceServiceListRequest) ProtoMessage() {}
 
 func (x *ServiceServiceListRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[38]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2735,7 +2735,7 @@ func (x *ServiceServiceListRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServiceServiceListRequest.ProtoReflect.Descriptor instead.
 func (*ServiceServiceListRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{38}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *ServiceServiceListRequest) GetCredential() *Credential {
@@ -2770,7 +2770,7 @@ type ServiceServiceListResponse struct {
 
 func (x *ServiceServiceListResponse) Reset() {
 	*x = ServiceServiceListResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[39]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2782,7 +2782,7 @@ func (x *ServiceServiceListResponse) String() string {
 func (*ServiceServiceListResponse) ProtoMessage() {}
 
 func (x *ServiceServiceListResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[39]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2795,7 +2795,7 @@ func (x *ServiceServiceListResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServiceServiceListResponse.ProtoReflect.Descriptor instead.
 func (*ServiceServiceListResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{39}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *ServiceServiceListResponse) GetServices() []*Service {
@@ -2829,7 +2829,7 @@ type ApplicationServiceCreateRequest struct {
 
 func (x *ApplicationServiceCreateRequest) Reset() {
 	*x = ApplicationServiceCreateRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[40]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2841,7 +2841,7 @@ func (x *ApplicationServiceCreateRequest) String() string {
 func (*ApplicationServiceCreateRequest) ProtoMessage() {}
 
 func (x *ApplicationServiceCreateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[40]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2854,7 +2854,7 @@ func (x *ApplicationServiceCreateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplicationServiceCreateRequest.ProtoReflect.Descriptor instead.
 func (*ApplicationServiceCreateRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{40}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *ApplicationServiceCreateRequest) GetCredential() *Credential {
@@ -2909,7 +2909,7 @@ type ApplicationServiceCreateResponse struct {
 
 func (x *ApplicationServiceCreateResponse) Reset() {
 	*x = ApplicationServiceCreateResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[41]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2921,7 +2921,7 @@ func (x *ApplicationServiceCreateResponse) String() string {
 func (*ApplicationServiceCreateResponse) ProtoMessage() {}
 
 func (x *ApplicationServiceCreateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[41]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2934,7 +2934,7 @@ func (x *ApplicationServiceCreateResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplicationServiceCreateResponse.ProtoReflect.Descriptor instead.
 func (*ApplicationServiceCreateResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{41}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *ApplicationServiceCreateResponse) GetApplication() *Application {
@@ -2955,7 +2955,7 @@ type ApplicationServiceDestroyRequest struct {
 
 func (x *ApplicationServiceDestroyRequest) Reset() {
 	*x = ApplicationServiceDestroyRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[42]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2967,7 +2967,7 @@ func (x *ApplicationServiceDestroyRequest) String() string {
 func (*ApplicationServiceDestroyRequest) ProtoMessage() {}
 
 func (x *ApplicationServiceDestroyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[42]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2980,7 +2980,7 @@ func (x *ApplicationServiceDestroyRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplicationServiceDestroyRequest.ProtoReflect.Descriptor instead.
 func (*ApplicationServiceDestroyRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{42}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *ApplicationServiceDestroyRequest) GetCredential() *Credential {
@@ -3005,7 +3005,7 @@ type ApplicationServiceDestroyResponse struct {
 
 func (x *ApplicationServiceDestroyResponse) Reset() {
 	*x = ApplicationServiceDestroyResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[43]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3017,7 +3017,7 @@ func (x *ApplicationServiceDestroyResponse) String() string {
 func (*ApplicationServiceDestroyResponse) ProtoMessage() {}
 
 func (x *ApplicationServiceDestroyResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[43]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3030,7 +3030,7 @@ func (x *ApplicationServiceDestroyResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use ApplicationServiceDestroyResponse.ProtoReflect.Descriptor instead.
 func (*ApplicationServiceDestroyResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{43}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{43}
 }
 
 // Deploys the application from a source, replacing what is running. `application.variables` is the
@@ -3049,7 +3049,7 @@ type ApplicationServiceDeployRequest struct {
 
 func (x *ApplicationServiceDeployRequest) Reset() {
 	*x = ApplicationServiceDeployRequest{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[44]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3061,7 +3061,7 @@ func (x *ApplicationServiceDeployRequest) String() string {
 func (*ApplicationServiceDeployRequest) ProtoMessage() {}
 
 func (x *ApplicationServiceDeployRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[44]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3074,7 +3074,7 @@ func (x *ApplicationServiceDeployRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplicationServiceDeployRequest.ProtoReflect.Descriptor instead.
 func (*ApplicationServiceDeployRequest) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{44}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *ApplicationServiceDeployRequest) GetCredential() *Credential {
@@ -3108,7 +3108,7 @@ type ApplicationServiceDeployResponse struct {
 
 func (x *ApplicationServiceDeployResponse) Reset() {
 	*x = ApplicationServiceDeployResponse{}
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[45]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3120,7 +3120,7 @@ func (x *ApplicationServiceDeployResponse) String() string {
 func (*ApplicationServiceDeployResponse) ProtoMessage() {}
 
 func (x *ApplicationServiceDeployResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_steward_provider_v1_provider_proto_msgTypes[45]
+	mi := &file_treno_provider_v1_provider_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3133,7 +3133,7 @@ func (x *ApplicationServiceDeployResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplicationServiceDeployResponse.ProtoReflect.Descriptor instead.
 func (*ApplicationServiceDeployResponse) Descriptor() ([]byte, []int) {
-	return file_steward_provider_v1_provider_proto_rawDescGZIP(), []int{45}
+	return file_treno_provider_v1_provider_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *ApplicationServiceDeployResponse) GetApplication() *Application {
@@ -3143,40 +3143,40 @@ func (x *ApplicationServiceDeployResponse) GetApplication() *Application {
 	return nil
 }
 
-var File_steward_provider_v1_provider_proto protoreflect.FileDescriptor
+var File_treno_provider_v1_provider_proto protoreflect.FileDescriptor
 
-const file_steward_provider_v1_provider_proto_rawDesc = "" +
+const file_treno_provider_v1_provider_proto_rawDesc = "" +
 	"\n" +
-	"\"steward/provider/v1/provider.proto\x12\x13steward.provider.v1\x1a\x1cgoogle/protobuf/struct.proto\"\xd7\x01\n" +
+	" treno/provider/v1/provider.proto\x12\x11treno.provider.v1\x1a\x1cgoogle/protobuf/struct.proto\"\xd5\x01\n" +
 	"\n" +
 	"Credential\x12\x12\n" +
 	"\x04ulid\x18\x03 \x01(\tR\x04ulid\x12\x12\n" +
-	"\x04name\x18\x04 \x01(\tR\x04name\x12E\n" +
-	"\forganization\x18\x05 \x01(\v2!.steward.provider.v1.OrganizationR\forganization\x12'\n" +
+	"\x04name\x18\x04 \x01(\tR\x04name\x12C\n" +
+	"\forganization\x18\x05 \x01(\v2\x1f.treno.provider.v1.OrganizationR\forganization\x12'\n" +
 	"\x0fidentity_issuer\x18\a \x01(\tR\x0eidentityIssuerJ\x04\b\x01\x10\x02J\x04\b\x02\x10\x03J\x04\b\x06\x10\aR\x06inputsR\asecretsR\x0eidentity_token\"6\n" +
 	"\fOrganization\x12\x12\n" +
 	"\x04ulid\x18\x01 \x01(\tR\x04ulid\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\"\xd3\x02\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\"\xcf\x02\n" +
 	"\aService\x12\x12\n" +
 	"\x04kind\x18\x01 \x01(\tR\x04kind\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12/\n" +
-	"\x06inputs\x18\x03 \x01(\v2\x17.google.protobuf.StructR\x06inputs\x12C\n" +
-	"\asecrets\x18\x04 \x03(\v2).steward.provider.v1.Service.SecretsEntryR\asecrets\x121\n" +
-	"\aoutputs\x18\x05 \x01(\v2\x17.google.protobuf.StructR\aoutputs\x12;\n" +
-	"\tvariables\x18\x06 \x03(\v2\x1d.steward.provider.v1.VariableR\tvariables\x1a:\n" +
+	"\x06inputs\x18\x03 \x01(\v2\x17.google.protobuf.StructR\x06inputs\x12A\n" +
+	"\asecrets\x18\x04 \x03(\v2'.treno.provider.v1.Service.SecretsEntryR\asecrets\x121\n" +
+	"\aoutputs\x18\x05 \x01(\v2\x17.google.protobuf.StructR\aoutputs\x129\n" +
+	"\tvariables\x18\x06 \x03(\v2\x1b.treno.provider.v1.VariableR\tvariables\x1a:\n" +
 	"\fSecretsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"5\n" +
 	"\x11VariadicVariables\x12 \n" +
-	"\vdescription\x18\x01 \x01(\tR\vdescription\"\x97\x03\n" +
+	"\vdescription\x18\x01 \x01(\tR\vdescription\"\x91\x03\n" +
 	"\vApplication\x12\x12\n" +
 	"\x04kind\x18\x01 \x01(\tR\x04kind\x12\x0e\n" +
 	"\x02id\x18\x02 \x01(\tR\x02id\x12/\n" +
-	"\x06inputs\x18\x03 \x01(\v2\x17.google.protobuf.StructR\x06inputs\x12G\n" +
-	"\asecrets\x18\x04 \x03(\v2-.steward.provider.v1.Application.SecretsEntryR\asecrets\x121\n" +
-	"\aoutputs\x18\x05 \x01(\v2\x17.google.protobuf.StructR\aoutputs\x12>\n" +
-	"\x06source\x18\x06 \x01(\v2&.steward.provider.v1.ApplicationSourceR\x06source\x12;\n" +
-	"\tvariables\x18\a \x03(\v2\x1d.steward.provider.v1.VariableR\tvariables\x1a:\n" +
+	"\x06inputs\x18\x03 \x01(\v2\x17.google.protobuf.StructR\x06inputs\x12E\n" +
+	"\asecrets\x18\x04 \x03(\v2+.treno.provider.v1.Application.SecretsEntryR\asecrets\x121\n" +
+	"\aoutputs\x18\x05 \x01(\v2\x17.google.protobuf.StructR\aoutputs\x12<\n" +
+	"\x06source\x18\x06 \x01(\v2$.treno.provider.v1.ApplicationSourceR\x06source\x129\n" +
+	"\tvariables\x18\a \x03(\v2\x1b.treno.provider.v1.VariableR\tvariables\x1a:\n" +
 	"\fSecretsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"z\n" +
@@ -3207,29 +3207,29 @@ const file_steward_provider_v1_provider_proto_rawDesc = "" +
 	"\x05level\x18\x02 \x01(\tH\x00R\x05level\x88\x01\x01\x12%\n" +
 	"\vdescription\x18\x03 \x01(\tH\x01R\vdescription\x88\x01\x01B\b\n" +
 	"\x06_levelB\x0e\n" +
-	"\f_description\"R\n" +
-	"\x0fDescribeRequest\x12?\n" +
+	"\f_description\"P\n" +
+	"\x0fDescribeRequest\x12=\n" +
 	"\n" +
-	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
-	"credential\"\xca\x01\n" +
+	"credential\x18\x01 \x01(\v2\x1d.treno.provider.v1.CredentialR\n" +
+	"credential\"\xc6\x01\n" +
 	"\x10DescribeResponse\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
-	"\aversion\x18\x02 \x01(\tR\aversion\x12G\n" +
+	"\aversion\x18\x02 \x01(\tR\aversion\x12E\n" +
 	"\n" +
-	"definition\x18\x03 \x01(\v2'.steward.provider.v1.ProviderDefinitionR\n" +
-	"definition\x12?\n" +
-	"\vsetup_links\x18\x04 \x03(\v2\x1e.steward.provider.v1.SetupLinkR\n" +
+	"definition\x18\x03 \x01(\v2%.treno.provider.v1.ProviderDefinitionR\n" +
+	"definition\x12=\n" +
+	"\vsetup_links\x18\x04 \x03(\v2\x1c.treno.provider.v1.SetupLinkR\n" +
 	"setupLinks\"U\n" +
 	"\tSetupLink\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x10\n" +
-	"\x03url\x18\x03 \x01(\tR\x03url\"\xc3\x03\n" +
+	"\x03url\x18\x03 \x01(\tR\x03url\"\xbd\x03\n" +
 	"\x12ProviderDefinition\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\x12B\n" +
-	"\bservices\x18\x04 \x03(\v2&.steward.provider.v1.ServiceDefinitionR\bservices\x12N\n" +
-	"\fapplications\x18\a \x03(\v2*.steward.provider.v1.ApplicationDefinitionR\fapplications\x12N\n" +
-	"\fentitlements\x18\r \x03(\v2*.steward.provider.v1.EntitlementDefinitionR\fentitlementsJ\x04\b\x03\x10\x04J\x04\b\b\x10\tJ\x04\b\x05\x10\x06J\x04\b\x06\x10\aJ\x04\b\f\x10\rJ\x04\b\t\x10\n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12@\n" +
+	"\bservices\x18\x04 \x03(\v2$.treno.provider.v1.ServiceDefinitionR\bservices\x12L\n" +
+	"\fapplications\x18\a \x03(\v2(.treno.provider.v1.ApplicationDefinitionR\fapplications\x12L\n" +
+	"\fentitlements\x18\r \x03(\v2(.treno.provider.v1.EntitlementDefinitionR\fentitlementsJ\x04\b\x03\x10\x04J\x04\b\b\x10\tJ\x04\b\x05\x10\x06J\x04\b\x06\x10\aJ\x04\b\f\x10\rJ\x04\b\t\x10\n" +
 	"J\x04\b\n" +
 	"\x10\vJ\x04\b\v\x10\fR\x06inputsR\asecretsR\vpermissionsR\x05rolesR\fgrant_inputsR\x0esecret_enginesR\x11identity_audienceR\vcredentials\"\x97\x02\n" +
 	"\x0fInputDefinition\x12\x12\n" +
@@ -3253,30 +3253,30 @@ const file_steward_provider_v1_provider_proto_rawDesc = "" +
 	"\x05label\x18\x02 \x01(\tR\x05label\x12 \n" +
 	"\vdescription\x18\x03 \x01(\tR\vdescription\x12\x12\n" +
 	"\x04type\x18\x04 \x01(\tR\x04type\x12\x1c\n" +
-	"\tsensitive\x18\x05 \x01(\bR\tsensitive\"\xed\x03\n" +
+	"\tsensitive\x18\x05 \x01(\bR\tsensitive\"\xe1\x03\n" +
 	"\x11ServiceDefinition\x12\x12\n" +
 	"\x04kind\x18\x01 \x01(\tR\x04kind\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12<\n" +
-	"\x06inputs\x18\x04 \x03(\v2$.steward.provider.v1.InputDefinitionR\x06inputs\x12?\n" +
-	"\asecrets\x18\b \x03(\v2%.steward.provider.v1.SecretDefinitionR\asecrets\x12K\n" +
-	"\vpermissions\x18\x05 \x03(\v2).steward.provider.v1.PermissionDefinitionR\vpermissions\x129\n" +
-	"\x05roles\x18\x06 \x03(\v2#.steward.provider.v1.RoleDefinitionR\x05roles\x12?\n" +
-	"\aoutputs\x18\a \x03(\v2%.steward.provider.v1.OutputDefinitionR\aoutputs\x12D\n" +
-	"\tvariables\x18\t \x01(\v2&.steward.provider.v1.VariadicVariablesR\tvariables\"\xbd\x02\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12:\n" +
+	"\x06inputs\x18\x04 \x03(\v2\".treno.provider.v1.InputDefinitionR\x06inputs\x12=\n" +
+	"\asecrets\x18\b \x03(\v2#.treno.provider.v1.SecretDefinitionR\asecrets\x12I\n" +
+	"\vpermissions\x18\x05 \x03(\v2'.treno.provider.v1.PermissionDefinitionR\vpermissions\x127\n" +
+	"\x05roles\x18\x06 \x03(\v2!.treno.provider.v1.RoleDefinitionR\x05roles\x12=\n" +
+	"\aoutputs\x18\a \x03(\v2#.treno.provider.v1.OutputDefinitionR\aoutputs\x12B\n" +
+	"\tvariables\x18\t \x01(\v2$.treno.provider.v1.VariadicVariablesR\tvariables\"\xb7\x02\n" +
 	"\x15ApplicationDefinition\x12\x12\n" +
 	"\x04kind\x18\x01 \x01(\tR\x04kind\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12<\n" +
-	"\x06inputs\x18\x04 \x03(\v2$.steward.provider.v1.InputDefinitionR\x06inputs\x12?\n" +
-	"\asecrets\x18\a \x03(\v2%.steward.provider.v1.SecretDefinitionR\asecrets\x12\x18\n" +
-	"\asources\x18\x05 \x03(\tR\asources\x12?\n" +
-	"\aoutputs\x18\x06 \x03(\v2%.steward.provider.v1.OutputDefinitionR\aoutputs\"\xa1\x01\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12:\n" +
+	"\x06inputs\x18\x04 \x03(\v2\".treno.provider.v1.InputDefinitionR\x06inputs\x12=\n" +
+	"\asecrets\x18\a \x03(\v2#.treno.provider.v1.SecretDefinitionR\asecrets\x12\x18\n" +
+	"\asources\x18\x05 \x03(\tR\asources\x12=\n" +
+	"\aoutputs\x18\x06 \x03(\v2#.treno.provider.v1.OutputDefinitionR\aoutputs\"\x9f\x01\n" +
 	"\x15EntitlementDefinition\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x12<\n" +
-	"\x06inputs\x18\x04 \x03(\v2$.steward.provider.v1.InputDefinitionR\x06inputs\"z\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12:\n" +
+	"\x06inputs\x18\x04 \x03(\v2\".treno.provider.v1.InputDefinitionR\x06inputs\"z\n" +
 	"\x14PermissionDefinition\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
@@ -3285,320 +3285,320 @@ const file_steward_provider_v1_provider_proto_rawDesc = "" +
 	"\x0eRoleDefinition\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\"\xa5\x02\n" +
-	"!ProviderServiceGrantAccessRequest\x12?\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\"\xa1\x02\n" +
+	"!ProviderServiceGrantAccessRequest\x12=\n" +
 	"\n" +
-	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
-	"credential\x129\n" +
-	"\bidentity\x18\x02 \x01(\v2\x1d.steward.provider.v1.IdentityR\bidentity\x12 \n" +
+	"credential\x18\x01 \x01(\v2\x1d.treno.provider.v1.CredentialR\n" +
+	"credential\x127\n" +
+	"\bidentity\x18\x02 \x01(\v2\x1b.treno.provider.v1.IdentityR\bidentity\x12 \n" +
 	"\ventitlement\x18\x05 \x01(\tR\ventitlement\x12/\n" +
 	"\x06inputs\x18\x06 \x01(\v2\x17.google.protobuf.StructR\x06inputsJ\x04\b\x03\x10\x04J\x04\b\x04\x10\x05J\x04\b\n" +
 	"\x10\vR\x04roleR\vpermissionsR\fgrant_inputs\"m\n" +
 	"\"ProviderServiceGrantAccessResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
-	"\apending\x18\x03 \x01(\bR\apendingJ\x04\b\x02\x10\x03J\x04\b\x04\x10\x05R\x04roleR\vpermissions\"\xb6\x02\n" +
-	"\"ProviderServiceRevokeAccessRequest\x12?\n" +
+	"\apending\x18\x03 \x01(\bR\apendingJ\x04\b\x02\x10\x03J\x04\b\x04\x10\x05R\x04roleR\vpermissions\"\xb2\x02\n" +
+	"\"ProviderServiceRevokeAccessRequest\x12=\n" +
 	"\n" +
-	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
-	"credential\x129\n" +
-	"\bidentity\x18\x02 \x01(\v2\x1d.steward.provider.v1.IdentityR\bidentity\x12\x0e\n" +
+	"credential\x18\x01 \x01(\v2\x1d.treno.provider.v1.CredentialR\n" +
+	"credential\x127\n" +
+	"\bidentity\x18\x02 \x01(\v2\x1b.treno.provider.v1.IdentityR\bidentity\x12\x0e\n" +
 	"\x02id\x18\x04 \x01(\tR\x02id\x12 \n" +
 	"\ventitlement\x18\x06 \x01(\tR\ventitlement\x12/\n" +
 	"\x06inputs\x18\a \x01(\v2\x17.google.protobuf.StructR\x06inputsJ\x04\b\x03\x10\x04J\x04\b\x05\x10\x06J\x04\b\n" +
 	"\x10\vR\x04roleR\vpermissionsR\fgrant_inputs\"%\n" +
-	"#ProviderServiceRevokeAccessResponse\"\x84\x02\n" +
-	"\x1fProviderServiceGetAccessRequest\x12?\n" +
+	"#ProviderServiceRevokeAccessResponse\"\x80\x02\n" +
+	"\x1fProviderServiceGetAccessRequest\x12=\n" +
 	"\n" +
-	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
-	"credential\x129\n" +
-	"\bidentity\x18\x02 \x01(\v2\x1d.steward.provider.v1.IdentityR\bidentity\x12 \n" +
+	"credential\x18\x01 \x01(\v2\x1d.treno.provider.v1.CredentialR\n" +
+	"credential\x127\n" +
+	"\bidentity\x18\x02 \x01(\v2\x1b.treno.provider.v1.IdentityR\bidentity\x12 \n" +
 	"\ventitlement\x18\x03 \x01(\tR\ventitlement\x12/\n" +
 	"\x06inputs\x18\x04 \x01(\v2\x17.google.protobuf.StructR\x06inputsJ\x04\b\n" +
-	"\x10\vR\fgrant_inputs\"\xb1\x01\n" +
+	"\x10\vR\fgrant_inputs\"\xaf\x01\n" +
 	" ProviderServiceGetAccessResponse\x12\x18\n" +
 	"\agranted\x18\x05 \x01(\bR\agranted\x12\x18\n" +
-	"\apending\x18\x02 \x01(\bR\apending\x129\n" +
-	"\bidentity\x18\x03 \x01(\v2\x1d.steward.provider.v1.IdentityR\bidentityJ\x04\b\x01\x10\x02J\x04\b\x04\x10\x05R\x05rolesR\vpermissions\"\xc8\x02\n" +
-	" ServiceServiceGrantAccessRequest\x12?\n" +
+	"\apending\x18\x02 \x01(\bR\apending\x127\n" +
+	"\bidentity\x18\x03 \x01(\v2\x1b.treno.provider.v1.IdentityR\bidentityJ\x04\b\x01\x10\x02J\x04\b\x04\x10\x05R\x05rolesR\vpermissions\"\xbe\x02\n" +
+	" ServiceServiceGrantAccessRequest\x12=\n" +
 	"\n" +
-	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
-	"credential\x126\n" +
-	"\aservice\x18\x02 \x01(\v2\x1c.steward.provider.v1.ServiceR\aservice\x129\n" +
-	"\bidentity\x18\x03 \x01(\v2\x1d.steward.provider.v1.IdentityR\bidentity\x12-\n" +
-	"\x04role\x18\x04 \x01(\v2\x19.steward.provider.v1.RoleR\x04role\x12A\n" +
-	"\vpermissions\x18\x05 \x03(\v2\x1f.steward.provider.v1.PermissionR\vpermissions\"\xbf\x01\n" +
+	"credential\x18\x01 \x01(\v2\x1d.treno.provider.v1.CredentialR\n" +
+	"credential\x124\n" +
+	"\aservice\x18\x02 \x01(\v2\x1a.treno.provider.v1.ServiceR\aservice\x127\n" +
+	"\bidentity\x18\x03 \x01(\v2\x1b.treno.provider.v1.IdentityR\bidentity\x12+\n" +
+	"\x04role\x18\x04 \x01(\v2\x17.treno.provider.v1.RoleR\x04role\x12?\n" +
+	"\vpermissions\x18\x05 \x03(\v2\x1d.treno.provider.v1.PermissionR\vpermissions\"\xbb\x01\n" +
 	"!ServiceServiceGrantAccessResponse\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12-\n" +
-	"\x04role\x18\x02 \x01(\v2\x19.steward.provider.v1.RoleR\x04role\x12A\n" +
-	"\vpermissions\x18\x04 \x03(\v2\x1f.steward.provider.v1.PermissionR\vpermissions\x12\x18\n" +
-	"\apending\x18\x03 \x01(\bR\apending\"\xd9\x02\n" +
-	"!ServiceServiceRevokeAccessRequest\x12?\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12+\n" +
+	"\x04role\x18\x02 \x01(\v2\x17.treno.provider.v1.RoleR\x04role\x12?\n" +
+	"\vpermissions\x18\x04 \x03(\v2\x1d.treno.provider.v1.PermissionR\vpermissions\x12\x18\n" +
+	"\apending\x18\x03 \x01(\bR\apending\"\xcf\x02\n" +
+	"!ServiceServiceRevokeAccessRequest\x12=\n" +
 	"\n" +
-	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
-	"credential\x126\n" +
-	"\aservice\x18\x02 \x01(\v2\x1c.steward.provider.v1.ServiceR\aservice\x129\n" +
-	"\bidentity\x18\x03 \x01(\v2\x1d.steward.provider.v1.IdentityR\bidentity\x12-\n" +
-	"\x04role\x18\x04 \x01(\v2\x19.steward.provider.v1.RoleR\x04role\x12A\n" +
-	"\vpermissions\x18\x06 \x03(\v2\x1f.steward.provider.v1.PermissionR\vpermissions\x12\x0e\n" +
+	"credential\x18\x01 \x01(\v2\x1d.treno.provider.v1.CredentialR\n" +
+	"credential\x124\n" +
+	"\aservice\x18\x02 \x01(\v2\x1a.treno.provider.v1.ServiceR\aservice\x127\n" +
+	"\bidentity\x18\x03 \x01(\v2\x1b.treno.provider.v1.IdentityR\bidentity\x12+\n" +
+	"\x04role\x18\x04 \x01(\v2\x17.treno.provider.v1.RoleR\x04role\x12?\n" +
+	"\vpermissions\x18\x06 \x03(\v2\x1d.treno.provider.v1.PermissionR\vpermissions\x12\x0e\n" +
 	"\x02id\x18\x05 \x01(\tR\x02id\"$\n" +
-	"\"ServiceServiceRevokeAccessResponse\"\xd4\x01\n" +
-	"\x1eServiceServiceGetAccessRequest\x12?\n" +
+	"\"ServiceServiceRevokeAccessResponse\"\xce\x01\n" +
+	"\x1eServiceServiceGetAccessRequest\x12=\n" +
 	"\n" +
-	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
-	"credential\x126\n" +
-	"\aservice\x18\x02 \x01(\v2\x1c.steward.provider.v1.ServiceR\aservice\x129\n" +
-	"\bidentity\x18\x03 \x01(\v2\x1d.steward.provider.v1.IdentityR\bidentity\"\xaf\x01\n" +
-	"\x1fServiceServiceGetAccessResponse\x12/\n" +
-	"\x05roles\x18\x01 \x03(\v2\x19.steward.provider.v1.RoleR\x05roles\x12A\n" +
-	"\vpermissions\x18\x03 \x03(\v2\x1f.steward.provider.v1.PermissionR\vpermissions\x12\x18\n" +
-	"\apending\x18\x02 \x01(\bR\apending\"\x8f\x03\n" +
-	"\x1eServiceServiceProvisionRequest\x12?\n" +
+	"credential\x18\x01 \x01(\v2\x1d.treno.provider.v1.CredentialR\n" +
+	"credential\x124\n" +
+	"\aservice\x18\x02 \x01(\v2\x1a.treno.provider.v1.ServiceR\aservice\x127\n" +
+	"\bidentity\x18\x03 \x01(\v2\x1b.treno.provider.v1.IdentityR\bidentity\"\xab\x01\n" +
+	"\x1fServiceServiceGetAccessResponse\x12-\n" +
+	"\x05roles\x18\x01 \x03(\v2\x17.treno.provider.v1.RoleR\x05roles\x12?\n" +
+	"\vpermissions\x18\x03 \x03(\v2\x1d.treno.provider.v1.PermissionR\vpermissions\x12\x18\n" +
+	"\apending\x18\x02 \x01(\bR\apending\"\x89\x03\n" +
+	"\x1eServiceServiceProvisionRequest\x12=\n" +
 	"\n" +
-	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
+	"credential\x18\x01 \x01(\v2\x1d.treno.provider.v1.CredentialR\n" +
 	"credential\x12\x12\n" +
 	"\x04kind\x18\x02 \x01(\tR\x04kind\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12/\n" +
-	"\x06inputs\x18\x04 \x01(\v2\x17.google.protobuf.StructR\x06inputs\x12Z\n" +
-	"\asecrets\x18\x05 \x03(\v2@.steward.provider.v1.ServiceServiceProvisionRequest.SecretsEntryR\asecrets\x12;\n" +
-	"\tvariables\x18\x06 \x03(\v2\x1d.steward.provider.v1.VariableR\tvariables\x1a:\n" +
+	"\x06inputs\x18\x04 \x01(\v2\x17.google.protobuf.StructR\x06inputs\x12X\n" +
+	"\asecrets\x18\x05 \x03(\v2>.treno.provider.v1.ServiceServiceProvisionRequest.SecretsEntryR\asecrets\x129\n" +
+	"\tvariables\x18\x06 \x03(\v2\x1b.treno.provider.v1.VariableR\tvariables\x1a:\n" +
 	"\fSecretsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"T\n" +
 	"\x1fServiceServiceProvisionResponse\x121\n" +
-	"\aoutputs\x18\x01 \x01(\v2\x17.google.protobuf.StructR\aoutputs\"\x9b\x01\n" +
-	" ServiceServiceDeprovisionRequest\x12?\n" +
+	"\aoutputs\x18\x01 \x01(\v2\x17.google.protobuf.StructR\aoutputs\"\x97\x01\n" +
+	" ServiceServiceDeprovisionRequest\x12=\n" +
 	"\n" +
-	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
-	"credential\x126\n" +
-	"\aservice\x18\x02 \x01(\v2\x1c.steward.provider.v1.ServiceR\aservice\"#\n" +
-	"!ServiceServiceDeprovisionResponse\"\x8f\x01\n" +
-	"\x19ServiceServiceListRequest\x12?\n" +
+	"credential\x18\x01 \x01(\v2\x1d.treno.provider.v1.CredentialR\n" +
+	"credential\x124\n" +
+	"\aservice\x18\x02 \x01(\v2\x1a.treno.provider.v1.ServiceR\aservice\"#\n" +
+	"!ServiceServiceDeprovisionResponse\"\x8d\x01\n" +
+	"\x19ServiceServiceListRequest\x12=\n" +
 	"\n" +
-	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
+	"credential\x18\x01 \x01(\v2\x1d.treno.provider.v1.CredentialR\n" +
 	"credential\x12\x12\n" +
 	"\x04kind\x18\x02 \x01(\tR\x04kind\x12\x1d\n" +
 	"\n" +
-	"page_token\x18\x03 \x01(\tR\tpageToken\"~\n" +
-	"\x1aServiceServiceListResponse\x128\n" +
-	"\bservices\x18\x01 \x03(\v2\x1c.steward.provider.v1.ServiceR\bservices\x12&\n" +
-	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"\xbd\x03\n" +
-	"\x1fApplicationServiceCreateRequest\x12?\n" +
+	"page_token\x18\x03 \x01(\tR\tpageToken\"|\n" +
+	"\x1aServiceServiceListResponse\x126\n" +
+	"\bservices\x18\x01 \x03(\v2\x1a.treno.provider.v1.ServiceR\bservices\x12&\n" +
+	"\x0fnext_page_token\x18\x02 \x01(\tR\rnextPageToken\"\xb5\x03\n" +
+	"\x1fApplicationServiceCreateRequest\x12=\n" +
 	"\n" +
-	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
+	"credential\x18\x01 \x01(\v2\x1d.treno.provider.v1.CredentialR\n" +
 	"credential\x12\x12\n" +
 	"\x04kind\x18\x02 \x01(\tR\x04kind\x12/\n" +
-	"\x06inputs\x18\x03 \x01(\v2\x17.google.protobuf.StructR\x06inputs\x12[\n" +
-	"\asecrets\x18\x04 \x03(\v2A.steward.provider.v1.ApplicationServiceCreateRequest.SecretsEntryR\asecrets\x12>\n" +
-	"\x06source\x18\x05 \x01(\v2&.steward.provider.v1.ApplicationSourceR\x06source\x12;\n" +
-	"\tvariables\x18\x06 \x03(\v2\x1d.steward.provider.v1.VariableR\tvariables\x1a:\n" +
+	"\x06inputs\x18\x03 \x01(\v2\x17.google.protobuf.StructR\x06inputs\x12Y\n" +
+	"\asecrets\x18\x04 \x03(\v2?.treno.provider.v1.ApplicationServiceCreateRequest.SecretsEntryR\asecrets\x12<\n" +
+	"\x06source\x18\x05 \x01(\v2$.treno.provider.v1.ApplicationSourceR\x06source\x129\n" +
+	"\tvariables\x18\x06 \x03(\v2\x1b.treno.provider.v1.VariableR\tvariables\x1a:\n" +
 	"\fSecretsEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"f\n" +
-	" ApplicationServiceCreateResponse\x12B\n" +
-	"\vapplication\x18\x01 \x01(\v2 .steward.provider.v1.ApplicationR\vapplication\"\xa7\x01\n" +
-	" ApplicationServiceDestroyRequest\x12?\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"d\n" +
+	" ApplicationServiceCreateResponse\x12@\n" +
+	"\vapplication\x18\x01 \x01(\v2\x1e.treno.provider.v1.ApplicationR\vapplication\"\xa3\x01\n" +
+	" ApplicationServiceDestroyRequest\x12=\n" +
 	"\n" +
-	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
-	"credential\x12B\n" +
-	"\vapplication\x18\x02 \x01(\v2 .steward.provider.v1.ApplicationR\vapplication\"#\n" +
-	"!ApplicationServiceDestroyResponse\"\xe6\x01\n" +
-	"\x1fApplicationServiceDeployRequest\x12?\n" +
+	"credential\x18\x01 \x01(\v2\x1d.treno.provider.v1.CredentialR\n" +
+	"credential\x12@\n" +
+	"\vapplication\x18\x02 \x01(\v2\x1e.treno.provider.v1.ApplicationR\vapplication\"#\n" +
+	"!ApplicationServiceDestroyResponse\"\xe0\x01\n" +
+	"\x1fApplicationServiceDeployRequest\x12=\n" +
 	"\n" +
-	"credential\x18\x01 \x01(\v2\x1f.steward.provider.v1.CredentialR\n" +
-	"credential\x12B\n" +
-	"\vapplication\x18\x02 \x01(\v2 .steward.provider.v1.ApplicationR\vapplication\x12>\n" +
-	"\x06source\x18\x03 \x01(\v2&.steward.provider.v1.ApplicationSourceR\x06source\"f\n" +
-	" ApplicationServiceDeployResponse\x12B\n" +
-	"\vapplication\x18\x01 \x01(\v2 .steward.provider.v1.ApplicationR\vapplication2\xe8\x03\n" +
-	"\x0fProviderService\x12W\n" +
-	"\bDescribe\x12$.steward.provider.v1.DescribeRequest\x1a%.steward.provider.v1.DescribeResponse\x12~\n" +
-	"\vGrantAccess\x126.steward.provider.v1.ProviderServiceGrantAccessRequest\x1a7.steward.provider.v1.ProviderServiceGrantAccessResponse\x12\x81\x01\n" +
-	"\fRevokeAccess\x127.steward.provider.v1.ProviderServiceRevokeAccessRequest\x1a8.steward.provider.v1.ProviderServiceRevokeAccessResponse\x12x\n" +
-	"\tGetAccess\x124.steward.provider.v1.ProviderServiceGetAccessRequest\x1a5.steward.provider.v1.ProviderServiceGetAccessResponse2\xe6\x05\n" +
-	"\x0eServiceService\x12|\n" +
-	"\vGrantAccess\x125.steward.provider.v1.ServiceServiceGrantAccessRequest\x1a6.steward.provider.v1.ServiceServiceGrantAccessResponse\x12\x7f\n" +
-	"\fRevokeAccess\x126.steward.provider.v1.ServiceServiceRevokeAccessRequest\x1a7.steward.provider.v1.ServiceServiceRevokeAccessResponse\x12v\n" +
-	"\tGetAccess\x123.steward.provider.v1.ServiceServiceGetAccessRequest\x1a4.steward.provider.v1.ServiceServiceGetAccessResponse\x12v\n" +
-	"\tProvision\x123.steward.provider.v1.ServiceServiceProvisionRequest\x1a4.steward.provider.v1.ServiceServiceProvisionResponse\x12|\n" +
-	"\vDeprovision\x125.steward.provider.v1.ServiceServiceDeprovisionRequest\x1a6.steward.provider.v1.ServiceServiceDeprovisionResponse\x12g\n" +
-	"\x04List\x12..steward.provider.v1.ServiceServiceListRequest\x1a/.steward.provider.v1.ServiceServiceListResponse2\xfc\x02\n" +
-	"\x12ApplicationService\x12u\n" +
-	"\x06Create\x124.steward.provider.v1.ApplicationServiceCreateRequest\x1a5.steward.provider.v1.ApplicationServiceCreateResponse\x12x\n" +
-	"\aDestroy\x125.steward.provider.v1.ApplicationServiceDestroyRequest\x1a6.steward.provider.v1.ApplicationServiceDestroyResponse\x12u\n" +
-	"\x06Deploy\x124.steward.provider.v1.ApplicationServiceDeployRequest\x1a5.steward.provider.v1.ApplicationServiceDeployResponseB\xde\x01\n" +
-	"\x17com.steward.provider.v1B\rProviderProtoP\x01ZFgithub.com/treno-dev/steward-sdk/go/gen/steward/provider/v1;providerv1\xa2\x02\x03SPX\xaa\x02\x13Steward.Provider.V1\xca\x02\x13Steward\\Provider\\V1\xe2\x02\x1fSteward\\Provider\\V1\\GPBMetadata\xea\x02\x15Steward::Provider::V1b\x06proto3"
+	"credential\x18\x01 \x01(\v2\x1d.treno.provider.v1.CredentialR\n" +
+	"credential\x12@\n" +
+	"\vapplication\x18\x02 \x01(\v2\x1e.treno.provider.v1.ApplicationR\vapplication\x12<\n" +
+	"\x06source\x18\x03 \x01(\v2$.treno.provider.v1.ApplicationSourceR\x06source\"d\n" +
+	" ApplicationServiceDeployResponse\x12@\n" +
+	"\vapplication\x18\x01 \x01(\v2\x1e.treno.provider.v1.ApplicationR\vapplication2\xd7\x03\n" +
+	"\x0fProviderService\x12S\n" +
+	"\bDescribe\x12\".treno.provider.v1.DescribeRequest\x1a#.treno.provider.v1.DescribeResponse\x12z\n" +
+	"\vGrantAccess\x124.treno.provider.v1.ProviderServiceGrantAccessRequest\x1a5.treno.provider.v1.ProviderServiceGrantAccessResponse\x12}\n" +
+	"\fRevokeAccess\x125.treno.provider.v1.ProviderServiceRevokeAccessRequest\x1a6.treno.provider.v1.ProviderServiceRevokeAccessResponse\x12t\n" +
+	"\tGetAccess\x122.treno.provider.v1.ProviderServiceGetAccessRequest\x1a3.treno.provider.v1.ProviderServiceGetAccessResponse2\xce\x05\n" +
+	"\x0eServiceService\x12x\n" +
+	"\vGrantAccess\x123.treno.provider.v1.ServiceServiceGrantAccessRequest\x1a4.treno.provider.v1.ServiceServiceGrantAccessResponse\x12{\n" +
+	"\fRevokeAccess\x124.treno.provider.v1.ServiceServiceRevokeAccessRequest\x1a5.treno.provider.v1.ServiceServiceRevokeAccessResponse\x12r\n" +
+	"\tGetAccess\x121.treno.provider.v1.ServiceServiceGetAccessRequest\x1a2.treno.provider.v1.ServiceServiceGetAccessResponse\x12r\n" +
+	"\tProvision\x121.treno.provider.v1.ServiceServiceProvisionRequest\x1a2.treno.provider.v1.ServiceServiceProvisionResponse\x12x\n" +
+	"\vDeprovision\x123.treno.provider.v1.ServiceServiceDeprovisionRequest\x1a4.treno.provider.v1.ServiceServiceDeprovisionResponse\x12c\n" +
+	"\x04List\x12,.treno.provider.v1.ServiceServiceListRequest\x1a-.treno.provider.v1.ServiceServiceListResponse2\xf0\x02\n" +
+	"\x12ApplicationService\x12q\n" +
+	"\x06Create\x122.treno.provider.v1.ApplicationServiceCreateRequest\x1a3.treno.provider.v1.ApplicationServiceCreateResponse\x12t\n" +
+	"\aDestroy\x123.treno.provider.v1.ApplicationServiceDestroyRequest\x1a4.treno.provider.v1.ApplicationServiceDestroyResponse\x12q\n" +
+	"\x06Deploy\x122.treno.provider.v1.ApplicationServiceDeployRequest\x1a3.treno.provider.v1.ApplicationServiceDeployResponseB\xd0\x01\n" +
+	"\x15com.treno.provider.v1B\rProviderProtoP\x01ZBgithub.com/treno-dev/treno-sdk/go/gen/treno/provider/v1;providerv1\xa2\x02\x03TPX\xaa\x02\x11Treno.Provider.V1\xca\x02\x11Treno\\Provider\\V1\xe2\x02\x1dTreno\\Provider\\V1\\GPBMetadata\xea\x02\x13Treno::Provider::V1b\x06proto3"
 
 var (
-	file_steward_provider_v1_provider_proto_rawDescOnce sync.Once
-	file_steward_provider_v1_provider_proto_rawDescData []byte
+	file_treno_provider_v1_provider_proto_rawDescOnce sync.Once
+	file_treno_provider_v1_provider_proto_rawDescData []byte
 )
 
-func file_steward_provider_v1_provider_proto_rawDescGZIP() []byte {
-	file_steward_provider_v1_provider_proto_rawDescOnce.Do(func() {
-		file_steward_provider_v1_provider_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_steward_provider_v1_provider_proto_rawDesc), len(file_steward_provider_v1_provider_proto_rawDesc)))
+func file_treno_provider_v1_provider_proto_rawDescGZIP() []byte {
+	file_treno_provider_v1_provider_proto_rawDescOnce.Do(func() {
+		file_treno_provider_v1_provider_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_treno_provider_v1_provider_proto_rawDesc), len(file_treno_provider_v1_provider_proto_rawDesc)))
 	})
-	return file_steward_provider_v1_provider_proto_rawDescData
+	return file_treno_provider_v1_provider_proto_rawDescData
 }
 
-var file_steward_provider_v1_provider_proto_msgTypes = make([]protoimpl.MessageInfo, 50)
-var file_steward_provider_v1_provider_proto_goTypes = []any{
-	(*Credential)(nil),                          // 0: steward.provider.v1.Credential
-	(*Organization)(nil),                        // 1: steward.provider.v1.Organization
-	(*Service)(nil),                             // 2: steward.provider.v1.Service
-	(*VariadicVariables)(nil),                   // 3: steward.provider.v1.VariadicVariables
-	(*Application)(nil),                         // 4: steward.provider.v1.Application
-	(*ApplicationSource)(nil),                   // 5: steward.provider.v1.ApplicationSource
-	(*Variable)(nil),                            // 6: steward.provider.v1.Variable
-	(*Identity)(nil),                            // 7: steward.provider.v1.Identity
-	(*Role)(nil),                                // 8: steward.provider.v1.Role
-	(*Permission)(nil),                          // 9: steward.provider.v1.Permission
-	(*DescribeRequest)(nil),                     // 10: steward.provider.v1.DescribeRequest
-	(*DescribeResponse)(nil),                    // 11: steward.provider.v1.DescribeResponse
-	(*SetupLink)(nil),                           // 12: steward.provider.v1.SetupLink
-	(*ProviderDefinition)(nil),                  // 13: steward.provider.v1.ProviderDefinition
-	(*InputDefinition)(nil),                     // 14: steward.provider.v1.InputDefinition
-	(*SecretDefinition)(nil),                    // 15: steward.provider.v1.SecretDefinition
-	(*OutputDefinition)(nil),                    // 16: steward.provider.v1.OutputDefinition
-	(*ServiceDefinition)(nil),                   // 17: steward.provider.v1.ServiceDefinition
-	(*ApplicationDefinition)(nil),               // 18: steward.provider.v1.ApplicationDefinition
-	(*EntitlementDefinition)(nil),               // 19: steward.provider.v1.EntitlementDefinition
-	(*PermissionDefinition)(nil),                // 20: steward.provider.v1.PermissionDefinition
-	(*RoleDefinition)(nil),                      // 21: steward.provider.v1.RoleDefinition
-	(*ProviderServiceGrantAccessRequest)(nil),   // 22: steward.provider.v1.ProviderServiceGrantAccessRequest
-	(*ProviderServiceGrantAccessResponse)(nil),  // 23: steward.provider.v1.ProviderServiceGrantAccessResponse
-	(*ProviderServiceRevokeAccessRequest)(nil),  // 24: steward.provider.v1.ProviderServiceRevokeAccessRequest
-	(*ProviderServiceRevokeAccessResponse)(nil), // 25: steward.provider.v1.ProviderServiceRevokeAccessResponse
-	(*ProviderServiceGetAccessRequest)(nil),     // 26: steward.provider.v1.ProviderServiceGetAccessRequest
-	(*ProviderServiceGetAccessResponse)(nil),    // 27: steward.provider.v1.ProviderServiceGetAccessResponse
-	(*ServiceServiceGrantAccessRequest)(nil),    // 28: steward.provider.v1.ServiceServiceGrantAccessRequest
-	(*ServiceServiceGrantAccessResponse)(nil),   // 29: steward.provider.v1.ServiceServiceGrantAccessResponse
-	(*ServiceServiceRevokeAccessRequest)(nil),   // 30: steward.provider.v1.ServiceServiceRevokeAccessRequest
-	(*ServiceServiceRevokeAccessResponse)(nil),  // 31: steward.provider.v1.ServiceServiceRevokeAccessResponse
-	(*ServiceServiceGetAccessRequest)(nil),      // 32: steward.provider.v1.ServiceServiceGetAccessRequest
-	(*ServiceServiceGetAccessResponse)(nil),     // 33: steward.provider.v1.ServiceServiceGetAccessResponse
-	(*ServiceServiceProvisionRequest)(nil),      // 34: steward.provider.v1.ServiceServiceProvisionRequest
-	(*ServiceServiceProvisionResponse)(nil),     // 35: steward.provider.v1.ServiceServiceProvisionResponse
-	(*ServiceServiceDeprovisionRequest)(nil),    // 36: steward.provider.v1.ServiceServiceDeprovisionRequest
-	(*ServiceServiceDeprovisionResponse)(nil),   // 37: steward.provider.v1.ServiceServiceDeprovisionResponse
-	(*ServiceServiceListRequest)(nil),           // 38: steward.provider.v1.ServiceServiceListRequest
-	(*ServiceServiceListResponse)(nil),          // 39: steward.provider.v1.ServiceServiceListResponse
-	(*ApplicationServiceCreateRequest)(nil),     // 40: steward.provider.v1.ApplicationServiceCreateRequest
-	(*ApplicationServiceCreateResponse)(nil),    // 41: steward.provider.v1.ApplicationServiceCreateResponse
-	(*ApplicationServiceDestroyRequest)(nil),    // 42: steward.provider.v1.ApplicationServiceDestroyRequest
-	(*ApplicationServiceDestroyResponse)(nil),   // 43: steward.provider.v1.ApplicationServiceDestroyResponse
-	(*ApplicationServiceDeployRequest)(nil),     // 44: steward.provider.v1.ApplicationServiceDeployRequest
-	(*ApplicationServiceDeployResponse)(nil),    // 45: steward.provider.v1.ApplicationServiceDeployResponse
-	nil,                                         // 46: steward.provider.v1.Service.SecretsEntry
-	nil,                                         // 47: steward.provider.v1.Application.SecretsEntry
-	nil,                                         // 48: steward.provider.v1.ServiceServiceProvisionRequest.SecretsEntry
-	nil,                                         // 49: steward.provider.v1.ApplicationServiceCreateRequest.SecretsEntry
+var file_treno_provider_v1_provider_proto_msgTypes = make([]protoimpl.MessageInfo, 50)
+var file_treno_provider_v1_provider_proto_goTypes = []any{
+	(*Credential)(nil),                          // 0: treno.provider.v1.Credential
+	(*Organization)(nil),                        // 1: treno.provider.v1.Organization
+	(*Service)(nil),                             // 2: treno.provider.v1.Service
+	(*VariadicVariables)(nil),                   // 3: treno.provider.v1.VariadicVariables
+	(*Application)(nil),                         // 4: treno.provider.v1.Application
+	(*ApplicationSource)(nil),                   // 5: treno.provider.v1.ApplicationSource
+	(*Variable)(nil),                            // 6: treno.provider.v1.Variable
+	(*Identity)(nil),                            // 7: treno.provider.v1.Identity
+	(*Role)(nil),                                // 8: treno.provider.v1.Role
+	(*Permission)(nil),                          // 9: treno.provider.v1.Permission
+	(*DescribeRequest)(nil),                     // 10: treno.provider.v1.DescribeRequest
+	(*DescribeResponse)(nil),                    // 11: treno.provider.v1.DescribeResponse
+	(*SetupLink)(nil),                           // 12: treno.provider.v1.SetupLink
+	(*ProviderDefinition)(nil),                  // 13: treno.provider.v1.ProviderDefinition
+	(*InputDefinition)(nil),                     // 14: treno.provider.v1.InputDefinition
+	(*SecretDefinition)(nil),                    // 15: treno.provider.v1.SecretDefinition
+	(*OutputDefinition)(nil),                    // 16: treno.provider.v1.OutputDefinition
+	(*ServiceDefinition)(nil),                   // 17: treno.provider.v1.ServiceDefinition
+	(*ApplicationDefinition)(nil),               // 18: treno.provider.v1.ApplicationDefinition
+	(*EntitlementDefinition)(nil),               // 19: treno.provider.v1.EntitlementDefinition
+	(*PermissionDefinition)(nil),                // 20: treno.provider.v1.PermissionDefinition
+	(*RoleDefinition)(nil),                      // 21: treno.provider.v1.RoleDefinition
+	(*ProviderServiceGrantAccessRequest)(nil),   // 22: treno.provider.v1.ProviderServiceGrantAccessRequest
+	(*ProviderServiceGrantAccessResponse)(nil),  // 23: treno.provider.v1.ProviderServiceGrantAccessResponse
+	(*ProviderServiceRevokeAccessRequest)(nil),  // 24: treno.provider.v1.ProviderServiceRevokeAccessRequest
+	(*ProviderServiceRevokeAccessResponse)(nil), // 25: treno.provider.v1.ProviderServiceRevokeAccessResponse
+	(*ProviderServiceGetAccessRequest)(nil),     // 26: treno.provider.v1.ProviderServiceGetAccessRequest
+	(*ProviderServiceGetAccessResponse)(nil),    // 27: treno.provider.v1.ProviderServiceGetAccessResponse
+	(*ServiceServiceGrantAccessRequest)(nil),    // 28: treno.provider.v1.ServiceServiceGrantAccessRequest
+	(*ServiceServiceGrantAccessResponse)(nil),   // 29: treno.provider.v1.ServiceServiceGrantAccessResponse
+	(*ServiceServiceRevokeAccessRequest)(nil),   // 30: treno.provider.v1.ServiceServiceRevokeAccessRequest
+	(*ServiceServiceRevokeAccessResponse)(nil),  // 31: treno.provider.v1.ServiceServiceRevokeAccessResponse
+	(*ServiceServiceGetAccessRequest)(nil),      // 32: treno.provider.v1.ServiceServiceGetAccessRequest
+	(*ServiceServiceGetAccessResponse)(nil),     // 33: treno.provider.v1.ServiceServiceGetAccessResponse
+	(*ServiceServiceProvisionRequest)(nil),      // 34: treno.provider.v1.ServiceServiceProvisionRequest
+	(*ServiceServiceProvisionResponse)(nil),     // 35: treno.provider.v1.ServiceServiceProvisionResponse
+	(*ServiceServiceDeprovisionRequest)(nil),    // 36: treno.provider.v1.ServiceServiceDeprovisionRequest
+	(*ServiceServiceDeprovisionResponse)(nil),   // 37: treno.provider.v1.ServiceServiceDeprovisionResponse
+	(*ServiceServiceListRequest)(nil),           // 38: treno.provider.v1.ServiceServiceListRequest
+	(*ServiceServiceListResponse)(nil),          // 39: treno.provider.v1.ServiceServiceListResponse
+	(*ApplicationServiceCreateRequest)(nil),     // 40: treno.provider.v1.ApplicationServiceCreateRequest
+	(*ApplicationServiceCreateResponse)(nil),    // 41: treno.provider.v1.ApplicationServiceCreateResponse
+	(*ApplicationServiceDestroyRequest)(nil),    // 42: treno.provider.v1.ApplicationServiceDestroyRequest
+	(*ApplicationServiceDestroyResponse)(nil),   // 43: treno.provider.v1.ApplicationServiceDestroyResponse
+	(*ApplicationServiceDeployRequest)(nil),     // 44: treno.provider.v1.ApplicationServiceDeployRequest
+	(*ApplicationServiceDeployResponse)(nil),    // 45: treno.provider.v1.ApplicationServiceDeployResponse
+	nil,                                         // 46: treno.provider.v1.Service.SecretsEntry
+	nil,                                         // 47: treno.provider.v1.Application.SecretsEntry
+	nil,                                         // 48: treno.provider.v1.ServiceServiceProvisionRequest.SecretsEntry
+	nil,                                         // 49: treno.provider.v1.ApplicationServiceCreateRequest.SecretsEntry
 	(*structpb.Struct)(nil),                     // 50: google.protobuf.Struct
 	(*structpb.Value)(nil),                      // 51: google.protobuf.Value
 }
-var file_steward_provider_v1_provider_proto_depIdxs = []int32{
-	1,  // 0: steward.provider.v1.Credential.organization:type_name -> steward.provider.v1.Organization
-	50, // 1: steward.provider.v1.Service.inputs:type_name -> google.protobuf.Struct
-	46, // 2: steward.provider.v1.Service.secrets:type_name -> steward.provider.v1.Service.SecretsEntry
-	50, // 3: steward.provider.v1.Service.outputs:type_name -> google.protobuf.Struct
-	6,  // 4: steward.provider.v1.Service.variables:type_name -> steward.provider.v1.Variable
-	50, // 5: steward.provider.v1.Application.inputs:type_name -> google.protobuf.Struct
-	47, // 6: steward.provider.v1.Application.secrets:type_name -> steward.provider.v1.Application.SecretsEntry
-	50, // 7: steward.provider.v1.Application.outputs:type_name -> google.protobuf.Struct
-	5,  // 8: steward.provider.v1.Application.source:type_name -> steward.provider.v1.ApplicationSource
-	6,  // 9: steward.provider.v1.Application.variables:type_name -> steward.provider.v1.Variable
-	50, // 10: steward.provider.v1.ApplicationSource.config:type_name -> google.protobuf.Struct
-	50, // 11: steward.provider.v1.Identity.attrs:type_name -> google.protobuf.Struct
-	0,  // 12: steward.provider.v1.DescribeRequest.credential:type_name -> steward.provider.v1.Credential
-	13, // 13: steward.provider.v1.DescribeResponse.definition:type_name -> steward.provider.v1.ProviderDefinition
-	12, // 14: steward.provider.v1.DescribeResponse.setup_links:type_name -> steward.provider.v1.SetupLink
-	17, // 15: steward.provider.v1.ProviderDefinition.services:type_name -> steward.provider.v1.ServiceDefinition
-	18, // 16: steward.provider.v1.ProviderDefinition.applications:type_name -> steward.provider.v1.ApplicationDefinition
-	19, // 17: steward.provider.v1.ProviderDefinition.entitlements:type_name -> steward.provider.v1.EntitlementDefinition
-	51, // 18: steward.provider.v1.InputDefinition.default:type_name -> google.protobuf.Value
-	14, // 19: steward.provider.v1.ServiceDefinition.inputs:type_name -> steward.provider.v1.InputDefinition
-	15, // 20: steward.provider.v1.ServiceDefinition.secrets:type_name -> steward.provider.v1.SecretDefinition
-	20, // 21: steward.provider.v1.ServiceDefinition.permissions:type_name -> steward.provider.v1.PermissionDefinition
-	21, // 22: steward.provider.v1.ServiceDefinition.roles:type_name -> steward.provider.v1.RoleDefinition
-	16, // 23: steward.provider.v1.ServiceDefinition.outputs:type_name -> steward.provider.v1.OutputDefinition
-	3,  // 24: steward.provider.v1.ServiceDefinition.variables:type_name -> steward.provider.v1.VariadicVariables
-	14, // 25: steward.provider.v1.ApplicationDefinition.inputs:type_name -> steward.provider.v1.InputDefinition
-	15, // 26: steward.provider.v1.ApplicationDefinition.secrets:type_name -> steward.provider.v1.SecretDefinition
-	16, // 27: steward.provider.v1.ApplicationDefinition.outputs:type_name -> steward.provider.v1.OutputDefinition
-	14, // 28: steward.provider.v1.EntitlementDefinition.inputs:type_name -> steward.provider.v1.InputDefinition
-	0,  // 29: steward.provider.v1.ProviderServiceGrantAccessRequest.credential:type_name -> steward.provider.v1.Credential
-	7,  // 30: steward.provider.v1.ProviderServiceGrantAccessRequest.identity:type_name -> steward.provider.v1.Identity
-	50, // 31: steward.provider.v1.ProviderServiceGrantAccessRequest.inputs:type_name -> google.protobuf.Struct
-	0,  // 32: steward.provider.v1.ProviderServiceRevokeAccessRequest.credential:type_name -> steward.provider.v1.Credential
-	7,  // 33: steward.provider.v1.ProviderServiceRevokeAccessRequest.identity:type_name -> steward.provider.v1.Identity
-	50, // 34: steward.provider.v1.ProviderServiceRevokeAccessRequest.inputs:type_name -> google.protobuf.Struct
-	0,  // 35: steward.provider.v1.ProviderServiceGetAccessRequest.credential:type_name -> steward.provider.v1.Credential
-	7,  // 36: steward.provider.v1.ProviderServiceGetAccessRequest.identity:type_name -> steward.provider.v1.Identity
-	50, // 37: steward.provider.v1.ProviderServiceGetAccessRequest.inputs:type_name -> google.protobuf.Struct
-	7,  // 38: steward.provider.v1.ProviderServiceGetAccessResponse.identity:type_name -> steward.provider.v1.Identity
-	0,  // 39: steward.provider.v1.ServiceServiceGrantAccessRequest.credential:type_name -> steward.provider.v1.Credential
-	2,  // 40: steward.provider.v1.ServiceServiceGrantAccessRequest.service:type_name -> steward.provider.v1.Service
-	7,  // 41: steward.provider.v1.ServiceServiceGrantAccessRequest.identity:type_name -> steward.provider.v1.Identity
-	8,  // 42: steward.provider.v1.ServiceServiceGrantAccessRequest.role:type_name -> steward.provider.v1.Role
-	9,  // 43: steward.provider.v1.ServiceServiceGrantAccessRequest.permissions:type_name -> steward.provider.v1.Permission
-	8,  // 44: steward.provider.v1.ServiceServiceGrantAccessResponse.role:type_name -> steward.provider.v1.Role
-	9,  // 45: steward.provider.v1.ServiceServiceGrantAccessResponse.permissions:type_name -> steward.provider.v1.Permission
-	0,  // 46: steward.provider.v1.ServiceServiceRevokeAccessRequest.credential:type_name -> steward.provider.v1.Credential
-	2,  // 47: steward.provider.v1.ServiceServiceRevokeAccessRequest.service:type_name -> steward.provider.v1.Service
-	7,  // 48: steward.provider.v1.ServiceServiceRevokeAccessRequest.identity:type_name -> steward.provider.v1.Identity
-	8,  // 49: steward.provider.v1.ServiceServiceRevokeAccessRequest.role:type_name -> steward.provider.v1.Role
-	9,  // 50: steward.provider.v1.ServiceServiceRevokeAccessRequest.permissions:type_name -> steward.provider.v1.Permission
-	0,  // 51: steward.provider.v1.ServiceServiceGetAccessRequest.credential:type_name -> steward.provider.v1.Credential
-	2,  // 52: steward.provider.v1.ServiceServiceGetAccessRequest.service:type_name -> steward.provider.v1.Service
-	7,  // 53: steward.provider.v1.ServiceServiceGetAccessRequest.identity:type_name -> steward.provider.v1.Identity
-	8,  // 54: steward.provider.v1.ServiceServiceGetAccessResponse.roles:type_name -> steward.provider.v1.Role
-	9,  // 55: steward.provider.v1.ServiceServiceGetAccessResponse.permissions:type_name -> steward.provider.v1.Permission
-	0,  // 56: steward.provider.v1.ServiceServiceProvisionRequest.credential:type_name -> steward.provider.v1.Credential
-	50, // 57: steward.provider.v1.ServiceServiceProvisionRequest.inputs:type_name -> google.protobuf.Struct
-	48, // 58: steward.provider.v1.ServiceServiceProvisionRequest.secrets:type_name -> steward.provider.v1.ServiceServiceProvisionRequest.SecretsEntry
-	6,  // 59: steward.provider.v1.ServiceServiceProvisionRequest.variables:type_name -> steward.provider.v1.Variable
-	50, // 60: steward.provider.v1.ServiceServiceProvisionResponse.outputs:type_name -> google.protobuf.Struct
-	0,  // 61: steward.provider.v1.ServiceServiceDeprovisionRequest.credential:type_name -> steward.provider.v1.Credential
-	2,  // 62: steward.provider.v1.ServiceServiceDeprovisionRequest.service:type_name -> steward.provider.v1.Service
-	0,  // 63: steward.provider.v1.ServiceServiceListRequest.credential:type_name -> steward.provider.v1.Credential
-	2,  // 64: steward.provider.v1.ServiceServiceListResponse.services:type_name -> steward.provider.v1.Service
-	0,  // 65: steward.provider.v1.ApplicationServiceCreateRequest.credential:type_name -> steward.provider.v1.Credential
-	50, // 66: steward.provider.v1.ApplicationServiceCreateRequest.inputs:type_name -> google.protobuf.Struct
-	49, // 67: steward.provider.v1.ApplicationServiceCreateRequest.secrets:type_name -> steward.provider.v1.ApplicationServiceCreateRequest.SecretsEntry
-	5,  // 68: steward.provider.v1.ApplicationServiceCreateRequest.source:type_name -> steward.provider.v1.ApplicationSource
-	6,  // 69: steward.provider.v1.ApplicationServiceCreateRequest.variables:type_name -> steward.provider.v1.Variable
-	4,  // 70: steward.provider.v1.ApplicationServiceCreateResponse.application:type_name -> steward.provider.v1.Application
-	0,  // 71: steward.provider.v1.ApplicationServiceDestroyRequest.credential:type_name -> steward.provider.v1.Credential
-	4,  // 72: steward.provider.v1.ApplicationServiceDestroyRequest.application:type_name -> steward.provider.v1.Application
-	0,  // 73: steward.provider.v1.ApplicationServiceDeployRequest.credential:type_name -> steward.provider.v1.Credential
-	4,  // 74: steward.provider.v1.ApplicationServiceDeployRequest.application:type_name -> steward.provider.v1.Application
-	5,  // 75: steward.provider.v1.ApplicationServiceDeployRequest.source:type_name -> steward.provider.v1.ApplicationSource
-	4,  // 76: steward.provider.v1.ApplicationServiceDeployResponse.application:type_name -> steward.provider.v1.Application
-	10, // 77: steward.provider.v1.ProviderService.Describe:input_type -> steward.provider.v1.DescribeRequest
-	22, // 78: steward.provider.v1.ProviderService.GrantAccess:input_type -> steward.provider.v1.ProviderServiceGrantAccessRequest
-	24, // 79: steward.provider.v1.ProviderService.RevokeAccess:input_type -> steward.provider.v1.ProviderServiceRevokeAccessRequest
-	26, // 80: steward.provider.v1.ProviderService.GetAccess:input_type -> steward.provider.v1.ProviderServiceGetAccessRequest
-	28, // 81: steward.provider.v1.ServiceService.GrantAccess:input_type -> steward.provider.v1.ServiceServiceGrantAccessRequest
-	30, // 82: steward.provider.v1.ServiceService.RevokeAccess:input_type -> steward.provider.v1.ServiceServiceRevokeAccessRequest
-	32, // 83: steward.provider.v1.ServiceService.GetAccess:input_type -> steward.provider.v1.ServiceServiceGetAccessRequest
-	34, // 84: steward.provider.v1.ServiceService.Provision:input_type -> steward.provider.v1.ServiceServiceProvisionRequest
-	36, // 85: steward.provider.v1.ServiceService.Deprovision:input_type -> steward.provider.v1.ServiceServiceDeprovisionRequest
-	38, // 86: steward.provider.v1.ServiceService.List:input_type -> steward.provider.v1.ServiceServiceListRequest
-	40, // 87: steward.provider.v1.ApplicationService.Create:input_type -> steward.provider.v1.ApplicationServiceCreateRequest
-	42, // 88: steward.provider.v1.ApplicationService.Destroy:input_type -> steward.provider.v1.ApplicationServiceDestroyRequest
-	44, // 89: steward.provider.v1.ApplicationService.Deploy:input_type -> steward.provider.v1.ApplicationServiceDeployRequest
-	11, // 90: steward.provider.v1.ProviderService.Describe:output_type -> steward.provider.v1.DescribeResponse
-	23, // 91: steward.provider.v1.ProviderService.GrantAccess:output_type -> steward.provider.v1.ProviderServiceGrantAccessResponse
-	25, // 92: steward.provider.v1.ProviderService.RevokeAccess:output_type -> steward.provider.v1.ProviderServiceRevokeAccessResponse
-	27, // 93: steward.provider.v1.ProviderService.GetAccess:output_type -> steward.provider.v1.ProviderServiceGetAccessResponse
-	29, // 94: steward.provider.v1.ServiceService.GrantAccess:output_type -> steward.provider.v1.ServiceServiceGrantAccessResponse
-	31, // 95: steward.provider.v1.ServiceService.RevokeAccess:output_type -> steward.provider.v1.ServiceServiceRevokeAccessResponse
-	33, // 96: steward.provider.v1.ServiceService.GetAccess:output_type -> steward.provider.v1.ServiceServiceGetAccessResponse
-	35, // 97: steward.provider.v1.ServiceService.Provision:output_type -> steward.provider.v1.ServiceServiceProvisionResponse
-	37, // 98: steward.provider.v1.ServiceService.Deprovision:output_type -> steward.provider.v1.ServiceServiceDeprovisionResponse
-	39, // 99: steward.provider.v1.ServiceService.List:output_type -> steward.provider.v1.ServiceServiceListResponse
-	41, // 100: steward.provider.v1.ApplicationService.Create:output_type -> steward.provider.v1.ApplicationServiceCreateResponse
-	43, // 101: steward.provider.v1.ApplicationService.Destroy:output_type -> steward.provider.v1.ApplicationServiceDestroyResponse
-	45, // 102: steward.provider.v1.ApplicationService.Deploy:output_type -> steward.provider.v1.ApplicationServiceDeployResponse
+var file_treno_provider_v1_provider_proto_depIdxs = []int32{
+	1,  // 0: treno.provider.v1.Credential.organization:type_name -> treno.provider.v1.Organization
+	50, // 1: treno.provider.v1.Service.inputs:type_name -> google.protobuf.Struct
+	46, // 2: treno.provider.v1.Service.secrets:type_name -> treno.provider.v1.Service.SecretsEntry
+	50, // 3: treno.provider.v1.Service.outputs:type_name -> google.protobuf.Struct
+	6,  // 4: treno.provider.v1.Service.variables:type_name -> treno.provider.v1.Variable
+	50, // 5: treno.provider.v1.Application.inputs:type_name -> google.protobuf.Struct
+	47, // 6: treno.provider.v1.Application.secrets:type_name -> treno.provider.v1.Application.SecretsEntry
+	50, // 7: treno.provider.v1.Application.outputs:type_name -> google.protobuf.Struct
+	5,  // 8: treno.provider.v1.Application.source:type_name -> treno.provider.v1.ApplicationSource
+	6,  // 9: treno.provider.v1.Application.variables:type_name -> treno.provider.v1.Variable
+	50, // 10: treno.provider.v1.ApplicationSource.config:type_name -> google.protobuf.Struct
+	50, // 11: treno.provider.v1.Identity.attrs:type_name -> google.protobuf.Struct
+	0,  // 12: treno.provider.v1.DescribeRequest.credential:type_name -> treno.provider.v1.Credential
+	13, // 13: treno.provider.v1.DescribeResponse.definition:type_name -> treno.provider.v1.ProviderDefinition
+	12, // 14: treno.provider.v1.DescribeResponse.setup_links:type_name -> treno.provider.v1.SetupLink
+	17, // 15: treno.provider.v1.ProviderDefinition.services:type_name -> treno.provider.v1.ServiceDefinition
+	18, // 16: treno.provider.v1.ProviderDefinition.applications:type_name -> treno.provider.v1.ApplicationDefinition
+	19, // 17: treno.provider.v1.ProviderDefinition.entitlements:type_name -> treno.provider.v1.EntitlementDefinition
+	51, // 18: treno.provider.v1.InputDefinition.default:type_name -> google.protobuf.Value
+	14, // 19: treno.provider.v1.ServiceDefinition.inputs:type_name -> treno.provider.v1.InputDefinition
+	15, // 20: treno.provider.v1.ServiceDefinition.secrets:type_name -> treno.provider.v1.SecretDefinition
+	20, // 21: treno.provider.v1.ServiceDefinition.permissions:type_name -> treno.provider.v1.PermissionDefinition
+	21, // 22: treno.provider.v1.ServiceDefinition.roles:type_name -> treno.provider.v1.RoleDefinition
+	16, // 23: treno.provider.v1.ServiceDefinition.outputs:type_name -> treno.provider.v1.OutputDefinition
+	3,  // 24: treno.provider.v1.ServiceDefinition.variables:type_name -> treno.provider.v1.VariadicVariables
+	14, // 25: treno.provider.v1.ApplicationDefinition.inputs:type_name -> treno.provider.v1.InputDefinition
+	15, // 26: treno.provider.v1.ApplicationDefinition.secrets:type_name -> treno.provider.v1.SecretDefinition
+	16, // 27: treno.provider.v1.ApplicationDefinition.outputs:type_name -> treno.provider.v1.OutputDefinition
+	14, // 28: treno.provider.v1.EntitlementDefinition.inputs:type_name -> treno.provider.v1.InputDefinition
+	0,  // 29: treno.provider.v1.ProviderServiceGrantAccessRequest.credential:type_name -> treno.provider.v1.Credential
+	7,  // 30: treno.provider.v1.ProviderServiceGrantAccessRequest.identity:type_name -> treno.provider.v1.Identity
+	50, // 31: treno.provider.v1.ProviderServiceGrantAccessRequest.inputs:type_name -> google.protobuf.Struct
+	0,  // 32: treno.provider.v1.ProviderServiceRevokeAccessRequest.credential:type_name -> treno.provider.v1.Credential
+	7,  // 33: treno.provider.v1.ProviderServiceRevokeAccessRequest.identity:type_name -> treno.provider.v1.Identity
+	50, // 34: treno.provider.v1.ProviderServiceRevokeAccessRequest.inputs:type_name -> google.protobuf.Struct
+	0,  // 35: treno.provider.v1.ProviderServiceGetAccessRequest.credential:type_name -> treno.provider.v1.Credential
+	7,  // 36: treno.provider.v1.ProviderServiceGetAccessRequest.identity:type_name -> treno.provider.v1.Identity
+	50, // 37: treno.provider.v1.ProviderServiceGetAccessRequest.inputs:type_name -> google.protobuf.Struct
+	7,  // 38: treno.provider.v1.ProviderServiceGetAccessResponse.identity:type_name -> treno.provider.v1.Identity
+	0,  // 39: treno.provider.v1.ServiceServiceGrantAccessRequest.credential:type_name -> treno.provider.v1.Credential
+	2,  // 40: treno.provider.v1.ServiceServiceGrantAccessRequest.service:type_name -> treno.provider.v1.Service
+	7,  // 41: treno.provider.v1.ServiceServiceGrantAccessRequest.identity:type_name -> treno.provider.v1.Identity
+	8,  // 42: treno.provider.v1.ServiceServiceGrantAccessRequest.role:type_name -> treno.provider.v1.Role
+	9,  // 43: treno.provider.v1.ServiceServiceGrantAccessRequest.permissions:type_name -> treno.provider.v1.Permission
+	8,  // 44: treno.provider.v1.ServiceServiceGrantAccessResponse.role:type_name -> treno.provider.v1.Role
+	9,  // 45: treno.provider.v1.ServiceServiceGrantAccessResponse.permissions:type_name -> treno.provider.v1.Permission
+	0,  // 46: treno.provider.v1.ServiceServiceRevokeAccessRequest.credential:type_name -> treno.provider.v1.Credential
+	2,  // 47: treno.provider.v1.ServiceServiceRevokeAccessRequest.service:type_name -> treno.provider.v1.Service
+	7,  // 48: treno.provider.v1.ServiceServiceRevokeAccessRequest.identity:type_name -> treno.provider.v1.Identity
+	8,  // 49: treno.provider.v1.ServiceServiceRevokeAccessRequest.role:type_name -> treno.provider.v1.Role
+	9,  // 50: treno.provider.v1.ServiceServiceRevokeAccessRequest.permissions:type_name -> treno.provider.v1.Permission
+	0,  // 51: treno.provider.v1.ServiceServiceGetAccessRequest.credential:type_name -> treno.provider.v1.Credential
+	2,  // 52: treno.provider.v1.ServiceServiceGetAccessRequest.service:type_name -> treno.provider.v1.Service
+	7,  // 53: treno.provider.v1.ServiceServiceGetAccessRequest.identity:type_name -> treno.provider.v1.Identity
+	8,  // 54: treno.provider.v1.ServiceServiceGetAccessResponse.roles:type_name -> treno.provider.v1.Role
+	9,  // 55: treno.provider.v1.ServiceServiceGetAccessResponse.permissions:type_name -> treno.provider.v1.Permission
+	0,  // 56: treno.provider.v1.ServiceServiceProvisionRequest.credential:type_name -> treno.provider.v1.Credential
+	50, // 57: treno.provider.v1.ServiceServiceProvisionRequest.inputs:type_name -> google.protobuf.Struct
+	48, // 58: treno.provider.v1.ServiceServiceProvisionRequest.secrets:type_name -> treno.provider.v1.ServiceServiceProvisionRequest.SecretsEntry
+	6,  // 59: treno.provider.v1.ServiceServiceProvisionRequest.variables:type_name -> treno.provider.v1.Variable
+	50, // 60: treno.provider.v1.ServiceServiceProvisionResponse.outputs:type_name -> google.protobuf.Struct
+	0,  // 61: treno.provider.v1.ServiceServiceDeprovisionRequest.credential:type_name -> treno.provider.v1.Credential
+	2,  // 62: treno.provider.v1.ServiceServiceDeprovisionRequest.service:type_name -> treno.provider.v1.Service
+	0,  // 63: treno.provider.v1.ServiceServiceListRequest.credential:type_name -> treno.provider.v1.Credential
+	2,  // 64: treno.provider.v1.ServiceServiceListResponse.services:type_name -> treno.provider.v1.Service
+	0,  // 65: treno.provider.v1.ApplicationServiceCreateRequest.credential:type_name -> treno.provider.v1.Credential
+	50, // 66: treno.provider.v1.ApplicationServiceCreateRequest.inputs:type_name -> google.protobuf.Struct
+	49, // 67: treno.provider.v1.ApplicationServiceCreateRequest.secrets:type_name -> treno.provider.v1.ApplicationServiceCreateRequest.SecretsEntry
+	5,  // 68: treno.provider.v1.ApplicationServiceCreateRequest.source:type_name -> treno.provider.v1.ApplicationSource
+	6,  // 69: treno.provider.v1.ApplicationServiceCreateRequest.variables:type_name -> treno.provider.v1.Variable
+	4,  // 70: treno.provider.v1.ApplicationServiceCreateResponse.application:type_name -> treno.provider.v1.Application
+	0,  // 71: treno.provider.v1.ApplicationServiceDestroyRequest.credential:type_name -> treno.provider.v1.Credential
+	4,  // 72: treno.provider.v1.ApplicationServiceDestroyRequest.application:type_name -> treno.provider.v1.Application
+	0,  // 73: treno.provider.v1.ApplicationServiceDeployRequest.credential:type_name -> treno.provider.v1.Credential
+	4,  // 74: treno.provider.v1.ApplicationServiceDeployRequest.application:type_name -> treno.provider.v1.Application
+	5,  // 75: treno.provider.v1.ApplicationServiceDeployRequest.source:type_name -> treno.provider.v1.ApplicationSource
+	4,  // 76: treno.provider.v1.ApplicationServiceDeployResponse.application:type_name -> treno.provider.v1.Application
+	10, // 77: treno.provider.v1.ProviderService.Describe:input_type -> treno.provider.v1.DescribeRequest
+	22, // 78: treno.provider.v1.ProviderService.GrantAccess:input_type -> treno.provider.v1.ProviderServiceGrantAccessRequest
+	24, // 79: treno.provider.v1.ProviderService.RevokeAccess:input_type -> treno.provider.v1.ProviderServiceRevokeAccessRequest
+	26, // 80: treno.provider.v1.ProviderService.GetAccess:input_type -> treno.provider.v1.ProviderServiceGetAccessRequest
+	28, // 81: treno.provider.v1.ServiceService.GrantAccess:input_type -> treno.provider.v1.ServiceServiceGrantAccessRequest
+	30, // 82: treno.provider.v1.ServiceService.RevokeAccess:input_type -> treno.provider.v1.ServiceServiceRevokeAccessRequest
+	32, // 83: treno.provider.v1.ServiceService.GetAccess:input_type -> treno.provider.v1.ServiceServiceGetAccessRequest
+	34, // 84: treno.provider.v1.ServiceService.Provision:input_type -> treno.provider.v1.ServiceServiceProvisionRequest
+	36, // 85: treno.provider.v1.ServiceService.Deprovision:input_type -> treno.provider.v1.ServiceServiceDeprovisionRequest
+	38, // 86: treno.provider.v1.ServiceService.List:input_type -> treno.provider.v1.ServiceServiceListRequest
+	40, // 87: treno.provider.v1.ApplicationService.Create:input_type -> treno.provider.v1.ApplicationServiceCreateRequest
+	42, // 88: treno.provider.v1.ApplicationService.Destroy:input_type -> treno.provider.v1.ApplicationServiceDestroyRequest
+	44, // 89: treno.provider.v1.ApplicationService.Deploy:input_type -> treno.provider.v1.ApplicationServiceDeployRequest
+	11, // 90: treno.provider.v1.ProviderService.Describe:output_type -> treno.provider.v1.DescribeResponse
+	23, // 91: treno.provider.v1.ProviderService.GrantAccess:output_type -> treno.provider.v1.ProviderServiceGrantAccessResponse
+	25, // 92: treno.provider.v1.ProviderService.RevokeAccess:output_type -> treno.provider.v1.ProviderServiceRevokeAccessResponse
+	27, // 93: treno.provider.v1.ProviderService.GetAccess:output_type -> treno.provider.v1.ProviderServiceGetAccessResponse
+	29, // 94: treno.provider.v1.ServiceService.GrantAccess:output_type -> treno.provider.v1.ServiceServiceGrantAccessResponse
+	31, // 95: treno.provider.v1.ServiceService.RevokeAccess:output_type -> treno.provider.v1.ServiceServiceRevokeAccessResponse
+	33, // 96: treno.provider.v1.ServiceService.GetAccess:output_type -> treno.provider.v1.ServiceServiceGetAccessResponse
+	35, // 97: treno.provider.v1.ServiceService.Provision:output_type -> treno.provider.v1.ServiceServiceProvisionResponse
+	37, // 98: treno.provider.v1.ServiceService.Deprovision:output_type -> treno.provider.v1.ServiceServiceDeprovisionResponse
+	39, // 99: treno.provider.v1.ServiceService.List:output_type -> treno.provider.v1.ServiceServiceListResponse
+	41, // 100: treno.provider.v1.ApplicationService.Create:output_type -> treno.provider.v1.ApplicationServiceCreateResponse
+	43, // 101: treno.provider.v1.ApplicationService.Destroy:output_type -> treno.provider.v1.ApplicationServiceDestroyResponse
+	45, // 102: treno.provider.v1.ApplicationService.Deploy:output_type -> treno.provider.v1.ApplicationServiceDeployResponse
 	90, // [90:103] is the sub-list for method output_type
 	77, // [77:90] is the sub-list for method input_type
 	77, // [77:77] is the sub-list for extension type_name
@@ -3606,29 +3606,29 @@ var file_steward_provider_v1_provider_proto_depIdxs = []int32{
 	0,  // [0:77] is the sub-list for field type_name
 }
 
-func init() { file_steward_provider_v1_provider_proto_init() }
-func file_steward_provider_v1_provider_proto_init() {
-	if File_steward_provider_v1_provider_proto != nil {
+func init() { file_treno_provider_v1_provider_proto_init() }
+func file_treno_provider_v1_provider_proto_init() {
+	if File_treno_provider_v1_provider_proto != nil {
 		return
 	}
-	file_steward_provider_v1_provider_proto_msgTypes[7].OneofWrappers = []any{}
-	file_steward_provider_v1_provider_proto_msgTypes[9].OneofWrappers = []any{}
-	file_steward_provider_v1_provider_proto_msgTypes[14].OneofWrappers = []any{}
+	file_treno_provider_v1_provider_proto_msgTypes[7].OneofWrappers = []any{}
+	file_treno_provider_v1_provider_proto_msgTypes[9].OneofWrappers = []any{}
+	file_treno_provider_v1_provider_proto_msgTypes[14].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_steward_provider_v1_provider_proto_rawDesc), len(file_steward_provider_v1_provider_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_treno_provider_v1_provider_proto_rawDesc), len(file_treno_provider_v1_provider_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   50,
 			NumExtensions: 0,
 			NumServices:   3,
 		},
-		GoTypes:           file_steward_provider_v1_provider_proto_goTypes,
-		DependencyIndexes: file_steward_provider_v1_provider_proto_depIdxs,
-		MessageInfos:      file_steward_provider_v1_provider_proto_msgTypes,
+		GoTypes:           file_treno_provider_v1_provider_proto_goTypes,
+		DependencyIndexes: file_treno_provider_v1_provider_proto_depIdxs,
+		MessageInfos:      file_treno_provider_v1_provider_proto_msgTypes,
 	}.Build()
-	File_steward_provider_v1_provider_proto = out.File
-	file_steward_provider_v1_provider_proto_goTypes = nil
-	file_steward_provider_v1_provider_proto_depIdxs = nil
+	File_treno_provider_v1_provider_proto = out.File
+	file_treno_provider_v1_provider_proto_goTypes = nil
+	file_treno_provider_v1_provider_proto_depIdxs = nil
 }

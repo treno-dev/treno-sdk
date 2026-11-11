@@ -1,14 +1,14 @@
-// The provider part of the Steward SDK for JavaScript: the plumbing between the provider contract (gRPC,
+// The provider part of the Treno SDK for JavaScript: the plumbing between the provider contract (gRPC,
 // see ../../../proto) and the plain objects a provider works with.
 //
-//   import { createProvider } from '@treno-dev/steward-sdk/provider';
+//   import { createProvider } from '@treno-dev/treno-sdk/provider';
 //
 //   const provider = createProvider({ name: 'github', version: '0.1.0', inputs: [...], validate });
 //   provider.service({ kind: 'repository', inputs: [...], provision, deprovision, list });
 //   provider.serve();
 //
 // A provider declares itself and each of its service or application kinds once, with the handlers
-// attached. The SDK routes every call to the right handler by kind, builds the description Steward
+// attached. The SDK routes every call to the right handler by kind, builds the description Treno
 // asks for, serves the gRPC services, prints the handshake line, answers the health check, fills in
 // whatever a handler leaves out of its response, and answers any call without a handler with
 // UNIMPLEMENTED.
@@ -35,20 +35,20 @@ import type {
   ServiceDefinition,
   RoleDefinition,
   SecretDefinition,
-} from '../gen/steward/provider/v1/provider.js';
-import * as contract from '../gen/steward/provider/v1/provider.js';
+} from '../gen/treno/provider/v1/provider.js';
+import * as contract from '../gen/treno/provider/v1/provider.js';
 
-export * from '../gen/steward/provider/v1/provider.js';
+export * from '../gen/treno/provider/v1/provider.js';
 
 const { HealthImplementation } = healthCheck;
 
-// The version of the Steward provider contract this provider speaks.
+// The version of the Treno provider contract this provider speaks.
 const APP_PROTOCOL_VERSION = 1;
 
 // A runner sets this cookie in the environment of every provider it starts, as hashicorp/go-plugin does.
 // A provider that does not find it was started by hand. Kept in step with go/provider/handshake.go.
-const MAGIC_COOKIE_KEY = 'STEWARD_PROVIDER';
-const MAGIC_COOKIE_VALUE = 'b6d7a1f2-steward-provider';
+const MAGIC_COOKIE_KEY = 'TRENO_PROVIDER';
+const MAGIC_COOKIE_VALUE = 'b6d7a1f2-treno-provider';
 
 type MaybePromise<T> = T | Promise<T>;
 
@@ -382,8 +382,8 @@ function addShutdown(server: grpc.Server, stop: () => void): void {
 
 function serve(provider: Provider): void {
   if (process.env[MAGIC_COOKIE_KEY] !== MAGIC_COOKIE_VALUE) {
-    console.error('This program is a Steward provider. It is started by a runner, not run directly.');
-    console.error('To try it, use `steward provider validate` or `steward provider run`.');
+    console.error('This program is a Treno provider. It is started by a runner, not run directly.');
+    console.error('To try it, use `treno provider validate` or `treno provider run`.');
     process.exit(1);
   }
 

@@ -6,4 +6,4 @@ jobs:
   release:
     permissions:
       contents: write
-    uses: treno-dev/steward-gh-actions/.github/workflows/release-provider.yml@v1
+    uses: treno-dev/treno-gh-actions/.github/workflows/release-provider.yml@v1

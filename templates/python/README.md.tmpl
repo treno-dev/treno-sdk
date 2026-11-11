@@ -1,6 +1,6 @@
 # [[.Title]]
 
-A Steward provider for [[.Title]], built with [`treno-dev-steward-sdk`](https://github.com/treno-dev/steward-sdk/tree/main/python).
+A Treno provider for [[.Title]], built with [`treno-dev-treno-sdk`](https://github.com/treno-dev/treno-sdk/tree/main/python).
 
 ## Run
 
@@ -8,13 +8,13 @@ A Steward provider for [[.Title]], built with [`treno-dev-steward-sdk`](https://
 python -m venv .venv
 source .venv/bin/activate
 pip install -e .
-steward provider validate python src/provider.py
+treno provider validate python src/provider.py
 ```
 
-With [uv](https://docs.astral.sh/uv/): `uv venv && uv pip install -e . && steward provider validate uv run src/provider.py`.
+With [uv](https://docs.astral.sh/uv/): `uv venv && uv pip install -e . && treno provider validate uv run src/provider.py`.
 
 A provider is started by a runner, not by hand: run directly it says so and exits. Use
-`steward provider validate` to check it, and `steward provider run --context context.json python src/provider.py`
+`treno provider validate` to check it, and `treno provider run --context context.json python src/provider.py`
 to invoke it. Write logs to standard error.
 
 ## Test
@@ -34,24 +34,24 @@ Save this as `context.json`, the credential and services to call the provider wi
 ```
 
 ```sh
-steward provider run --context context.json python src/provider.py
-steward provider run --context context.json --call provision python src/provider.py
+treno provider run --context context.json python src/provider.py
+treno provider run --context context.json --call provision python src/provider.py
 ```
 
 The first creates each service, grants and revokes the role, and removes it. It does this for real, in
 whatever your secrets reach, and asks before it starts (`--yes` skips the question). `--call` makes
 only the calls you name, once each and without cleaning up: `provision`, `grant-access`, `get-access`,
-`revoke-access` and `deprovision`. `steward provider validate` never changes anything.
+`revoke-access` and `deprovision`. `treno provider validate` never changes anything.
 
 ## Where things are
 
 `src/provider.py` declares the provider's inputs (what it needs to connect), each kind of service and the
-handlers Steward calls: `provision`, `deprovision`, `grant_access`, `revoke_access` and `get_access`.
+handlers Treno calls: `provision`, `deprovision`, `grant_access`, `revoke_access` and `get_access`.
 Each handler is annotated with the request and response types the SDK exports. Delete the handlers
-you do not need: Steward offers only what you implement.
+you do not need: Treno offers only what you implement.
 
 To add a kind of service, call `provider.service(kind=..., ...)` again with its own inputs, outputs and
 handlers.
 
-See the [SDK README](https://github.com/treno-dev/steward-sdk/blob/main/python/README.md) for
+See the [SDK README](https://github.com/treno-dev/treno-sdk/blob/main/python/README.md) for
 everything a provider can declare.

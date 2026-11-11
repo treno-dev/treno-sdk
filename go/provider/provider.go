@@ -1,4 +1,4 @@
-// Package provider is the provider part of the Steward SDK for Go: the plumbing between the provider
+// Package provider is the provider part of the Treno SDK for Go: the plumbing between the provider
 // contract (gRPC, see ../../proto) and the functions a provider writes.
 //
 //	p := provider.New(provider.Options{Name: "github", Version: "0.1.0"})
@@ -7,7 +7,7 @@
 //
 // A provider declares itself and each of its service or application kinds once, with the handlers
 // attached. The SDK routes every call to the right
-// handler by kind, builds the description Steward asks for, serves the gRPC services, prints the
+// handler by kind, builds the description Treno asks for, serves the gRPC services, prints the
 // handshake line, answers the health check, and answers any call without a handler with UNIMPLEMENTED.
 //
 // Everything a provider logs must go to stderr: stdout is reserved for the handshake line.
@@ -23,7 +23,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	providerv1 "github.com/treno-dev/steward-sdk/go/gen/steward/provider/v1"
+	providerv1 "github.com/treno-dev/treno-sdk/go/gen/treno/provider/v1"
 )
 
 // Options declare the provider and, when it supports access as a whole, the handlers for that. A provider has no settings or secrets of

@@ -1,17 +1,17 @@
 syntax = "proto3";
 
-package steward.provider.v1;
+package treno.provider.v1;
 
 import "google/protobuf/struct.proto";
 
 // The provider contract. Every provider serves ProviderService: it describes itself and, when it declares entitlements,
 // gives access as a whole. A provider that has services also serves ServiceService, and one that
 // runs applications serves ApplicationService. A provider
-// offers a call by implementing it. A call it does not offer fails with UNIMPLEMENTED, and Steward
+// offers a call by implementing it. A call it does not offer fails with UNIMPLEMENTED, and Treno
 // treats that as not offered. Within v1 the contract is additive only.
 //
 // Calls that change state are idempotent and return the result of the change, not a report of what
-// changed: Steward keeps the state and works out the difference itself. Failures, such as an
+// changed: Treno keeps the state and works out the difference itself. Failures, such as an
 // unreachable tool or an invalid request, are returned as gRPC errors.
 //
 // The file has the messages first, then the services at the bottom.
@@ -34,13 +34,13 @@ message Credential {
   // The organization the credential belongs to.
   Organization organization = 5;
 
-  // The address of Steward as an issuer of identity tokens: the `iss` of the token, which a cloud is
+  // The address of Treno as an issuer of identity tokens: the `iss` of the token, which a cloud is
   // told to trust. A provider that sets up trust in it, such as with a link to a guide, uses this
   // address. It is set in Describe, for the credential the provider is described for.
   string identity_issuer = 7;
 }
 
-// An organization of Steward, as a provider is told of it.
+// An organization of Treno, as a provider is told of it.
 message Organization {
   string ulid = 1;
   string name = 2;
@@ -51,7 +51,7 @@ message Service {
   // A kind declared in ProviderDefinition.services.
   string kind = 1;
 
-  // The service's name in the tool, such as a repository's full name. Steward stores it with the
+  // The service's name in the tool, such as a repository's full name. Treno stores it with the
   // kind and sends it on every later call, which is how a service is identified.
   string name = 2;
 
@@ -65,7 +65,7 @@ message Service {
   // Values the service produced, as declared in ServiceDefinition.outputs, keyed by output name.
   // Set by the provider when it lists a service; ignored on calls. Provision returns its outputs
   // separately. Values of outputs declared sensitive stay with the runner and are not passed on to
-  // Steward.
+  // Treno.
   google.protobuf.Struct outputs = 5;
 
   // Its variables, when the kind takes them (ServiceDefinition.variables).
@@ -74,7 +74,7 @@ message Service {
 
 // Says that a kind takes variables: name and value pairs, of any number, that whoever sets up a service
 // adds to it, such as the variables of a Terraform workspace. Unlike an input, the names are not
-// declared, and Steward keeps the variables apart from the inputs, since they are handled in ways that
+// declared, and Treno keeps the variables apart from the inputs, since they are handled in ways that
 // inputs are not.
 message VariadicVariables {
   // What the variables are for, said where they are set.
@@ -105,7 +105,7 @@ message Application {
   repeated Variable variables = 7;
 }
 
-// Where an application is deployed from. The source types are a fixed set that Steward defines, each
+// Where an application is deployed from. The source types are a fixed set that Treno defines, each
 // with its own configuration, so every provider sees the same shapes:
 //
 //   github    { owner, name, branch? }    a GitHub repository
@@ -148,12 +148,12 @@ message Variable {
 
 // Who a user is in the tool, such as a GitHub login or an AWS principal.
 //
-// Every field is optional, so an identity can be as complete as Steward knows it. A call that needs
+// Every field is optional, so an identity can be as complete as Treno knows it. A call that needs
 // more than it was given, such as an entitlement with neither an external_id nor an attr the tool can
 // invite by, fails with INVALID_ARGUMENT.
 message Identity {
-  // Steward's own opaque identifier for the identity. A provider does not interpret it; it is there
-  // to correlate a call with what Steward recorded.
+  // Treno's own opaque identifier for the identity. A provider does not interpret it; it is there
+  // to correlate a call with what Treno recorded.
   optional string ulid = 1;
 
   // The identity in the tool, such as a GitHub login.
@@ -166,7 +166,7 @@ message Identity {
   google.protobuf.Struct attrs = 4;
 }
 
-// A role: one the tool defines itself, or one Steward composed from the permissions the provider
+// A role: one the tool defines itself, or one Treno composed from the permissions the provider
 // declares. A call that carries a role always names it. The permissions of a composed role travel
 // beside it, in `permissions`.
 message Role {
@@ -176,7 +176,7 @@ message Role {
 // One permission, in whatever form the tool uses. The name is the permission itself, such as
 // "s3:GetObject", "DescribeStacks" or "pull_requests". The level qualifies it for tools whose
 // permissions come in degrees, such as "read" or "write", and is unset for those whose do not.
-// Steward does not interpret either; the provider does.
+// Treno does not interpret either; the provider does.
 message Permission {
   string name = 1;
   optional string level = 2;
@@ -191,7 +191,7 @@ message Permission {
 // ---------------------------------------------------------------------------------------------
 
 message DescribeRequest {
-  // The credential the provider is being added for, when there is one. Steward sets it when a runner
+  // The credential the provider is being added for, when there is one. Treno sets it when a runner
   // installs a credential, so that the provider can say what the person does in the tool before the
   // settings. Tools that only read the description, such as the generator of docs, leave it empty.
   Credential credential = 1;
@@ -268,11 +268,11 @@ message InputDefinition {
   string description = 3;
 
   // One of "string", "number", "boolean", "select", "list" (of strings), "map" (string keys and
-  // values) or a type of Steward's own, named `steward::<name>`: "steward::source", where something is
+  // values) or a type of Treno's own, named `treno::<name>`: "treno::source", where something is
   // fetched from as `{ type, config }`, whose `options` are the source types it accepts, and
-  // "map(string)", names and values asked for as a list of rows, and "steward::json", any JSON value,
+  // "map(string)", names and values asked for as a list of rows, and "treno::json", any JSON value,
   // asked for in a dialog that checks it. The SDKs export these
-  // as constants, and `steward provider validate` rejects any other.
+  // as constants, and `treno provider validate` rejects any other.
   string type = 4;
 
   bool required = 5;
@@ -280,7 +280,7 @@ message InputDefinition {
   // Used when no value is given.
   google.protobuf.Value default = 6;
 
-  // The choices for a "select", and the source types a "steward::source" accepts.
+  // The choices for a "select", and the source types a "treno::source" accepts.
   repeated string options = 7;
 
   // For a "number": the least and the greatest value it can have. Left out, there is no limit on that side.
@@ -306,7 +306,7 @@ message OutputDefinition {
 
   // The value is a secret, such as a generated password. The provider still returns it in
   // Service.outputs, but the runner writes it to the customer's own secret store and reports only
-  // a reference to Steward, which never sees or stores the value.
+  // a reference to Treno, which never sees or stores the value.
   bool sensitive = 5;
 }
 
@@ -323,7 +323,7 @@ message ServiceDefinition {
   repeated SecretDefinition secrets = 8;
 
   // What can be granted on this type. Declaring permissions or roles is what says the type supports
-  // access. A tool may expose permissions, roles, or both, as separate lists. Steward lets
+  // access. A tool may expose permissions, roles, or both, as separate lists. Treno lets
   // organizations build their own roles from the permissions.
   repeated PermissionDefinition permissions = 5;
   repeated RoleDefinition roles = 6;
@@ -391,7 +391,7 @@ message RoleDefinition {
   string description = 3;
 }
 
-// Access to the provider as a whole, such as a role in an AWS account or membership of a GitHub organization. Steward grants it before
+// Access to the provider as a whole, such as a role in an AWS account or membership of a GitHub organization. Treno grants it before
 // it grants access to the provider's services, and decides when to remove it.
 //
 // Idempotent: granting what is already granted succeeds.
@@ -414,7 +414,7 @@ message ProviderServiceGrantAccessResponse {
   reserved "role", "permissions";
 
   // The entitlement's own identity in the tool, such as a membership or invitation id. Empty when the
-  // tool has none. Steward records it and sends it back on revoke.
+  // tool has none. Treno records it and sends it back on revoke.
   string id = 1;
 
   // True when the entitlement needs the identity to act before it takes effect, such as accepting an
@@ -471,7 +471,7 @@ message ProviderServiceGetAccessResponse {
 // ServiceService messages
 // ---------------------------------------------------------------------------------------------
 
-// Access to one service, such as a role on a repository. Steward grants it after the identity has
+// Access to one service, such as a role on a repository. Treno grants it after the identity has
 // access to the provider.
 //
 // Idempotent: granting what is already granted succeeds.
@@ -485,7 +485,7 @@ message ServiceServiceGrantAccessRequest {
 
 message ServiceServiceGrantAccessResponse {
   // The entitlement's own identity in the tool, such as an assignment or invitation id. Empty when the
-  // tool has none. Steward records it and sends it back on revoke.
+  // tool has none. Treno records it and sends it back on revoke.
   string id = 1;
 
   // What the tool actually applied. It can differ from what was requested: a composed role may land
@@ -498,7 +498,7 @@ message ServiceServiceGrantAccessResponse {
   bool pending = 3;
 }
 
-// Idempotent: revoking what is already absent succeeds. Steward works out overlap between roles
+// Idempotent: revoking what is already absent succeeds. Treno works out overlap between roles
 // before it sends a revoke, so the role here is safe to remove in full.
 message ServiceServiceRevokeAccessRequest {
   Credential credential = 1;
@@ -530,14 +530,14 @@ message ServiceServiceGetAccessResponse {
 }
 
 // Idempotent: provisioning something that already exists with the same kind and name succeeds, and
-// still returns its outputs. Steward works out what changed by comparing the state it stores.
+// still returns its outputs. Treno works out what changed by comparing the state it stores.
 message ServiceServiceProvisionRequest {
   Credential credential = 1;
 
   // The kind to create, as declared in ProviderDefinition.services.
   string kind = 2;
 
-  // What to call it in the tool. Steward stores the name with the kind.
+  // What to call it in the tool. Treno stores the name with the kind.
   string name = 3;
 
   // Its inputs, validated against the kind's definition.
@@ -554,7 +554,7 @@ message ServiceServiceProvisionRequest {
 message ServiceServiceProvisionResponse {
   // What the service produced, as declared in ServiceDefinition.outputs, keyed by output name,
   // such as a URL or an id the tool assigned. Values of outputs declared sensitive stay with the
-  // runner and are not passed on to Steward.
+  // runner and are not passed on to Treno.
   google.protobuf.Struct outputs = 1;
 }
 

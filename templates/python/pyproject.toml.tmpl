@@ -5,10 +5,10 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "[[.Name]]"
 version = "0.1.0"
-description = "[[.Title]] provider for Steward"
+description = "[[.Title]] provider for Treno"
 requires-python = ">=3.10"
 dependencies = [
-  "[[if .SDKPath]]treno-dev-steward-sdk @ file://[[.SDKPath]][[else]]treno-dev-steward-sdk>=[[.SDKVersion]][[end]]",
+  "[[if .SDKPath]]treno-dev-treno-sdk @ file://[[.SDKPath]][[else]]treno-dev-treno-sdk>=[[.SDKVersion]][[end]]",
 ]
 
 [tool.setuptools]

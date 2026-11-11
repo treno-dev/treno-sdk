@@ -1,17 +1,17 @@
-# @treno-dev/steward-sdk
+# @treno-dev/treno-sdk
 
-The Steward SDK for JavaScript and TypeScript. Today it holds the part for writing Steward providers,
-imported from `@treno-dev/steward-sdk/provider`. A provider declares what it needs to connect to the tools
-it works with and what it manages there, and implements the calls Steward makes. The SDK handles
+The Treno SDK for JavaScript and TypeScript. Today it holds the part for writing Treno providers,
+imported from `@treno-dev/treno-sdk/provider`. A provider declares what it needs to connect to the tools
+it works with and what it manages there, and implements the calls Treno makes. The SDK handles
 everything else: the gRPC services, the handshake with the runner, the health check, and routing each
 call to your handler by kind.
 
 ```sh
-npm install @treno-dev/steward-sdk
+npm install @treno-dev/treno-sdk
 ```
 
 ```js
-import { createProvider } from '@treno-dev/steward-sdk/provider';
+import { createProvider } from '@treno-dev/treno-sdk/provider';
 ```
 
 Requires Node.js (tested on 24). The package is ES modules and ships its TypeScript types.
@@ -19,26 +19,26 @@ Requires Node.js (tested on 24). The package is ES modules and ships its TypeScr
 ## Start a provider
 
 ```sh
-steward provider init my-provider --language js    # or --language ts
+treno provider init my-provider --language js    # or --language ts
 cd my-provider
 npm install
-steward provider validate node src/provider.js
+treno provider validate node src/provider.js
 ```
 
-`steward provider init` takes its templates from the SDK release, so the project always matches the
+`treno provider init` takes its templates from the SDK release, so the project always matches the
 SDK it depends on. To work on the SDK and its templates together, point it at a local checkout with
-`--sdk-path /path/to/steward-sdk`. The templates live next to the SDKs, in `../templates/js` and
+`--sdk-path /path/to/treno-sdk`. The templates live next to the SDKs, in `../templates/js` and
 `../templates/ts`.
 
 ## A provider
 
-`steward provider init --language js` generates a provider with a service that can be provisioned and given
+`treno provider init --language js` generates a provider with a service that can be provisioned and given
 access to. The whole file, with every call and its comments, is
-[`templates/js/src/provider.js.tmpl`](https://github.com/treno-dev/steward-sdk/blob/main/templates/js/src/provider.js.tmpl).
+[`templates/js/src/provider.js.tmpl`](https://github.com/treno-dev/treno-sdk/blob/main/templates/js/src/provider.js.tmpl).
 In short:
 
 ```js
-import { createProvider } from '@treno-dev/steward-sdk/provider';
+import { createProvider } from '@treno-dev/treno-sdk/provider';
 
 const provider = createProvider({
   name: 'my-provider',
@@ -74,10 +74,10 @@ for example both Cloudflare and AWS, take a secret for each tool.
 | Option | |
 |---|---|
 | `name`, `version` | Required. |
-| `title`, `description` | Shown in Steward. |
+| `title`, `description` | Shown in Treno. |
 | `inputs` | The settings the provider is configured with. |
 | `secrets` | The secrets it is configured with, such as an API token. |
-| `validate` | Optional. Checks the secrets, which Steward cannot. Returns `{ errors, inputErrors, secretErrors }`, each a list of `{ field, message }`: `inputErrors` and `secretErrors` name an input or a secret, and `errors` is about the credential as a whole. Without it, every credential is accepted. |
+| `validate` | Optional. Checks the secrets, which Treno cannot. Returns `{ errors, inputErrors, secretErrors }`, each a list of `{ field, message }`: `inputErrors` and `secretErrors` name an input or a secret, and `errors` is about the credential as a whole. Without it, every credential is accepted. |
 | `roles`, `permissions`, `grantAccess`, `revokeAccess`, `getAccess` | Access to the provider as a whole, such as membership of an organization. |
 
 **A service**, with `provider.service({ kind, ... })`, and **an application**, with
@@ -110,7 +110,7 @@ Access exists at two levels, each with the same three handlers, `grantAccess`, `
 `getAccess`:
 
 - **The provider**, in `createProvider`: membership of the tool as a whole, such as an organization or a
-  site. Steward grants this first, then access to the services.
+  site. Treno grants this first, then access to the services.
 - **A service kind**, in `provider.service`: a role on one service, such as a repository. The
   generated provider above shows this.
 
@@ -176,34 +176,34 @@ Declaring `roles` or `permissions` is what says that the provider, or the kind, 
 two separate lists:
 
 - **`roles`** are the ones the tool defines itself, each with a `name`, `title` and `description`.
-- **`permissions`** are the pieces Steward builds its own roles from. A permission is a `name` with an
+- **`permissions`** are the pieces Treno builds its own roles from. A permission is a `name` with an
   optional `level`: `{ name: 'pull_requests', level: 'read' }`, or just `{ name: 's3:GetObject' }`.
 
 Handlers receive the `identity` (`externalId`, `name`, `attrs`) and the `role` to apply, and a service
-call also gets the `service` (`kind`, `name`). The `role` is always set. For a role Steward composed
+call also gets the `service` (`kind`, `name`). The `role` is always set. For a role Treno composed
 from your permissions, `permissions` lists its pieces too, for you to apply as far as the tool allows.
 They return:
 
 - `grantAccess`: the `role` and `permissions` as the tool applied them, which may differ from what was
-  requested, an `id` for the grant if the tool has one (Steward sends it back on revoke), and
+  requested, an `id` for the grant if the tool has one (Treno sends it back on revoke), and
   `pending: true` while the person has to act first, such as accepting an invitation.
 - `revokeAccess`: nothing. It succeeds if the identity did not have the role.
 - `getAccess`: the `roles` and `permissions` the identity holds now, and whether a grant is still
   `pending`.
 
-Steward works out overlap between roles before it asks you to revoke one, so you can remove the role
+Treno works out overlap between roles before it asks you to revoke one, so you can remove the role
 you are given in full.
 
-## What Steward offers
+## What Treno offers
 
-Steward offers what you implement. A call for a handler you did not write answers `UNIMPLEMENTED`,
-and Steward treats that as not offered. Access also needs its `roles` or `permissions`, which tell
-Steward what can be granted.
+Treno offers what you implement. A call for a handler you did not write answers `UNIMPLEMENTED`,
+and Treno treats that as not offered. Access also needs its `roles` or `permissions`, which tell
+Treno what can be granted.
 
 | You write | The kind can |
 |---|---|
 | `provision`, `deprovision` | be created and removed |
-| `list` | be discovered (optional: Steward keeps track of what it creates, so `list` is only for finding services that already exist) |
+| `list` | be discovered (optional: Treno keeps track of what it creates, so `list` is only for finding services that already exist) |
 | `roles` or `permissions`, with `grantAccess`, `revokeAccess`, `getAccess` | have access granted (services and the provider) |
 | `create`, `destroy`, `deploy` | be run as an application |
 
@@ -219,9 +219,9 @@ responses are typed from the contract.
   empty if nothing was set.
 - **Idempotent, and no report of changes.** Make calls that change something idempotent: creating
   what exists, or removing what is gone, simply succeeds. Return the result of the change (the
-  `outputs`, the applied `role`), not a description of what changed: Steward keeps the state and
+  `outputs`, the applied `role`), not a description of what changed: Treno keeps the state and
   works out the difference itself.
-- **Services and identities.** A service is identified by its `kind` and `name`, which Steward
+- **Services and identities.** A service is identified by its `kind` and `name`, which Treno
   stores and sends on every later call. `provision` receives them with the `inputs` and returns only
   the `outputs`, such as a URL or an id the tool assigned. An identity has
   `externalId`, `name`, `ulid` and `attrs`.

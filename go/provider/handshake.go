@@ -7,13 +7,13 @@ import goplugin "github.com/hashicorp/go-plugin"
 // The magic cookie is set in the environment of every provider a runner starts: a provider that does not find
 // it was started by hand, not by a runner, and says so and exits.
 //
-// A provider in another language does the same with its own code. It reads STEWARD_PROVIDER from its
+// A provider in another language does the same with its own code. It reads TRENO_PROVIDER from its
 // environment, prints the handshake line, and, when PROVIDER_UNIX_SOCKET_DIR is set, listens on a unix
 // socket created in that directory.
 var Handshake = goplugin.HandshakeConfig{
 	ProtocolVersion:  1,
-	MagicCookieKey:   "STEWARD_PROVIDER",
-	MagicCookieValue: "b6d7a1f2-steward-provider",
+	MagicCookieKey:   "TRENO_PROVIDER",
+	MagicCookieValue: "b6d7a1f2-treno-provider",
 }
 
 // Name is the name a provider is served under, and the name of the service its health check answers for. go-plugin registers that

@@ -177,7 +177,7 @@ jobs:
       # the version is installable from the tag whether or not they have caught up.
       - name: Ask the Go module proxy for the new version
         run: |
-          module=github.com/treno-dev/steward-sdk/go
+          module=github.com/treno-dev/treno-sdk/go
 
           for attempt in 1 2 3 4 5 6; do
             if curl -fsS "https://proxy.golang.org/$module/@v/v$VERSION.info"; then

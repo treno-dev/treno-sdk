@@ -5,7 +5,7 @@ import (
 
 	"google.golang.org/protobuf/types/known/structpb"
 
-	providerv1 "github.com/treno-dev/steward-sdk/go/gen/steward/provider/v1"
+	providerv1 "github.com/treno-dev/treno-sdk/go/gen/treno/provider/v1"
 )
 
 // Struct turns a map into the Struct the contract uses for open-ended values, such as a response's
@@ -92,15 +92,15 @@ const (
 	TypeList    = "list"
 	TypeMap     = "map"
 
-	// TypeSource is a type that Steward defines: where something is fetched from, as `{ type, config }`. The input lists the source
+	// TypeSource is a type that Treno defines: where something is fetched from, as `{ type, config }`. The input lists the source
 	// types it accepts as its options, and the console asks for it with the same fields as the source of a provider.
-	TypeSource = "steward::source"
+	TypeSource = "treno::source"
 
-	// TypeStringMap is a type that Steward defines: names and values, text to text, that the console asks for as a list of rows, such as
+	// TypeStringMap is a type that Treno defines: names and values, text to text, that the console asks for as a list of rows, such as
 	// the settings of a backend.
 	TypeStringMap = "map(string)"
 
-	// TypeJSON is a type that Steward defines: any JSON value, which the console asks for in a dialog that checks it, so that a value that is
+	// TypeJSON is a type that Treno defines: any JSON value, which the console asks for in a dialog that checks it, so that a value that is
 	// not a string, such as a map or a list of numbers, can be given.
-	TypeJSON = "steward::json"
+	TypeJSON = "treno::json"
 )

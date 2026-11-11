@@ -1,7 +1,7 @@
-// This is the file you edit. It declares what your provider offers and implements the calls Steward
+// This is the file you edit. It declares what your provider offers and implements the calls Treno
 // makes. The gRPC plumbing, the handshake and the health check live in the SDK.
 //
-// Declare the provider and each kind of service once, with its handlers attached: Steward's forms
+// Declare the provider and each kind of service once, with its handlers attached: Treno's forms
 // follow from what you write here, and every call is routed to the right handler by kind. If your
 // provider needs more than one tool, take the secrets for each as inputs.
 //
@@ -15,7 +15,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/treno-dev/steward-sdk/go/provider"
+	"github.com/treno-dev/treno-sdk/go/provider"
 )
 
 // Check that the inputs and secrets work. Return an error for each input or secret the user can fix.
@@ -23,7 +23,7 @@ func validate(ctx context.Context, request *provider.ProviderValidateRequest) (*
 	response := &provider.ProviderValidateResponse{}
 
 	// An error goes in the list of what it is about: InputErrors for an input, SecretErrors for a secret, and Errors for what is
-	// about the credential as a whole. Steward marks the field that the list says, and does not guess it from a name.
+	// about the credential as a whole. Treno marks the field that the list says, and does not guess it from a name.
 	if request.GetCredential().GetSecrets()["API_TOKEN"] == "" {
 		response.SecretErrors = append(response.SecretErrors, &provider.ValidationError{
 			Field:   "API_TOKEN",
@@ -50,7 +50,7 @@ func deprovision(ctx context.Context, request *provider.ServiceDeprovisionReques
 	return &provider.ServiceDeprovisionResponse{}, nil
 }
 
-// Give an identity a role on the service. Idempotent. The Role is always set. For a role Steward
+// Give an identity a role on the service. Idempotent. The Role is always set. For a role Treno
 // composed, Permissions lists its pieces. Return what the tool applied, an Id for the grant if the
 // tool has one, and Pending if the person has to act first, such as accepting an invitation. The
 // request has the Credential, Service, Identity (ExternalId, Name, Attrs), Role and Permissions.
@@ -70,14 +70,14 @@ func getAccess(ctx context.Context, request *provider.ServiceGetAccessRequest) (
 }
 
 func main() {
-	// Steward builds the provider's form from Inputs and Secrets, so they are also the documentation
+	// Treno builds the provider's form from Inputs and Secrets, so they are also the documentation
 	// people see. Settings arrive in request.Credential.Inputs, and secrets, kept and sent
 	// separately, in request.Credential.Secrets.
 	p := provider.New(provider.Options{
 		Name:        "[[.Name]]",
 		Version:     "0.1.0",
 		Title:       "[[.Title]]",
-		Description: "Connects Steward to [[.Title]].",
+		Description: "Connects Treno to [[.Title]].",
 
 		// The settings this provider is configured with.
 		Inputs: []*provider.InputDefinition{
@@ -97,12 +97,12 @@ func main() {
 		Title:       "Item",
 		Description: "An example service.",
 
-		// What a service of this kind takes besides its name, which Steward stores with the kind.
+		// What a service of this kind takes besides its name, which Treno stores with the kind.
 		Inputs:  []*provider.InputDefinition{{Name: "description", Label: "Description", Description: "What the item is for.", Type: provider.TypeString}},
 		Outputs: []*provider.OutputDefinition{{Name: "url", Label: "URL", Description: "Where the item can be opened.", Type: provider.TypeString}},
 
 		// What can be granted on this kind. Declaring permissions or roles is what makes the kind
-		// accept access, along with the three access handlers. The permissions are the pieces Steward
+		// accept access, along with the three access handlers. The permissions are the pieces Treno
 		// builds its own roles from; the roles are the ones the tool defines itself.
 		Permissions: []*provider.PermissionDefinition{
 			{Name: "view", Title: "View"},

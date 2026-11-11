@@ -84,7 +84,7 @@ jobs:
           python -m venv "$RUNNER_TEMP/wheel"
           "$RUNNER_TEMP/wheel/bin/pip" install dist/*.whl
           cd "$RUNNER_TEMP"
-          "$RUNNER_TEMP/wheel/bin/python" -c "from steward_sdk.provider import create_provider"
+          "$RUNNER_TEMP/wheel/bin/python" -c "from treno_sdk.provider import create_provider"
 
   go:
     name: Go

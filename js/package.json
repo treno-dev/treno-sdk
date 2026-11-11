@@ -1,11 +1,11 @@
 {
-  "name": "@treno-dev/steward-sdk",
+  "name": "@treno-dev/treno-sdk",
   "version": "0.1.0-rc.8",
-  "description": "The Steward SDK for JavaScript and TypeScript: write Steward providers",
+  "description": "The Treno SDK for JavaScript and TypeScript: write Treno providers",
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/treno-dev/steward-sdk.git",
+    "url": "git+https://github.com/treno-dev/treno-sdk.git",
     "directory": "js"
   },
   "publishConfig": {
